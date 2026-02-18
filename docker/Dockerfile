@@ -1,12 +1,16 @@
 FROM dunglas/frankenphp:1.11-php8.4
 
-# Git
-RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+# Git, zip, unzip
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git unzip libzip-dev \
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install zip \
+    && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
 RUN install-php-extensions intl
 
-# PHP extensions
+# php.ini
 COPY ./docker/php.ini /usr/local/etc/php/php.ini
 
 # Composer
