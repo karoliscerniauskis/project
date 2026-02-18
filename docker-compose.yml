@@ -1,0 +1,31 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: app
+    ports:
+      - 8080:80
+    volumes:
+      - ./:/app:delegated
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    environment:
+      APP_ENV: dev
+      SERVER_NAME: ":80"
+      DATABASE_URL: "postgresql://app_user:app_password@postgres:5432/app_db?serverVersion=17&charset=utf8"
+    depends_on:
+      - db
+  db:
+    image: postgres:17-alpine
+    container_name: db
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: app_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
