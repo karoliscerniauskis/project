@@ -11,6 +11,14 @@ deptrac:
                 -
                     type: directory
                     value: src/Shared/Domain/.*
+        -   name: SharedApplication
+            collectors:
+                -   type: directory
+                    value: src/Shared/Application/.*
+        -   name: SharedInfrastructure
+            collectors:
+                -   type: directory
+                    value: src/Shared/Infrastructure/.*
         # Voucher
         -
             name: VoucherDomain
@@ -37,6 +45,12 @@ deptrac:
                     type: directory
                     value: src/Voucher/UI/.*
     ruleset:
+        # Shared
+        SharedApplication:
+            - SharedDomain
+        SharedInfrastructure:
+            - SharedApplication
+            - SharedDomain
         # Voucher
         VoucherDomain:
             - SharedDomain
