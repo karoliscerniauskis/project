@@ -11,3 +11,6 @@ docker compose exec app bash
 
 # Deptrac
 ./vendor/bin/deptrac
+
+# PHPStan
+./vendor/bin/phpstan analyse

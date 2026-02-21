@@ -17,7 +17,8 @@
     },
     "require-dev": {
         "deptrac/deptrac": "^4.6",
-        "friendsofphp/php-cs-fixer": "^3.94"
+        "friendsofphp/php-cs-fixer": "^3.94",
+        "phpstan/phpstan": "^2.1"
     },
     "config": {
         "allow-plugins": {
