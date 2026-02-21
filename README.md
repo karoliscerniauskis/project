@@ -7,6 +7,7 @@ docker compose exec app bash
 # php-cs-fixer
 ./vendor/bin/php-cs-fixer check --allow-risky=yes
 ./vendor/bin/php-cs-fixer fix
+./vendor/bin/php-cs-fixer fix --dry-run --diff --allow-risky=yes
 
 # Deptrac
 ./vendor/bin/deptrac
