@@ -44,13 +44,23 @@ deptrac:
                 -
                     type: directory
                     value: src/Voucher/UI/.*
+        # External
+        -
+            name: Symfony
+            collectors:
+                -   type: classLike
+                    value: ^Symfony\\
     ruleset:
         # Shared
+        SharedDomain:
         SharedApplication:
             - SharedDomain
         SharedInfrastructure:
             - SharedApplication
             - SharedDomain
+            - Symfony
         # Voucher
         VoucherDomain:
             - SharedDomain
+        # External
+        Symfony:
