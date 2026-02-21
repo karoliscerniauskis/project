@@ -22,6 +22,10 @@ return (new PhpCsFixer\Config())
         'single_blank_line_at_eof' => true,
         // Add: declare(strict_types=1); at the top of PHP files (where applicable)
         'declare_strict_types' => true,
+        // Import global classes
+        'global_namespace_import' => [
+            'import_classes' => true,
+        ],
     ])
     ->setFinder($finder)
 ;
