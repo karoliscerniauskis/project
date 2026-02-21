@@ -2,29 +2,41 @@ deptrac:
     paths:
         - ./src
     exclude_files:
-        - '#.*test.*#'
+        - '#^src/Kernel\.php$#'
     layers:
+        # Shared
         -
-            name: Controller
+            name: SharedDomain
             collectors:
                 -
-                    type: classLike
-                    value: .*Controller.*
+                    type: directory
+                    value: src/Shared/Domain/.*
+        # Voucher
         -
-            name: Repository
+            name: VoucherDomain
             collectors:
                 -
-                    type: classLike
-                    value: .*Repository.*
+                    type: directory
+                    value: src/Voucher/Domain/.*
         -
-            name: Service
+            name: VoucherApplication
             collectors:
                 -
-                    type: classLike
-                    value: .*Service.*
+                    type: directory
+                    value: src/Voucher/Application/.*
+        -
+            name: VoucherInfrastructure
+            collectors:
+                -
+                    type: directory
+                    value: src/Voucher/Infrastructure/.*
+        -
+            name: VoucherUI
+            collectors:
+                -
+                    type: directory
+                    value: src/Voucher/UI/.*
     ruleset:
-        Controller:
-            - Service
-        Service:
-            - Repository
-        Repository:
+        # Voucher
+        VoucherDomain:
+            - SharedDomain
