@@ -26,6 +26,8 @@ return (new PhpCsFixer\Config())
         'global_namespace_import' => [
             'import_classes' => true,
         ],
+        // Disable Yoda conditions
+        'yoda_style' => false,
     ])
     ->setFinder($finder)
 ;
