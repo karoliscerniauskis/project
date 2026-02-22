@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Shared\Infrastructure\Messaging;
+namespace App\Shared\Infrastructure\Messenger;
 
 use App\Shared\Application\Event\DomainEventDispatcher;
 use App\Shared\Domain\Event\DomainEvent;
