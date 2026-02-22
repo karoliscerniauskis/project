@@ -10,6 +10,6 @@ services:
         tags:
           - phpstan.rules.rule
     -
-        class: App\Shared\Infrastructure\PHPStan\Rule\FinalReadonlyCommandRule
+        class: App\Shared\Infrastructure\PHPStan\Rule\FinalReadonlyCommandHandlerRule
         tags:
           - phpstan.rules.rule
