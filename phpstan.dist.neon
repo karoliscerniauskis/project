@@ -3,3 +3,13 @@ parameters:
     paths:
         - src/
         - tests/
+
+services:
+    -
+        class: App\Shared\Infrastructure\PHPStan\Rule\FinalReadonlyCommandRule
+        tags:
+          - phpstan.rules.rule
+    -
+        class: App\Shared\Infrastructure\PHPStan\Rule\FinalReadonlyCommandRule
+        tags:
+          - phpstan.rules.rule
