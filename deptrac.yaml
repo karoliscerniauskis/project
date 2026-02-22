@@ -63,6 +63,14 @@ deptrac:
             collectors:
                 -   type: classLike
                     value: ^Symfony\\
+        -   name: PHPStan
+            collectors:
+                -   type: classLike
+                    value: ^PHPStan\\
+        -   name: PhpParser
+            collectors:
+                -   type: classLike
+                    value: ^PhpParser\\
     ruleset:
         # Shared
         SharedDomain:
@@ -72,6 +80,8 @@ deptrac:
             - SharedApplication
             - SharedDomain
             - Symfony
+            - PHPStan
+            - PhpParser
         # Auth
         AuthDomain:
             - SharedDomain
@@ -82,3 +92,5 @@ deptrac:
             - SharedDomain
         # External
         Symfony:
+        PHPStan:
+        PhpParser:
