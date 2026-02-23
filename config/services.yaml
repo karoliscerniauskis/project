@@ -21,3 +21,11 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\Auth\Application\Handler\:
+        resource: '../src/Auth/Application/Handler/'
+        tags: [ 'messenger.message_handler' ]
+
+    App\Voucher\Application\Handler\:
+        resource: '../src/Voucher/Application/Handler/'
+        tags: [ 'messenger.message_handler' ]
