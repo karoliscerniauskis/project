@@ -86,10 +86,30 @@ deptrac:
         AuthDomain:
             - SharedDomain
         AuthApplication:
+            - AuthDomain
+            - SharedApplication
+            - SharedDomain
         AuthInfrastructure:
+            - AuthApplication
+            - AuthDomain
+            - SharedInfrastructure
+            - SharedApplication
+            - SharedDomain
+            - Symfony
         # Voucher
         VoucherDomain:
             - SharedDomain
+        VoucherApplication:
+            - VoucherDomain
+            - SharedApplication
+            - SharedDomain
+        VoucherInfrastructure:
+            - VoucherApplication
+            - VoucherDomain
+            - SharedInfrastructure
+            - SharedApplication
+            - SharedDomain
+            - Symfony
         # External
         Symfony:
         PHPStan:
