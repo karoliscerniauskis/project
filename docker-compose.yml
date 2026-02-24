@@ -12,7 +12,7 @@ services:
     environment:
       APP_ENV: dev
       SERVER_NAME: ":80"
-      DATABASE_URL: "postgresql://app_user:app_password@postgres:5432/app_db?serverVersion=17&charset=utf8"
+      DATABASE_URL: "postgresql://app_user:app_password@db:5432/app_db?serverVersion=17&charset=utf8"
     depends_on:
       - db
       - mailer

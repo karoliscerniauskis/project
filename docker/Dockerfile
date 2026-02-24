@@ -8,7 +8,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
-RUN install-php-extensions intl
+RUN install-php-extensions intl pdo_pgsql
 
 # php.ini
 COPY ./docker/php.ini /usr/local/etc/php/php.ini
