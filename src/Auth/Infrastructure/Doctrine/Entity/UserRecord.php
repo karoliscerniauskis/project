@@ -15,13 +15,17 @@ class UserRecord
     private string $id;
     #[ORM\Column(type: 'string', unique: true)]
     private string $email;
+    #[ORM\Column(type: 'string')]
+    private string $hashedPassword;
 
     public function __construct(
         string $id,
         string $email,
+        string $hashedPassword,
     ) {
         $this->id = $id;
         $this->email = $email;
+        $this->hashedPassword = $hashedPassword;
     }
 
     public function getId(): string
@@ -32,5 +36,10 @@ class UserRecord
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function getHashedPassword(): string
+    {
+        return $this->hashedPassword;
     }
 }

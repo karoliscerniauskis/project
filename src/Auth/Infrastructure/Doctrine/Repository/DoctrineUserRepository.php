@@ -12,14 +12,25 @@ use Doctrine\ORM\EntityManagerInterface;
 final readonly class DoctrineUserRepository implements UserRepository
 {
     public function __construct(
-        private EntityManagerInterface $em,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
     public function save(User $user): void
     {
-        $userRecord = new UserRecord($user->getId(), $user->getEmail());
-        $this->em->persist($userRecord);
-        $this->em->flush();
+        $userRecord = new UserRecord($user->getId(), $user->getEmail(), $user->getHashedPassword());
+        $this->entityManager->persist($userRecord);
+        $this->entityManager->flush();
+    }
+
+    public function findByEmail(string $email): ?User
+    {
+        $userRecord = $this->entityManager->getRepository(UserRecord::class)->findOneBy(['email' => $email]);
+
+        if (!$userRecord instanceof UserRecord) {
+            return null;
+        }
+
+        return User::reconstitute($userRecord->getId(), $userRecord->getEmail(), $userRecord->getHashedPassword());
     }
 }

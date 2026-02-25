@@ -7,6 +7,7 @@ namespace App\Auth\Application\Handler;
 use App\Auth\Application\Command\RegisterUser;
 use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
+use App\Auth\Domain\Security\UserPasswordHasher;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UuidCreator;
 
@@ -16,6 +17,7 @@ final readonly class RegisterUserHandler
         private UserRepository $userRepository,
         private UuidCreator $uuidCreator,
         private Clock $clock,
+        private UserPasswordHasher $passwordHasher,
     ) {
     }
 
@@ -24,6 +26,7 @@ final readonly class RegisterUserHandler
         $user = User::register(
             $this->uuidCreator->create(),
             $command->getEmail(),
+            $this->passwordHasher->hashPassword($command->getPassword()),
             $this->clock->now(),
         );
 

@@ -12,6 +12,7 @@ final class User extends AbstractAggregateRoot
 {
     private string $id;
     private string $email;
+    private string $hashedPassword;
 
     private function __construct()
     {
@@ -21,11 +22,13 @@ final class User extends AbstractAggregateRoot
     public static function register(
         string $id,
         string $email,
+        string $hashedPassword,
         DateTimeImmutable $occurredOn,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->email = $email;
+        $self->hashedPassword = $hashedPassword;
         $self->record(new UserRegistered($occurredOn));
 
         return $self;
@@ -39,5 +42,20 @@ final class User extends AbstractAggregateRoot
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function getHashedPassword(): string
+    {
+        return $this->hashedPassword;
+    }
+
+    public static function reconstitute(string $id, string $email, string $hashedPassword): self
+    {
+        $self = new self();
+        $self->id = $id;
+        $self->email = $email;
+        $self->hashedPassword = $hashedPassword;
+
+        return $self;
     }
 }

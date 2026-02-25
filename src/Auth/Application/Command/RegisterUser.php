@@ -8,7 +8,7 @@ final readonly class RegisterUser
 {
     public function __construct(
         private string $email,
-        private string $plainPassword,
+        private string $password,
     ) {
     }
 
@@ -17,8 +17,8 @@ final readonly class RegisterUser
         return $this->email;
     }
 
-    public function getPlainPassword(): string
+    public function getPassword(): string
     {
-        return $this->plainPassword;
+        return $this->password;
     }
 }
