@@ -14,3 +14,6 @@ docker compose exec app bash
 
 # PHPStan
 ./vendor/bin/phpstan analyse
+
+# Lexik
+php bin/console lexik:jwt:generate-keypair --skip-if-exists
