@@ -20,6 +20,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Auth/Infrastructure/Doctrine/Entity'
                 prefix: 'App\Auth\Infrastructure\Doctrine\Entity'
                 alias: Auth
+            Voucher:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Voucher/Infrastructure/Doctrine/Entity'
+                prefix: 'App\Voucher\Infrastructure\Doctrine\Entity'
+                alias: Voucher
         controller_resolver:
             auto_mapping: false
 

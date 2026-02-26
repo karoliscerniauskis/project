@@ -75,6 +75,10 @@ deptrac:
             collectors:
                 -   type: classLike
                     value: ^Doctrine\\
+        -   name: Hidehalo
+            collectors:
+                -   type: classLike
+                    value: ^Hidehalo\\
     ruleset:
         # Shared
         SharedDomain:
@@ -117,8 +121,10 @@ deptrac:
             - SharedDomain
             - Symfony
             - Doctrine
+            - Hidehalo
         # External
         Symfony:
         PHPStan:
         PhpParser:
         Doctrine:
+        Hidehalo:
