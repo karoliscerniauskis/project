@@ -32,6 +32,8 @@ security:
     access_control:
         - { path: ^/api/auth/register$, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/provider, roles: ROLE_VOUCHER_PROVIDER }
         - { path: ^/api, roles: ROLE_USER }
 
 when@test:

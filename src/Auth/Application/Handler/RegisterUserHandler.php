@@ -27,6 +27,7 @@ final readonly class RegisterUserHandler
             $this->uuidCreator->create(),
             $command->getEmail(),
             $this->passwordHasher->hashPassword($command->getPassword()),
+            $command->getRoles(),
             $this->clock->now(),
         );
 

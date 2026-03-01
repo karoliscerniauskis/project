@@ -18,7 +18,7 @@ final readonly class DoctrineUserRepository implements UserRepository
 
     public function save(User $user): void
     {
-        $userRecord = new UserRecord($user->getId(), $user->getEmail(), $user->getHashedPassword());
+        $userRecord = new UserRecord($user->getId(), $user->getEmail(), $user->getHashedPassword(), $user->getRoles());
         $this->entityManager->persist($userRecord);
         $this->entityManager->flush();
     }
@@ -31,6 +31,11 @@ final readonly class DoctrineUserRepository implements UserRepository
             return null;
         }
 
-        return User::reconstitute($userRecord->getId(), $userRecord->getEmail(), $userRecord->getHashedPassword());
+        return User::reconstitute(
+            $userRecord->getId(),
+            $userRecord->getEmail(),
+            $userRecord->getHashedPassword(),
+            $userRecord->getRoles(),
+        );
     }
 }

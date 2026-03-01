@@ -16,7 +16,7 @@ final readonly class SecurityUser implements UserInterface, PasswordAuthenticate
     public function __construct(
         private string $userIdentifier,
         private ?string $password,
-        private array $roles = ['ROLE_USER'],
+        private array $roles,
     ) {
         if ($this->userIdentifier === '') {
             throw new InvalidArgumentException('User identifier must be a non-empty string.');

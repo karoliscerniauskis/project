@@ -6,9 +6,13 @@ namespace App\Auth\Application\Command;
 
 final readonly class RegisterUser
 {
+    /**
+     * @param string[] $roles
+     */
     public function __construct(
         private string $email,
         private string $password,
+        private array $roles,
     ) {
     }
 
@@ -20,5 +24,13 @@ final readonly class RegisterUser
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRoles(): array
+    {
+        return $this->roles;
     }
 }

@@ -42,6 +42,7 @@ final readonly class DoctrineUserProvider implements UserProviderInterface
         return new SecurityUser(
             $record->getEmail(),
             $record->getHashedPassword(),
+            $record->getRoles(),
         );
     }
 }

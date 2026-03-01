@@ -17,15 +17,23 @@ class UserRecord
     private string $email;
     #[ORM\Column(type: 'string')]
     private string $hashedPassword;
+    /** @var string[] */
+    #[ORM\Column(type: 'json')]
+    private array $roles;
 
+    /**
+     * @param string[] $roles
+     */
     public function __construct(
         string $id,
         string $email,
         string $hashedPassword,
+        array $roles,
     ) {
         $this->id = $id;
         $this->email = $email;
         $this->hashedPassword = $hashedPassword;
+        $this->roles = $roles;
     }
 
     public function getId(): string
@@ -41,5 +49,13 @@ class UserRecord
     public function getHashedPassword(): string
     {
         return $this->hashedPassword;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRoles(): array
+    {
+        return $this->roles;
     }
 }

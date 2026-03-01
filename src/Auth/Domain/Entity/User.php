@@ -14,21 +14,29 @@ final class User extends AbstractAggregateRoot
     private string $email;
     private string $hashedPassword;
 
+    /** @var string[] */
+    private array $roles;
+
     private function __construct()
     {
         parent::__construct();
     }
 
+    /**
+     * @param string[] $roles
+     */
     public static function register(
         string $id,
         string $email,
         string $hashedPassword,
+        array $roles,
         DateTimeImmutable $occurredOn,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->email = $email;
         $self->hashedPassword = $hashedPassword;
+        $self->roles = $roles;
         $self->record(new UserRegistered($occurredOn));
 
         return $self;
@@ -49,12 +57,24 @@ final class User extends AbstractAggregateRoot
         return $this->hashedPassword;
     }
 
-    public static function reconstitute(string $id, string $email, string $hashedPassword): self
+    /**
+     * @return string[]
+     */
+    public function getRoles(): array
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @param string[] $roles
+     */
+    public static function reconstitute(string $id, string $email, string $hashedPassword, array $roles): self
     {
         $self = new self();
         $self->id = $id;
         $self->email = $email;
         $self->hashedPassword = $hashedPassword;
+        $self->roles = $roles;
 
         return $self;
     }

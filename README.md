@@ -13,7 +13,7 @@ docker compose exec app bash
 ./vendor/bin/deptrac
 
 # PHPStan
-./vendor/bin/phpstan analyse
+./vendor/bin/phpstan analyse --level=10
 
 # Lexik
 php bin/console lexik:jwt:generate-keypair --skip-if-exists
