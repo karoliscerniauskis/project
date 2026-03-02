@@ -31,6 +31,9 @@ final readonly class CreateVoucherHandler
             $voucher = Voucher::create(
                 $this->uuidCreator->create(),
                 $this->voucherCodeGenerator->generate(),
+                $command->getProviderId(),
+                $command->getIssuedToUserId(),
+                $command->getIssuedToEmail(),
                 $this->clock->now(),
             );
 

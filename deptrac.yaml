@@ -57,6 +57,25 @@ deptrac:
                 -
                     type: directory
                     value: src/Voucher/UI/.*
+        # Provider
+        -
+            name: ProviderDomain
+            collectors:
+                -
+                    type: directory
+                    value: src/Provider/Domain/.*
+        -
+            name: ProviderApplication
+            collectors:
+                -
+                    type: directory
+                    value: src/Provider/Application/.*
+        -
+            name: ProviderInfrastructure
+            collectors:
+                -
+                    type: directory
+                    value: src/Provider/Infrastructure/.*
         # External
         -
             name: Symfony
@@ -122,6 +141,18 @@ deptrac:
             - Symfony
             - Doctrine
             - Hidehalo
+        # Provider
+        ProviderDomain:
+            - SharedDomain
+        ProviderApplication:
+            - ProviderDomain
+            - SharedApplication
+            - SharedDomain
+        ProviderInfrastructure:
+            - ProviderDomain
+            - SharedInfrastructure
+            - SharedDomain
+            - Doctrine
         # External
         Symfony:
         PHPStan:

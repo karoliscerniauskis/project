@@ -20,7 +20,14 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository
 
     public function save(Voucher $voucher): void
     {
-        $voucherRecord = new VoucherRecord($voucher->getId(), $voucher->getCode());
+        $voucherRecord = new VoucherRecord(
+            $voucher->getId(),
+            $voucher->getCode(),
+            $voucher->getProviderId(),
+            $voucher->getIssuedToUserId(),
+            $voucher->getIssuedToEmail(),
+            $voucher->getClaimedByUserId(),
+        );
         $this->entityManager->persist($voucherRecord);
 
         try {
@@ -40,6 +47,13 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository
             return null;
         }
 
-        return Voucher::reconstitute($voucherRecord->getId(), $voucherRecord->getCode());
+        return Voucher::reconstitute(
+            $voucherRecord->getId(),
+            $voucherRecord->getCode(),
+            $voucherRecord->getProviderId(),
+            $voucherRecord->getIssuedToUserId(),
+            $voucherRecord->getIssuedToEmail(),
+            $voucherRecord->getClaimedByUserId(),
+        );
     }
 }

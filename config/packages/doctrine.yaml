@@ -26,6 +26,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Voucher/Infrastructure/Doctrine/Entity'
                 prefix: 'App\Voucher\Infrastructure\Doctrine\Entity'
                 alias: Voucher
+            Provider:
+                type: attribute
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Provider/Infrastructure/Doctrine/Entity'
+                prefix: 'App\Provider\Infrastructure\Doctrine\Entity'
+                alias: Provider
         controller_resolver:
             auto_mapping: false
 
