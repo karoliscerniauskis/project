@@ -9,6 +9,7 @@ use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Security\UserPasswordHasher;
 use App\Shared\Domain\Clock\Clock;
+use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\UuidCreator;
 
 final readonly class RegisterUserHandler
@@ -24,7 +25,7 @@ final readonly class RegisterUserHandler
     public function __invoke(RegisterUser $command): void
     {
         $user = User::register(
-            $this->uuidCreator->create(),
+            UserId::fromString($this->uuidCreator->create()),
             $command->getEmail(),
             $this->passwordHasher->hashPassword($command->getPassword()),
             $command->getRoles(),

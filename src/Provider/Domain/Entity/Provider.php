@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Provider\Domain\Entity;
 
 use App\Shared\Domain\Event\AbstractAggregateRoot;
+use App\Shared\Domain\Id\ProviderId;
 
 final class Provider extends AbstractAggregateRoot
 {
-    private string $id;
+    private ProviderId $id;
     private string $name;
     private string $status;
 
@@ -18,7 +19,7 @@ final class Provider extends AbstractAggregateRoot
     }
 
     public static function create(
-        string $id,
+        ProviderId $id,
         string $name,
         string $status,
     ): self {
@@ -31,7 +32,7 @@ final class Provider extends AbstractAggregateRoot
     }
 
     public static function reconstitute(
-        string $id,
+        ProviderId $id,
         string $name,
         string $status,
     ): self {
@@ -43,7 +44,7 @@ final class Provider extends AbstractAggregateRoot
         return $self;
     }
 
-    public function getId(): string
+    public function getId(): ProviderId
     {
         return $this->id;
     }

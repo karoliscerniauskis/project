@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Provider\Domain\Entity;
 
 use App\Shared\Domain\Event\AbstractAggregateRoot;
+use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\ProviderUserId;
+use App\Shared\Domain\Id\UserId;
 
 final class ProviderUser extends AbstractAggregateRoot
 {
-    private string $id;
-    private string $providerId;
-    private string $userId;
+    private ProviderUserId $id;
+    private ProviderId $providerId;
+    private UserId $userId;
 
     private function __construct()
     {
@@ -18,9 +21,9 @@ final class ProviderUser extends AbstractAggregateRoot
     }
 
     public static function assign(
-        string $id,
-        string $providerId,
-        string $userId,
+        ProviderUserId $id,
+        ProviderId $providerId,
+        UserId $userId,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -31,9 +34,9 @@ final class ProviderUser extends AbstractAggregateRoot
     }
 
     public static function reconstitute(
-        string $id,
-        string $providerId,
-        string $userId,
+        ProviderUserId $id,
+        ProviderId $providerId,
+        UserId $userId,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -43,17 +46,17 @@ final class ProviderUser extends AbstractAggregateRoot
         return $self;
     }
 
-    public function getId(): string
+    public function getId(): ProviderUserId
     {
         return $this->id;
     }
 
-    public function getProviderId(): string
+    public function getProviderId(): ProviderId
     {
         return $this->providerId;
     }
 
-    public function getUserId(): string
+    public function getUserId(): UserId
     {
         return $this->userId;
     }

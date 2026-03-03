@@ -6,11 +6,12 @@ namespace App\Auth\Domain\Entity;
 
 use App\Auth\Domain\Event\UserRegistered;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
+use App\Shared\Domain\Id\UserId;
 use DateTimeImmutable;
 
 final class User extends AbstractAggregateRoot
 {
-    private string $id;
+    private UserId $id;
     private string $email;
     private string $hashedPassword;
 
@@ -26,7 +27,7 @@ final class User extends AbstractAggregateRoot
      * @param string[] $roles
      */
     public static function register(
-        string $id,
+        UserId $id,
         string $email,
         string $hashedPassword,
         array $roles,
@@ -42,7 +43,7 @@ final class User extends AbstractAggregateRoot
         return $self;
     }
 
-    public function getId(): string
+    public function getId(): UserId
     {
         return $this->id;
     }
@@ -68,7 +69,7 @@ final class User extends AbstractAggregateRoot
     /**
      * @param string[] $roles
      */
-    public static function reconstitute(string $id, string $email, string $hashedPassword, array $roles): self
+    public static function reconstitute(UserId $id, string $email, string $hashedPassword, array $roles): self
     {
         $self = new self();
         $self->id = $id;

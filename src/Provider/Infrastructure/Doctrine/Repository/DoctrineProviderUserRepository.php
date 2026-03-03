@@ -7,6 +7,8 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
+use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class DoctrineProviderUserRepository implements ProviderUserRepository
@@ -19,25 +21,25 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
     public function save(ProviderUser $providerUser): void
     {
         $record = new ProviderUserRecord(
-            $providerUser->getId(),
-            $providerUser->getProviderId(),
-            $providerUser->getUserId(),
+            $providerUser->getId()->toString(),
+            $providerUser->getProviderId()->toString(),
+            $providerUser->getUserId()->toString(),
         );
 
         $this->entityManager->persist($record);
         $this->entityManager->flush();
     }
 
-    public function findProviderIdByUserId(string $userId): ?string
+    public function findProviderIdByUserId(UserId $userId): ?ProviderId
     {
         $record = $this->entityManager
             ->getRepository(ProviderUserRecord::class)
-            ->findOneBy(['userId' => $userId]);
+            ->findOneBy(['userId' => $userId->toString()]);
 
         if (!$record instanceof ProviderUserRecord) {
             return null;
         }
 
-        return $record->getProviderId();
+        return ProviderId::fromString($record->getProviderId());
     }
 }

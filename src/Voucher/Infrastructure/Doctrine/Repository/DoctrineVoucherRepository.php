@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Voucher\Infrastructure\Doctrine\Repository;
 
+use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\UserId;
+use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Exception\VoucherCodeAlreadyExists;
 use App\Voucher\Domain\Entity\Voucher;
 use App\Voucher\Domain\Repository\VoucherRepository;
@@ -21,12 +24,12 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository
     public function save(Voucher $voucher): void
     {
         $voucherRecord = new VoucherRecord(
-            $voucher->getId(),
+            $voucher->getId()->toString(),
             $voucher->getCode(),
-            $voucher->getProviderId(),
-            $voucher->getIssuedToUserId(),
+            $voucher->getProviderId()->toString(),
+            $voucher->getIssuedToUserId()?->toString(),
             $voucher->getIssuedToEmail(),
-            $voucher->getClaimedByUserId(),
+            $voucher->getClaimedByUserId()?->toString(),
         );
         $this->entityManager->persist($voucherRecord);
 
@@ -47,13 +50,16 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository
             return null;
         }
 
+        $issuedToUserId = $voucherRecord->getIssuedToUserId();
+        $claimedByUserId = $voucherRecord->getClaimedByUserId();
+
         return Voucher::reconstitute(
-            $voucherRecord->getId(),
+            VoucherId::fromString($voucherRecord->getId()),
             $voucherRecord->getCode(),
-            $voucherRecord->getProviderId(),
-            $voucherRecord->getIssuedToUserId(),
+            ProviderId::fromString($voucherRecord->getProviderId()),
+            $issuedToUserId !== null ? UserId::fromString($issuedToUserId) : null,
             $voucherRecord->getIssuedToEmail(),
-            $voucherRecord->getClaimedByUserId(),
+            $claimedByUserId !== null ? UserId::fromString($claimedByUserId) : null,
         );
     }
 }

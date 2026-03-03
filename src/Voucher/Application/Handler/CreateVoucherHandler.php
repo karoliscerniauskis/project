@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Voucher\Application\Handler;
 
 use App\Shared\Domain\Clock\Clock;
+use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\UuidCreator;
+use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Command\CreateVoucher;
 use App\Voucher\Application\Exception\UnableToGenerateUniqueVoucherCode;
 use App\Voucher\Application\Exception\VoucherCodeAlreadyExists;
@@ -27,12 +30,15 @@ final readonly class CreateVoucherHandler
 
     public function __invoke(CreateVoucher $command): void
     {
+        $issuedToUserIdRaw = $command->getIssuedToUserId();
+        $issuedToUserId = $issuedToUserIdRaw !== null ? UserId::fromString($issuedToUserIdRaw) : null;
+
         for ($i = 0; $i < self::ATTEMPTS_LIMIT; ++$i) {
             $voucher = Voucher::create(
-                $this->uuidCreator->create(),
+                VoucherId::fromString($this->uuidCreator->create()),
                 $this->voucherCodeGenerator->generate(),
-                $command->getProviderId(),
-                $command->getIssuedToUserId(),
+                ProviderId::fromString($command->getProviderId()),
+                $issuedToUserId,
                 $command->getIssuedToEmail(),
                 $this->clock->now(),
             );
