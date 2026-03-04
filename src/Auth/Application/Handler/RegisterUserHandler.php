@@ -7,7 +7,9 @@ namespace App\Auth\Application\Handler;
 use App\Auth\Application\Command\RegisterUser;
 use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
+use App\Auth\Domain\Security\EmailVerificationSlugGenerator;
 use App\Auth\Domain\Security\UserPasswordHasher;
+use App\Shared\Application\Event\DomainEventDispatcher;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\UuidCreator;
@@ -19,6 +21,8 @@ final readonly class RegisterUserHandler
         private UuidCreator $uuidCreator,
         private Clock $clock,
         private UserPasswordHasher $passwordHasher,
+        private EmailVerificationSlugGenerator $emailVerificationSlugGenerator,
+        private DomainEventDispatcher $domainEventDispatcher,
     ) {
     }
 
@@ -29,9 +33,14 @@ final readonly class RegisterUserHandler
             $command->getEmail(),
             $this->passwordHasher->hashPassword($command->getPassword()),
             $command->getRoles(),
+            $this->emailVerificationSlugGenerator->generate(),
             $this->clock->now(),
         );
 
         $this->userRepository->save($user);
+
+        foreach ($user->pullDomainEvents() as $event) {
+            $this->domainEventDispatcher->dispatch($event);
+        }
     }
 }

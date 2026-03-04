@@ -19,11 +19,24 @@ final readonly class DoctrineUserRepository implements UserRepository
 
     public function save(User $user): void
     {
+        $existing = $this->entityManager->getRepository(UserRecord::class)->find($user->getId()->toString());
+
+        if ($existing instanceof UserRecord) {
+            $existing->setEmailVerificationSlug($user->getEmailVerificationSlug());
+            $existing->setEmailVerifiedAt($user->getEmailVerifiedAt());
+
+            $this->entityManager->flush();
+
+            return;
+        }
+
         $userRecord = new UserRecord(
             $user->getId()->toString(),
             $user->getEmail(),
             $user->getHashedPassword(),
             $user->getRoles(),
+            $user->getEmailVerificationSlug(),
+            $user->getEmailVerifiedAt(),
         );
         $this->entityManager->persist($userRecord);
         $this->entityManager->flush();
@@ -37,11 +50,31 @@ final readonly class DoctrineUserRepository implements UserRepository
             return null;
         }
 
+        return $this->toDomainUser($userRecord);
+    }
+
+    public function findByEmailVerificationSlug(string $emailVerificationSlug): ?User
+    {
+        $userRecord = $this->entityManager->getRepository(UserRecord::class)->findOneBy([
+            'emailVerificationSlug' => $emailVerificationSlug,
+        ]);
+
+        if (!$userRecord instanceof UserRecord) {
+            return null;
+        }
+
+        return $this->toDomainUser($userRecord);
+    }
+
+    private function toDomainUser(UserRecord $userRecord): User
+    {
         return User::reconstitute(
             UserId::fromString($userRecord->getId()),
             $userRecord->getEmail(),
             $userRecord->getHashedPassword(),
             $userRecord->getRoles(),
+            $userRecord->getEmailVerificationSlug(),
+            $userRecord->getEmailVerifiedAt(),
         );
     }
 }

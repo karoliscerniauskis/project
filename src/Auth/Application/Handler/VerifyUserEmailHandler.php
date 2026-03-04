@@ -5,10 +5,26 @@ declare(strict_types=1);
 namespace App\Auth\Application\Handler;
 
 use App\Auth\Application\Command\VerifyUserEmail;
+use App\Auth\Domain\Repository\UserRepository;
+use App\Shared\Domain\Clock\Clock;
 
 final readonly class VerifyUserEmailHandler
 {
+    public function __construct(
+        private UserRepository $userRepository,
+        private Clock $clock,
+    ) {
+    }
+
     public function __invoke(VerifyUserEmail $command): void
     {
+        $user = $this->userRepository->findByEmailVerificationSlug($command->getEmailVerificationSlug());
+
+        if ($user === null) {
+            return;
+        }
+
+        $user->verifyEmail($this->clock->now());
+        $this->userRepository->save($user);
     }
 }

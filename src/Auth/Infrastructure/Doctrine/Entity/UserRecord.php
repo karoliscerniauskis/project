@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Infrastructure\Doctrine\Entity;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -20,6 +21,10 @@ class UserRecord
     /** @var string[] */
     #[ORM\Column(type: 'json')]
     private array $roles;
+    #[ORM\Column(type: 'string', unique: true, nullable: true)]
+    private ?string $emailVerificationSlug;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $emailVerifiedAt;
 
     /**
      * @param string[] $roles
@@ -29,11 +34,15 @@ class UserRecord
         string $email,
         string $hashedPassword,
         array $roles,
+        ?string $emailVerificationSlug,
+        ?DateTimeImmutable $emailVerifiedAt = null,
     ) {
         $this->id = $id;
         $this->email = $email;
         $this->hashedPassword = $hashedPassword;
         $this->roles = $roles;
+        $this->emailVerificationSlug = $emailVerificationSlug;
+        $this->emailVerifiedAt = $emailVerifiedAt;
     }
 
     public function getId(): string
@@ -57,5 +66,29 @@ class UserRecord
     public function getRoles(): array
     {
         return $this->roles;
+    }
+
+    public function getEmailVerificationSlug(): ?string
+    {
+        return $this->emailVerificationSlug;
+    }
+
+    public function setEmailVerificationSlug(?string $emailVerificationSlug): self
+    {
+        $this->emailVerificationSlug = $emailVerificationSlug;
+
+        return $this;
+    }
+
+    public function getEmailVerifiedAt(): ?DateTimeImmutable
+    {
+        return $this->emailVerifiedAt;
+    }
+
+    public function setEmailVerifiedAt(?DateTimeImmutable $emailVerifiedAt): self
+    {
+        $this->emailVerifiedAt = $emailVerifiedAt;
+
+        return $this;
     }
 }

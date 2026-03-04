@@ -31,6 +31,7 @@ security:
     # Note: Only the *first* matching rule is applied
     access_control:
         - { path: ^/api/auth/register$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/verify, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/login$, roles: PUBLIC_ACCESS }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api/provider, roles: ROLE_VOUCHER_PROVIDER }
