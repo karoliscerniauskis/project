@@ -137,4 +137,9 @@ final class User extends AbstractAggregateRoot
         $this->emailVerificationSlug = $emailVerificationSlug;
         $this->record(new UserEmailChangeRequested($newEmail, $emailVerificationSlug, $occurredOn));
     }
+
+    public function changePassword(string $hashedPassword): void
+    {
+        $this->hashedPassword = $hashedPassword;
+    }
 }

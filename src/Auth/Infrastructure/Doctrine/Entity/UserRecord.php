@@ -83,6 +83,13 @@ class UserRecord
         return $this->hashedPassword;
     }
 
+    public function setHashedPassword(string $hashedPassword): self
+    {
+        $this->hashedPassword = $hashedPassword;
+
+        return $this;
+    }
+
     /**
      * @return string[]
      */

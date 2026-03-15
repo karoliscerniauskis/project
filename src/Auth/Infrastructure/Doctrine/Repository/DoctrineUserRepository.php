@@ -24,6 +24,7 @@ final readonly class DoctrineUserRepository implements UserRepository
         if ($existing instanceof UserRecord) {
             $existing->setEmail($user->getEmail());
             $existing->setPendingEmail($user->getPendingEmail());
+            $existing->setHashedPassword($user->getHashedPassword());
             $existing->setEmailVerificationSlug($user->getEmailVerificationSlug());
             $existing->setEmailVerifiedAt($user->getEmailVerifiedAt());
 
