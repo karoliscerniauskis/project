@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Domain\Entity;
 
-use App\Auth\Domain\Event\UserEmailChanged;
+use App\Auth\Domain\Event\UserEmailChangeRequested;
 use App\Auth\Domain\Event\UserRegistered;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\UserId;
@@ -14,6 +14,7 @@ final class User extends AbstractAggregateRoot
 {
     private UserId $id;
     private string $email;
+    private ?string $pendingEmail = null;
     private string $hashedPassword;
     /** @var string[] */
     private array $roles;
@@ -39,6 +40,7 @@ final class User extends AbstractAggregateRoot
         $self = new self();
         $self->id = $id;
         $self->email = $email;
+        $self->pendingEmail = null;
         $self->hashedPassword = $hashedPassword;
         $self->roles = $roles;
         $self->emailVerificationSlug = $emailVerificationSlug;
@@ -56,6 +58,11 @@ final class User extends AbstractAggregateRoot
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function getPendingEmail(): ?string
+    {
+        return $this->pendingEmail;
     }
 
     public function getHashedPassword(): string
@@ -77,6 +84,7 @@ final class User extends AbstractAggregateRoot
     public static function reconstitute(
         UserId $id,
         string $email,
+        ?string $pendingEmail,
         string $hashedPassword,
         array $roles,
         ?string $emailVerificationSlug,
@@ -85,6 +93,7 @@ final class User extends AbstractAggregateRoot
         $self = new self();
         $self->id = $id;
         $self->email = $email;
+        $self->pendingEmail = $pendingEmail;
         $self->hashedPassword = $hashedPassword;
         $self->roles = $roles;
         $self->emailVerificationSlug = $emailVerificationSlug;
@@ -105,23 +114,27 @@ final class User extends AbstractAggregateRoot
 
     public function verifyEmail(DateTimeImmutable $verifiedAt): void
     {
-        if ($this->emailVerifiedAt !== null) {
+        if ($this->pendingEmail === null && $this->emailVerifiedAt !== null) {
             return;
+        }
+
+        if ($this->pendingEmail !== null) {
+            $this->email = $this->pendingEmail;
+            $this->pendingEmail = null;
         }
 
         $this->emailVerifiedAt = $verifiedAt;
         $this->emailVerificationSlug = null;
     }
 
-    public function changeEmail(string $newEmail, string $emailVerificationSlug, DateTimeImmutable $occurredOn): void
+    public function requestEmailChange(string $newEmail, string $emailVerificationSlug, DateTimeImmutable $occurredOn): void
     {
         if ($this->email === $newEmail) {
             return;
         }
 
-        $this->email = $newEmail;
+        $this->pendingEmail = $newEmail;
         $this->emailVerificationSlug = $emailVerificationSlug;
-        $this->emailVerifiedAt = null;
-        $this->record(new UserEmailChanged($newEmail, $emailVerificationSlug, $occurredOn));
+        $this->record(new UserEmailChangeRequested($newEmail, $emailVerificationSlug, $occurredOn));
     }
 }

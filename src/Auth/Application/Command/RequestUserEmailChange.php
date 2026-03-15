@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Application\Command;
 
-final readonly class ChangeUserEmail
+final readonly class RequestUserEmailChange
 {
     public function __construct(
         private string $userId,

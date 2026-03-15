@@ -40,7 +40,7 @@ services:
         arguments:
             $emailFrom: '%app.email_from%'
 
-    App\Auth\Application\Handler\SendVerifyEmailOnUserEmailChangedHandler:
+    App\Auth\Application\Handler\SendVerifyEmailOnUserEmailChangeRequestedHandler:
         tags: [ 'messenger.message_handler' ]
         arguments:
             $emailFrom: '%app.email_from%'

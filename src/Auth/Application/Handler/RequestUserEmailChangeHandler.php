@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Auth\Application\Handler;
 
-use App\Auth\Application\Command\ChangeUserEmail;
+use App\Auth\Application\Command\RequestUserEmailChange;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Security\EmailVerificationSlugGenerator;
 use App\Shared\Application\Event\DomainEventDispatcher;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;
 
-final readonly class ChangeUserEmailHandler
+final readonly class RequestUserEmailChangeHandler
 {
     public function __construct(
         private UserRepository $userRepository,
@@ -21,7 +21,7 @@ final readonly class ChangeUserEmailHandler
     ) {
     }
 
-    public function __invoke(ChangeUserEmail $command): void
+    public function __invoke(RequestUserEmailChange $command): void
     {
         $userId = UserId::fromString($command->getUserId());
         $user = $this->userRepository->findById($userId);
@@ -30,8 +30,20 @@ final readonly class ChangeUserEmailHandler
             return;
         }
 
+        $existingByEmail = $this->userRepository->findByEmail($command->getNewEmail());
+
+        if ($existingByEmail !== null && !$existingByEmail->getId()->equals($user->getId())) {
+            return;
+        }
+
+        $existingByPendingEmail = $this->userRepository->findByPendingEmail($command->getNewEmail());
+
+        if ($existingByPendingEmail !== null && !$existingByPendingEmail->getId()->equals($user->getId())) {
+            return;
+        }
+
         $slug = $this->emailVerificationSlugGenerator->generate();
-        $user->changeEmail($command->getNewEmail(), $slug, $this->clock->now());
+        $user->requestEmailChange($command->getNewEmail(), $slug, $this->clock->now());
         $this->userRepository->save($user);
         $this->domainEventDispatcher->dispatchAll($user->pullDomainEvents());
     }

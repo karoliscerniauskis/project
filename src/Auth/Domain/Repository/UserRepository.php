@@ -13,6 +13,8 @@ interface UserRepository
 
     public function findByEmail(string $email): ?User;
 
+    public function findByPendingEmail(string $pendingEmail): ?User;
+
     public function findByEmailVerificationSlug(string $emailVerificationSlug): ?User;
 
     public function findById(UserId $id): ?User;

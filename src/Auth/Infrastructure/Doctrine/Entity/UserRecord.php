@@ -16,6 +16,8 @@ class UserRecord
     private string $id;
     #[ORM\Column(type: 'string', unique: true)]
     private string $email;
+    #[ORM\Column(type: 'string', unique: true, nullable: true)]
+    private ?string $pendingEmail;
     #[ORM\Column(type: 'string')]
     private string $hashedPassword;
     /** @var string[] */
@@ -32,6 +34,7 @@ class UserRecord
     public function __construct(
         string $id,
         string $email,
+        ?string $pendingEmail,
         string $hashedPassword,
         array $roles,
         ?string $emailVerificationSlug,
@@ -39,6 +42,7 @@ class UserRecord
     ) {
         $this->id = $id;
         $this->email = $email;
+        $this->pendingEmail = $pendingEmail;
         $this->hashedPassword = $hashedPassword;
         $this->roles = $roles;
         $this->emailVerificationSlug = $emailVerificationSlug;
@@ -58,6 +62,18 @@ class UserRecord
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    public function getPendingEmail(): ?string
+    {
+        return $this->pendingEmail;
+    }
+
+    public function setPendingEmail(?string $pendingEmail): self
+    {
+        $this->pendingEmail = $pendingEmail;
 
         return $this;
     }

@@ -7,7 +7,7 @@ namespace App\Auth\Domain\Event;
 use App\Shared\Domain\Event\AbstractDomainEvent;
 use DateTimeImmutable;
 
-final readonly class UserEmailChanged extends AbstractDomainEvent
+final readonly class UserEmailChangeRequested extends AbstractDomainEvent
 {
     public function __construct(
         private string $email,

@@ -23,6 +23,7 @@ final readonly class DoctrineUserRepository implements UserRepository
 
         if ($existing instanceof UserRecord) {
             $existing->setEmail($user->getEmail());
+            $existing->setPendingEmail($user->getPendingEmail());
             $existing->setEmailVerificationSlug($user->getEmailVerificationSlug());
             $existing->setEmailVerifiedAt($user->getEmailVerifiedAt());
 
@@ -34,6 +35,7 @@ final readonly class DoctrineUserRepository implements UserRepository
         $userRecord = new UserRecord(
             $user->getId()->toString(),
             $user->getEmail(),
+            $user->getPendingEmail(),
             $user->getHashedPassword(),
             $user->getRoles(),
             $user->getEmailVerificationSlug(),
@@ -47,11 +49,16 @@ final readonly class DoctrineUserRepository implements UserRepository
     {
         $userRecord = $this->entityManager->getRepository(UserRecord::class)->findOneBy(['email' => $email]);
 
-        if (!$userRecord instanceof UserRecord) {
-            return null;
-        }
+        return $this->toDomainUserOrNull($userRecord);
+    }
 
-        return $this->toDomainUser($userRecord);
+    public function findByPendingEmail(string $pendingEmail): ?User
+    {
+        $userRecord = $this->entityManager->getRepository(UserRecord::class)->findOneBy([
+            'pendingEmail' => $pendingEmail,
+        ]);
+
+        return $this->toDomainUserOrNull($userRecord);
     }
 
     public function findByEmailVerificationSlug(string $emailVerificationSlug): ?User
@@ -60,22 +67,14 @@ final readonly class DoctrineUserRepository implements UserRepository
             'emailVerificationSlug' => $emailVerificationSlug,
         ]);
 
-        if (!$userRecord instanceof UserRecord) {
-            return null;
-        }
-
-        return $this->toDomainUser($userRecord);
+        return $this->toDomainUserOrNull($userRecord);
     }
 
     public function findById(UserId $id): ?User
     {
         $userRecord = $this->entityManager->getRepository(UserRecord::class)->find($id->toString());
 
-        if (!$userRecord instanceof UserRecord) {
-            return null;
-        }
-
-        return $this->toDomainUser($userRecord);
+        return $this->toDomainUserOrNull($userRecord);
     }
 
     private function toDomainUser(UserRecord $userRecord): User
@@ -83,10 +82,20 @@ final readonly class DoctrineUserRepository implements UserRepository
         return User::reconstitute(
             UserId::fromString($userRecord->getId()),
             $userRecord->getEmail(),
+            $userRecord->getPendingEmail(),
             $userRecord->getHashedPassword(),
             $userRecord->getRoles(),
             $userRecord->getEmailVerificationSlug(),
             $userRecord->getEmailVerifiedAt(),
         );
+    }
+
+    private function toDomainUserOrNull(?UserRecord $userRecord): ?User
+    {
+        if (!$userRecord instanceof UserRecord) {
+            return null;
+        }
+
+        return $this->toDomainUser($userRecord);
     }
 }
