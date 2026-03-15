@@ -34,7 +34,7 @@ final readonly class CreateProviderHandler
         $provider = Provider::create(
             ProviderId::fromString($this->uuidCreator->create()),
             $command->getName(),
-            'active',
+            'pending',
         );
 
         $providerUser = ProviderUser::assign(

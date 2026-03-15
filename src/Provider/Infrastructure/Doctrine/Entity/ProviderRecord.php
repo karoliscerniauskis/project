@@ -44,4 +44,11 @@ class ProviderRecord
     {
         return $this->status;
     }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
 }

@@ -58,4 +58,13 @@ final class Provider extends AbstractAggregateRoot
     {
         return $this->status;
     }
+
+    public function approve(): void
+    {
+        if ($this->status === 'active') {
+            return;
+        }
+
+        $this->status = 'active';
+    }
 }

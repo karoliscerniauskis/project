@@ -19,6 +19,15 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
 
     public function save(Provider $provider): void
     {
+        $existing = $this->entityManager->getRepository(ProviderRecord::class)->find($provider->getId()->toString());
+
+        if ($existing instanceof ProviderRecord) {
+            $existing->setStatus($provider->getStatus());
+            $this->entityManager->flush();
+
+            return;
+        }
+
         $record = new ProviderRecord(
             $provider->getId()->toString(),
             $provider->getName(),
