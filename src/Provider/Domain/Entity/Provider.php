@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Provider\Domain\Entity;
 
+use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
 
@@ -11,7 +12,7 @@ final class Provider extends AbstractAggregateRoot
 {
     private ProviderId $id;
     private string $name;
-    private string $status;
+    private ProviderStatus $status;
 
     private function __construct()
     {
@@ -21,7 +22,7 @@ final class Provider extends AbstractAggregateRoot
     public static function create(
         ProviderId $id,
         string $name,
-        string $status,
+        ProviderStatus $status,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -34,7 +35,7 @@ final class Provider extends AbstractAggregateRoot
     public static function reconstitute(
         ProviderId $id,
         string $name,
-        string $status,
+        ProviderStatus $status,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -54,17 +55,17 @@ final class Provider extends AbstractAggregateRoot
         return $this->name;
     }
 
-    public function getStatus(): string
+    public function getStatus(): ProviderStatus
     {
         return $this->status;
     }
 
     public function approve(): void
     {
-        if ($this->status === 'active') {
+        if ($this->status === ProviderStatus::Active) {
             return;
         }
 
-        $this->status = 'active';
+        $this->status = ProviderStatus::Active;
     }
 }

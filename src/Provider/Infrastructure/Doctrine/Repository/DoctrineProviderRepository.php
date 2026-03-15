@@ -6,6 +6,7 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 
 use App\Provider\Domain\Entity\Provider;
 use App\Provider\Domain\Repository\ProviderRepository;
+use App\Provider\Domain\Status\ProviderStatus;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
 use App\Shared\Domain\Id\ProviderId;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,7 +23,7 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
         $existing = $this->entityManager->getRepository(ProviderRecord::class)->find($provider->getId()->toString());
 
         if ($existing instanceof ProviderRecord) {
-            $existing->setStatus($provider->getStatus());
+            $existing->setStatus($provider->getStatus()->value);
             $this->entityManager->flush();
 
             return;
@@ -31,7 +32,7 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
         $record = new ProviderRecord(
             $provider->getId()->toString(),
             $provider->getName(),
-            $provider->getStatus(),
+            $provider->getStatus()->value,
         );
         $this->entityManager->persist($record);
         $this->entityManager->flush();
@@ -48,7 +49,7 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
         return Provider::reconstitute(
             ProviderId::fromString($record->getId()),
             $record->getName(),
-            $record->getStatus(),
+            ProviderStatus::from($record->getStatus()),
         );
     }
 }

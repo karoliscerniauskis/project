@@ -9,6 +9,7 @@ use App\Provider\Domain\Entity\Provider;
 use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
+use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
@@ -34,7 +35,7 @@ final readonly class CreateProviderHandler
         $provider = Provider::create(
             ProviderId::fromString($this->uuidCreator->create()),
             $command->getName(),
-            'pending',
+            ProviderStatus::Pending,
         );
 
         $providerUser = ProviderUser::assign(
