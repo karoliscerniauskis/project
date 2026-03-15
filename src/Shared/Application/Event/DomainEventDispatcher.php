@@ -9,4 +9,9 @@ use App\Shared\Domain\Event\DomainEvent;
 interface DomainEventDispatcher
 {
     public function dispatch(DomainEvent $event): void;
+
+    /**
+     * @param DomainEvent[] $events
+     */
+    public function dispatchAll(array $events): void;
 }

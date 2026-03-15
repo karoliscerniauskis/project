@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Domain\Entity;
 
+use App\Auth\Domain\Event\UserEmailChanged;
 use App\Auth\Domain\Event\UserRegistered;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\UserId;
@@ -110,5 +111,17 @@ final class User extends AbstractAggregateRoot
 
         $this->emailVerifiedAt = $verifiedAt;
         $this->emailVerificationSlug = null;
+    }
+
+    public function changeEmail(string $newEmail, string $emailVerificationSlug, DateTimeImmutable $occurredOn): void
+    {
+        if ($this->email === $newEmail) {
+            return;
+        }
+
+        $this->email = $newEmail;
+        $this->emailVerificationSlug = $emailVerificationSlug;
+        $this->emailVerifiedAt = null;
+        $this->record(new UserEmailChanged($newEmail, $emailVerificationSlug, $occurredOn));
     }
 }

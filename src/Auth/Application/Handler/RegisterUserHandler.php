@@ -38,9 +38,6 @@ final readonly class RegisterUserHandler
         );
 
         $this->userRepository->save($user);
-
-        foreach ($user->pullDomainEvents() as $event) {
-            $this->domainEventDispatcher->dispatch($event);
-        }
+        $this->domainEventDispatcher->dispatchAll($user->pullDomainEvents());
     }
 }

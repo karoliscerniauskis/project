@@ -22,6 +22,7 @@ final readonly class DoctrineUserRepository implements UserRepository
         $existing = $this->entityManager->getRepository(UserRecord::class)->find($user->getId()->toString());
 
         if ($existing instanceof UserRecord) {
+            $existing->setEmail($user->getEmail());
             $existing->setEmailVerificationSlug($user->getEmailVerificationSlug());
             $existing->setEmailVerifiedAt($user->getEmailVerifiedAt());
 
@@ -58,6 +59,17 @@ final readonly class DoctrineUserRepository implements UserRepository
         $userRecord = $this->entityManager->getRepository(UserRecord::class)->findOneBy([
             'emailVerificationSlug' => $emailVerificationSlug,
         ]);
+
+        if (!$userRecord instanceof UserRecord) {
+            return null;
+        }
+
+        return $this->toDomainUser($userRecord);
+    }
+
+    public function findById(UserId $id): ?User
+    {
+        $userRecord = $this->entityManager->getRepository(UserRecord::class)->find($id->toString());
 
         if (!$userRecord instanceof UserRecord) {
             return null;

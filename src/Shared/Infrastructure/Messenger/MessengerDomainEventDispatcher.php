@@ -18,4 +18,11 @@ final readonly class MessengerDomainEventDispatcher implements DomainEventDispat
     {
         $this->eventBus->dispatch($event);
     }
+
+    public function dispatchAll(array $events): void
+    {
+        foreach ($events as $event) {
+            $this->dispatch($event);
+        }
+    }
 }

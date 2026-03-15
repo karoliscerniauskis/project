@@ -15,11 +15,16 @@ final readonly class SecurityUser implements UserInterface, PasswordAuthenticate
      */
     public function __construct(
         private string $userIdentifier,
+        private string $id,
         private ?string $password,
         private array $roles,
     ) {
         if ($this->userIdentifier === '') {
             throw new InvalidArgumentException('User identifier must be a non-empty string.');
+        }
+
+        if ($this->id === '') {
+            throw new InvalidArgumentException('User id must be a non-empty string.');
         }
     }
 
@@ -36,5 +41,10 @@ final readonly class SecurityUser implements UserInterface, PasswordAuthenticate
     public function getUserIdentifier(): string
     {
         return $this->userIdentifier;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
     }
 }
