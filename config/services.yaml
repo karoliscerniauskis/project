@@ -32,6 +32,10 @@ services:
         resource: '../src/Voucher/Application/Handler/'
         tags: [ 'messenger.message_handler' ]
 
+    App\Provider\Application\Handler\:
+        resource: '../src/Provider/Application/Handler/'
+        tags: [ 'messenger.message_handler' ]
+
     App\Auth\Domain\Repository\UserRepository:
         class: App\Auth\Infrastructure\Doctrine\Repository\DoctrineUserRepository
 
