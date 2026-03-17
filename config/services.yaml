@@ -48,3 +48,8 @@ services:
         tags: [ 'messenger.message_handler' ]
         arguments:
             $emailFrom: '%app.email_from%'
+
+    App\Provider\Application\Handler\SendProviderApprovedEmailHandler:
+        tags: [ 'messenger.message_handler' ]
+        arguments:
+            $emailFrom: '%app.email_from%'

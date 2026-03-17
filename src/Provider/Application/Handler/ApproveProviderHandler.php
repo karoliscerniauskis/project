@@ -6,12 +6,16 @@ namespace App\Provider\Application\Handler;
 
 use App\Provider\Application\Command\ApproveProvider;
 use App\Provider\Domain\Repository\ProviderRepository;
+use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 
 final readonly class ApproveProviderHandler
 {
     public function __construct(
         private ProviderRepository $providerRepository,
+        private Clock $clock,
+        private DomainEventDispatcher $domainEventDispatcher,
     ) {
     }
 
@@ -24,7 +28,8 @@ final readonly class ApproveProviderHandler
             return;
         }
 
-        $provider->approve();
+        $provider->approve($this->clock->now());
         $this->providerRepository->save($provider);
+        $this->domainEventDispatcher->dispatchAll($provider->pullDomainEvents());
     }
 }

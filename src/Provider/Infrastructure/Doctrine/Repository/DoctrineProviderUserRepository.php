@@ -42,4 +42,17 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
 
         return ProviderId::fromString($record->getProviderId());
     }
+
+    public function findUserIdByProviderId(ProviderId $providerId): ?UserId
+    {
+        $record = $this->entityManager
+            ->getRepository(ProviderUserRecord::class)
+            ->findOneBy(['providerId' => $providerId->toString()]);
+
+        if (!$record instanceof ProviderUserRecord) {
+            return null;
+        }
+
+        return UserId::fromString($record->getUserId());
+    }
 }

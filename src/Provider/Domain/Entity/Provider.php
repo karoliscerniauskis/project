@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Provider\Domain\Entity;
 
+use App\Provider\Domain\Event\ProviderApproved;
 use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
+use DateTimeImmutable;
 
 final class Provider extends AbstractAggregateRoot
 {
@@ -60,12 +62,16 @@ final class Provider extends AbstractAggregateRoot
         return $this->status;
     }
 
-    public function approve(): void
+    public function approve(DateTimeImmutable $occurredOn): void
     {
         if ($this->status === ProviderStatus::Active) {
             return;
         }
 
         $this->status = ProviderStatus::Active;
+        $this->record(new ProviderApproved(
+            $this->id->toString(),
+            $occurredOn,
+        ));
     }
 }

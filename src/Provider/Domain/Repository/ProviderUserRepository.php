@@ -13,4 +13,6 @@ interface ProviderUserRepository
     public function save(ProviderUser $providerUser): void;
 
     public function findProviderIdByUserId(UserId $userId): ?ProviderId;
+
+    public function findUserIdByProviderId(ProviderId $providerId): ?UserId;
 }

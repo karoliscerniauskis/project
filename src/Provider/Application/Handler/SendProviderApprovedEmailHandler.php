@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Provider\Application\Handler;
+
+use App\Provider\Domain\Event\ProviderApproved;
+use App\Provider\Domain\Repository\ProviderRepository;
+use App\Provider\Domain\Repository\ProviderUserRepository;
+use App\Shared\Application\Email\EmailSender;
+use App\Shared\Application\User\UserEmailFinder;
+use App\Shared\Domain\Id\ProviderId;
+
+final readonly class SendProviderApprovedEmailHandler
+{
+    public function __construct(
+        private ProviderRepository $providerRepository,
+        private ProviderUserRepository $providerUserRepository,
+        private UserEmailFinder $userEmailFinder,
+        private EmailSender $emailSender,
+        private string $emailFrom,
+    ) {
+    }
+
+    public function __invoke(ProviderApproved $event): void
+    {
+        $providerId = ProviderId::fromString($event->getProviderId());
+        $userId = $this->providerUserRepository->findUserIdByProviderId($providerId);
+
+        if ($userId === null) {
+            return;
+        }
+
+        $email = $this->userEmailFinder->findByUserId($userId);
+
+        if ($email === null) {
+            return;
+        }
+
+        $provider = $this->providerRepository->findById($providerId);
+
+        if ($provider === null) {
+            return;
+        }
+
+        $this->emailSender->send(
+            $this->emailFrom,
+            $email,
+            'Your provider has been approved',
+            sprintf('Your provider "%s" has been approved and is now active.', $provider->getName()),
+        );
+    }
+}
