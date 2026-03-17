@@ -34,7 +34,6 @@ security:
         - { path: ^/api/auth/verify, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/login$, roles: PUBLIC_ACCESS }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/provider, roles: ROLE_VOUCHER_PROVIDER }
         - { path: ^/api, roles: ROLE_USER }
 
 when@test:

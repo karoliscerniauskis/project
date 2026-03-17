@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'provider_user')]
-#[ORM\UniqueConstraint(name: 'uniq_provider_user_user_id', columns: ['user_id'])]
+#[ORM\UniqueConstraint(name: 'uniq_provider_user_provider_id_user_id', columns: ['provider_id', 'user_id'])]
 class ProviderUserRecord
 {
     #[ORM\Id]
@@ -21,14 +21,19 @@ class ProviderUserRecord
     #[ORM\Column(name: 'user_id', type: 'uuid')]
     private string $userId;
 
+    #[ORM\Column(type: 'string')]
+    private string $role;
+
     public function __construct(
         string $id,
         string $providerId,
         string $userId,
+        string $role,
     ) {
         $this->id = $id;
         $this->providerId = $providerId;
         $this->userId = $userId;
+        $this->role = $role;
     }
 
     public function getId(): string
@@ -44,5 +49,17 @@ class ProviderUserRecord
     public function getUserId(): string
     {
         return $this->userId;
+    }
+
+    public function getRole(): string
+    {
+        return $this->role;
+    }
+
+    public function setRole(string $role): self
+    {
+        $this->role = $role;
+
+        return $this;
     }
 }

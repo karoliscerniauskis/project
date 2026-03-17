@@ -6,6 +6,7 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 
 use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderUserRepository;
+use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
@@ -24,35 +25,53 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
             $providerUser->getId()->toString(),
             $providerUser->getProviderId()->toString(),
             $providerUser->getUserId()->toString(),
+            $providerUser->getRole()->value,
         );
 
         $this->entityManager->persist($record);
         $this->entityManager->flush();
     }
 
-    public function findProviderIdByUserId(UserId $userId): ?ProviderId
+    public function isMember(ProviderId $providerId, UserId $userId): bool
     {
         $record = $this->entityManager
             ->getRepository(ProviderUserRecord::class)
-            ->findOneBy(['userId' => $userId->toString()]);
+            ->findOneBy([
+                'providerId' => $providerId->toString(),
+                'userId' => $userId->toString(),
+            ]);
 
-        if (!$record instanceof ProviderUserRecord) {
-            return null;
-        }
-
-        return ProviderId::fromString($record->getProviderId());
+        return $record instanceof ProviderUserRecord;
     }
 
-    public function findUserIdByProviderId(ProviderId $providerId): ?UserId
+    public function isAdmin(ProviderId $providerId, UserId $userId): bool
     {
         $record = $this->entityManager
             ->getRepository(ProviderUserRecord::class)
-            ->findOneBy(['providerId' => $providerId->toString()]);
+            ->findOneBy([
+                'providerId' => $providerId->toString(),
+                'userId' => $userId->toString(),
+                'role' => ProviderUserRole::Admin->value,
+            ]);
 
-        if (!$record instanceof ProviderUserRecord) {
-            return null;
+        return $record instanceof ProviderUserRecord;
+    }
+
+    public function findUserIdsByProviderIdAndRole(ProviderId $providerId, ProviderUserRole $role): array
+    {
+        $records = $this->entityManager
+            ->getRepository(ProviderUserRecord::class)
+            ->findBy([
+                'providerId' => $providerId->toString(),
+                'role' => $role->value,
+            ]);
+
+        $userIds = [];
+
+        foreach ($records as $record) {
+            $userIds[] = UserId::fromString($record->getUserId());
         }
 
-        return UserId::fromString($record->getUserId());
+        return $userIds;
     }
 }

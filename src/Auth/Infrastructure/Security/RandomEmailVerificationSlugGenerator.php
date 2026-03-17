@@ -6,7 +6,7 @@ namespace App\Auth\Infrastructure\Security;
 
 use App\Auth\Domain\Security\EmailVerificationSlugGenerator;
 
-class RandomEmailVerificationSlugGenerator implements EmailVerificationSlugGenerator
+final readonly class RandomEmailVerificationSlugGenerator implements EmailVerificationSlugGenerator
 {
     public function generate(): string
     {

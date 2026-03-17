@@ -28,17 +28,13 @@ final readonly class CreateProviderHandler
     {
         $userId = UserId::fromString($command->getUserId());
 
-        if ($this->providerUserRepository->findProviderIdByUserId($userId) !== null) {
-            return;
-        }
-
         $provider = Provider::create(
             ProviderId::fromString($this->uuidCreator->create()),
             $command->getName(),
             ProviderStatus::Pending,
         );
 
-        $providerUser = ProviderUser::assign(
+        $providerUser = ProviderUser::assignAdmin(
             ProviderUserId::fromString($this->uuidCreator->create()),
             $provider->getId(),
             $userId,

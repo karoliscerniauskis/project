@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Provider\Domain\Entity;
 
+use App\Provider\Domain\Role\ProviderUserRole;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
@@ -14,6 +15,7 @@ final class ProviderUser extends AbstractAggregateRoot
     private ProviderUserId $id;
     private ProviderId $providerId;
     private UserId $userId;
+    private ProviderUserRole $role;
 
     private function __construct()
     {
@@ -24,24 +26,44 @@ final class ProviderUser extends AbstractAggregateRoot
         ProviderUserId $id,
         ProviderId $providerId,
         UserId $userId,
+        ProviderUserRole $role,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->providerId = $providerId;
         $self->userId = $userId;
+        $self->role = $role;
 
         return $self;
+    }
+
+    public static function assignAdmin(
+        ProviderUserId $id,
+        ProviderId $providerId,
+        UserId $userId,
+    ): self {
+        return self::assign($id, $providerId, $userId, ProviderUserRole::Admin);
+    }
+
+    public static function assignMember(
+        ProviderUserId $id,
+        ProviderId $providerId,
+        UserId $userId,
+    ): self {
+        return self::assign($id, $providerId, $userId, ProviderUserRole::Member);
     }
 
     public static function reconstitute(
         ProviderUserId $id,
         ProviderId $providerId,
         UserId $userId,
+        ProviderUserRole $role,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->providerId = $providerId;
         $self->userId = $userId;
+        $self->role = $role;
 
         return $self;
     }
@@ -59,5 +81,15 @@ final class ProviderUser extends AbstractAggregateRoot
     public function getUserId(): UserId
     {
         return $this->userId;
+    }
+
+    public function getRole(): ProviderUserRole
+    {
+        return $this->role;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === ProviderUserRole::Admin;
     }
 }

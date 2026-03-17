@@ -74,4 +74,9 @@ final class Provider extends AbstractAggregateRoot
             $occurredOn,
         ));
     }
+
+    public function isActive(): bool
+    {
+        return $this->status === ProviderStatus::Active;
+    }
 }

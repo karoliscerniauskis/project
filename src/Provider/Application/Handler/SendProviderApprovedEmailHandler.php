@@ -7,6 +7,7 @@ namespace App\Provider\Application\Handler;
 use App\Provider\Domain\Event\ProviderApproved;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
+use App\Provider\Domain\Role\ProviderUserRole;
 use App\Shared\Application\Email\EmailSender;
 use App\Shared\Application\User\UserEmailFinder;
 use App\Shared\Domain\Id\ProviderId;
@@ -25,29 +26,31 @@ final readonly class SendProviderApprovedEmailHandler
     public function __invoke(ProviderApproved $event): void
     {
         $providerId = ProviderId::fromString($event->getProviderId());
-        $userId = $this->providerUserRepository->findUserIdByProviderId($providerId);
-
-        if ($userId === null) {
-            return;
-        }
-
-        $email = $this->userEmailFinder->findByUserId($userId);
-
-        if ($email === null) {
-            return;
-        }
-
         $provider = $this->providerRepository->findById($providerId);
 
-        if ($provider === null) {
+        if ($provider === null || !$provider->isActive()) {
             return;
         }
 
-        $this->emailSender->send(
-            $this->emailFrom,
-            $email,
-            'Your provider has been approved',
-            sprintf('Your provider "%s" has been approved and is now active.', $provider->getName()),
+        $providerName = $provider->getName();
+        $adminUserIds = $this->providerUserRepository->findUserIdsByProviderIdAndRole(
+            $providerId,
+            ProviderUserRole::Admin,
         );
+
+        foreach ($adminUserIds as $adminUserId) {
+            $email = $this->userEmailFinder->findByUserId($adminUserId);
+
+            if ($email === null) {
+                continue;
+            }
+
+            $this->emailSender->send(
+                $this->emailFrom,
+                $email,
+                'Your provider has been approved',
+                sprintf('Your provider "%s" has been approved and is now active.', $providerName),
+            );
+        }
     }
 }
