@@ -6,7 +6,7 @@ namespace App\Auth\Application\Handler;
 
 use App\Auth\Application\Command\RequestUserEmailChange;
 use App\Auth\Domain\Repository\UserRepository;
-use App\Auth\Domain\Security\EmailVerificationSlugGenerator;
+use App\Auth\Domain\Slug\EmailVerificationSlugGenerator;
 use App\Shared\Application\Event\DomainEventDispatcher;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;

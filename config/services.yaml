@@ -53,3 +53,8 @@ services:
         tags: [ 'messenger.message_handler' ]
         arguments:
             $emailFrom: '%app.email_from%'
+
+    App\Provider\Application\Handler\SendProviderInvitationEmailHandler:
+        tags: [ 'messenger.message_handler' ]
+        arguments:
+            $emailFrom: '%app.email_from%'

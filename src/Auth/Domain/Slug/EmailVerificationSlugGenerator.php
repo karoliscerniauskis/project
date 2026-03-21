@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Auth\Domain\Security;
+namespace App\Auth\Domain\Slug;
 
 interface EmailVerificationSlugGenerator
 {

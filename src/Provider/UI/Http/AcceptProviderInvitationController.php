@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Provider\UI\Http;
+
+use App\Auth\Infrastructure\Security\SecurityUser;
+use App\Provider\Application\Command\AcceptProviderInvitation;
+use App\Shared\Application\Bus\CommandBus;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+class AcceptProviderInvitationController extends AbstractController
+{
+    public function __construct(
+        private CommandBus $commandBus,
+    ) {
+    }
+
+    #[Route('/api/provider/invitations/{slug}/accept', name: 'api_provider_accept_invitation', methods: ['POST'])]
+    public function __invoke(string $slug): JsonResponse
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof SecurityUser) {
+            return new JsonResponse(null, Response::HTTP_UNAUTHORIZED);
+        }
+
+        $this->commandBus->dispatch(new AcceptProviderInvitation(
+            $slug,
+            $user->getId(),
+        ));
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+}
