@@ -47,4 +47,12 @@ final readonly class ProviderInvitationRecordMapper
             $providerInvitation->getExpiresAt(),
         );
     }
+
+    public function syncRecord(ProviderInvitation $providerInvitation, ProviderInvitationRecord $record): void
+    {
+        $record
+            ->setStatus($providerInvitation->getStatus()->value)
+            ->setAcceptedUserId($providerInvitation->getAcceptedUserId()?->toString())
+            ->setAcceptedAt($providerInvitation->getAcceptedAt());
+    }
 }

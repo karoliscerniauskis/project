@@ -28,4 +28,9 @@ final readonly class ProviderRecordMapper
             $provider->getStatus()->value,
         );
     }
+
+    public function syncRecord(Provider $provider, ProviderRecord $record): void
+    {
+        $record->setStatus($provider->getStatus()->value);
+    }
 }

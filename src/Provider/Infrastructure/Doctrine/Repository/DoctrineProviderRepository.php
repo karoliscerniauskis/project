@@ -24,7 +24,7 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
         $existing = $this->entityManager->getRepository(ProviderRecord::class)->find($provider->getId()->toString());
 
         if ($existing instanceof ProviderRecord) {
-            $existing->setStatus($provider->getStatus()->value);
+            $this->providerRecordMapper->syncRecord($provider, $existing);
 
             return;
         }

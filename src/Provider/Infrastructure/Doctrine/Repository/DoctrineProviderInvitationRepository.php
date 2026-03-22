@@ -28,9 +28,7 @@ final readonly class DoctrineProviderInvitationRepository implements ProviderInv
             ->find($invitation->getId()->toString());
 
         if ($existing instanceof ProviderInvitationRecord) {
-            $existing->setStatus($invitation->getStatus()->value);
-            $existing->setAcceptedUserId($invitation->getAcceptedUserId()?->toString());
-            $existing->setAcceptedAt($invitation->getAcceptedAt());
+            $this->providerInvitationRecordMapper->syncRecord($invitation, $existing);
 
             return;
         }
