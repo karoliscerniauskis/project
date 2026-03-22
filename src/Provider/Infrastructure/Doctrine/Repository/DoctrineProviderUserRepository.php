@@ -8,6 +8,7 @@ use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
+use App\Provider\Infrastructure\Doctrine\Mapper\ProviderUserRecordMapper;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,20 +17,13 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private ProviderUserRecordMapper $providerUserRecordMapper,
     ) {
     }
 
     public function save(ProviderUser $providerUser): void
     {
-        $record = new ProviderUserRecord(
-            $providerUser->getId()->toString(),
-            $providerUser->getProviderId()->toString(),
-            $providerUser->getUserId()->toString(),
-            $providerUser->getRole()->value,
-        );
-
-        $this->entityManager->persist($record);
-        $this->entityManager->flush();
+        $this->entityManager->persist($this->providerUserRecordMapper->toRecord($providerUser));
     }
 
     public function isMember(ProviderId $providerId, UserId $userId): bool

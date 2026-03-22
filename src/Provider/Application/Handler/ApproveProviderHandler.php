@@ -7,6 +7,7 @@ namespace App\Provider\Application\Handler;
 use App\Provider\Application\Command\ApproveProvider;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 
@@ -16,6 +17,7 @@ final readonly class ApproveProviderHandler
         private ProviderRepository $providerRepository,
         private Clock $clock,
         private DomainEventDispatcher $domainEventDispatcher,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -30,6 +32,7 @@ final readonly class ApproveProviderHandler
 
         $provider->approve($this->clock->now());
         $this->providerRepository->save($provider);
+        $this->transactionManager->flush();
         $this->domainEventDispatcher->dispatchAll($provider->pullDomainEvents());
     }
 }

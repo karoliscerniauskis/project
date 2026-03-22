@@ -9,6 +9,7 @@ use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderInvitationRepository;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Application\User\UserEmailFinder;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderUserId;
@@ -24,6 +25,7 @@ final readonly class AcceptProviderInvitationHandler
         private UserEmailFinder $userEmailFinder,
         private Clock $clock,
         private UuidCreator $uuidCreator,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -60,5 +62,6 @@ final readonly class AcceptProviderInvitationHandler
             $userId,
         );
         $this->providerUserRepository->save($providerUser);
+        $this->transactionManager->flush();
     }
 }

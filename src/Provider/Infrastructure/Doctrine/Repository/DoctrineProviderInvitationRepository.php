@@ -7,17 +7,16 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 use App\Provider\Domain\Entity\ProviderInvitation;
 use App\Provider\Domain\Invitation\ProviderInvitationStatus;
 use App\Provider\Domain\Repository\ProviderInvitationRepository;
-use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderInvitationRecord;
+use App\Provider\Infrastructure\Doctrine\Mapper\ProviderInvitationRecordMapper;
 use App\Shared\Domain\Id\ProviderId;
-use App\Shared\Domain\Id\ProviderInvitationId;
-use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class DoctrineProviderInvitationRepository implements ProviderInvitationRepository
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private ProviderInvitationRecordMapper $providerInvitationRecordMapper,
     ) {
     }
 
@@ -33,27 +32,10 @@ final readonly class DoctrineProviderInvitationRepository implements ProviderInv
             $existing->setAcceptedUserId($invitation->getAcceptedUserId()?->toString());
             $existing->setAcceptedAt($invitation->getAcceptedAt());
 
-            $this->entityManager->flush();
-
             return;
         }
 
-        $record = new ProviderInvitationRecord(
-            $invitation->getId()->toString(),
-            $invitation->getProviderId()->toString(),
-            $invitation->getEmail(),
-            $invitation->getRole()->value,
-            $invitation->getSlug(),
-            $invitation->getStatus()->value,
-            $invitation->getInvitedByUserId()->toString(),
-            $invitation->getAcceptedUserId()?->toString(),
-            $invitation->getCreatedAt(),
-            $invitation->getAcceptedAt(),
-            $invitation->getExpiresAt(),
-        );
-
-        $this->entityManager->persist($record);
-        $this->entityManager->flush();
+        $this->entityManager->persist($this->providerInvitationRecordMapper->toRecord($invitation));
     }
 
     public function findBySlug(string $slug): ?ProviderInvitation
@@ -66,7 +48,7 @@ final readonly class DoctrineProviderInvitationRepository implements ProviderInv
             return null;
         }
 
-        return $this->toDomain($record);
+        return $this->providerInvitationRecordMapper->toDomain($record);
     }
 
     public function findPendingByProviderIdAndEmail(ProviderId $providerId, string $email): ?ProviderInvitation
@@ -83,7 +65,7 @@ final readonly class DoctrineProviderInvitationRepository implements ProviderInv
             return null;
         }
 
-        return $this->toDomain($record);
+        return $this->providerInvitationRecordMapper->toDomain($record);
     }
 
     public function existsAcceptedByProviderIdAndEmail(ProviderId $providerId, string $email): bool
@@ -97,22 +79,5 @@ final readonly class DoctrineProviderInvitationRepository implements ProviderInv
             ]);
 
         return $record instanceof ProviderInvitationRecord;
-    }
-
-    private function toDomain(ProviderInvitationRecord $record): ProviderInvitation
-    {
-        return ProviderInvitation::reconstitute(
-            ProviderInvitationId::fromString($record->getId()),
-            ProviderId::fromString($record->getProviderId()),
-            $record->getEmail(),
-            ProviderUserRole::from($record->getRole()),
-            $record->getSlug(),
-            ProviderInvitationStatus::from($record->getStatus()),
-            UserId::fromString($record->getInvitedByUserId()),
-            $record->getAcceptedUserId() !== null ? UserId::fromString($record->getAcceptedUserId()) : null,
-            $record->getCreatedAt(),
-            $record->getAcceptedAt(),
-            $record->getExpiresAt(),
-        );
     }
 }

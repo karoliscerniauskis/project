@@ -11,6 +11,7 @@ use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Slug\ProviderInvitationSlugGenerator;
 use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderInvitationId;
@@ -26,6 +27,7 @@ final readonly class InviteProviderUserHandler
         private Clock $clock,
         private ProviderInvitationSlugGenerator $providerInvitationSlugGenerator,
         private DomainEventDispatcher $domainEventDispatcher,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -59,6 +61,7 @@ final readonly class InviteProviderUserHandler
             $this->clock->now()->modify('+7 days'),
         );
         $this->providerInvitationRepository->save($invitation);
+        $this->transactionManager->flush();
         $this->domainEventDispatcher->dispatchAll($invitation->pullDomainEvents());
     }
 }

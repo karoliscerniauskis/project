@@ -10,6 +10,7 @@ use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Status\ProviderStatus;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
@@ -21,6 +22,7 @@ final readonly class CreateProviderHandler
         private ProviderRepository $providerRepository,
         private ProviderUserRepository $providerUserRepository,
         private UuidCreator $uuidCreator,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -42,5 +44,6 @@ final readonly class CreateProviderHandler
 
         $this->providerRepository->save($provider);
         $this->providerUserRepository->save($providerUser);
+        $this->transactionManager->flush();
     }
 }

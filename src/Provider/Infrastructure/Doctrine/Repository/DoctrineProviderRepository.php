@@ -6,8 +6,8 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 
 use App\Provider\Domain\Entity\Provider;
 use App\Provider\Domain\Repository\ProviderRepository;
-use App\Provider\Domain\Status\ProviderStatus;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
+use App\Provider\Infrastructure\Doctrine\Mapper\ProviderRecordMapper;
 use App\Shared\Domain\Id\ProviderId;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -15,6 +15,7 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private ProviderRecordMapper $providerRecordMapper,
     ) {
     }
 
@@ -24,18 +25,11 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
 
         if ($existing instanceof ProviderRecord) {
             $existing->setStatus($provider->getStatus()->value);
-            $this->entityManager->flush();
 
             return;
         }
 
-        $record = new ProviderRecord(
-            $provider->getId()->toString(),
-            $provider->getName(),
-            $provider->getStatus()->value,
-        );
-        $this->entityManager->persist($record);
-        $this->entityManager->flush();
+        $this->entityManager->persist($this->providerRecordMapper->toRecord($provider));
     }
 
     public function findById(ProviderId $id): ?Provider
@@ -46,10 +40,6 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
             return null;
         }
 
-        return Provider::reconstitute(
-            ProviderId::fromString($record->getId()),
-            $record->getName(),
-            ProviderStatus::from($record->getStatus()),
-        );
+        return $this->providerRecordMapper->toDomain($record);
     }
 }
