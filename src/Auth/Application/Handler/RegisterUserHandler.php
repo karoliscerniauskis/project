@@ -10,6 +10,7 @@ use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Security\UserPasswordHasher;
 use App\Auth\Domain\Slug\EmailVerificationSlugGenerator;
 use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\UuidCreator;
@@ -23,6 +24,7 @@ final readonly class RegisterUserHandler
         private UserPasswordHasher $passwordHasher,
         private EmailVerificationSlugGenerator $emailVerificationSlugGenerator,
         private DomainEventDispatcher $domainEventDispatcher,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -38,6 +40,7 @@ final readonly class RegisterUserHandler
         );
 
         $this->userRepository->save($user);
+        $this->transactionManager->flush();
         $this->domainEventDispatcher->dispatchAll($user->pullDomainEvents());
     }
 }

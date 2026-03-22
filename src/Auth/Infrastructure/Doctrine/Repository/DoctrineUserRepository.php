@@ -7,6 +7,7 @@ namespace App\Auth\Infrastructure\Doctrine\Repository;
 use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Infrastructure\Doctrine\Entity\UserRecord;
+use App\Auth\Infrastructure\Doctrine\Mapper\UserRecordMapper;
 use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -14,6 +15,7 @@ final readonly class DoctrineUserRepository implements UserRepository
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
+        private UserRecordMapper $userRecordMapper,
     ) {
     }
 
@@ -22,28 +24,12 @@ final readonly class DoctrineUserRepository implements UserRepository
         $existing = $this->entityManager->getRepository(UserRecord::class)->find($user->getId()->toString());
 
         if ($existing instanceof UserRecord) {
-            $existing->setEmail($user->getEmail());
-            $existing->setPendingEmail($user->getPendingEmail());
-            $existing->setHashedPassword($user->getHashedPassword());
-            $existing->setEmailVerificationSlug($user->getEmailVerificationSlug());
-            $existing->setEmailVerifiedAt($user->getEmailVerifiedAt());
-
-            $this->entityManager->flush();
+            $this->userRecordMapper->syncRecord($user, $existing);
 
             return;
         }
 
-        $userRecord = new UserRecord(
-            $user->getId()->toString(),
-            $user->getEmail(),
-            $user->getPendingEmail(),
-            $user->getHashedPassword(),
-            $user->getRoles(),
-            $user->getEmailVerificationSlug(),
-            $user->getEmailVerifiedAt(),
-        );
-        $this->entityManager->persist($userRecord);
-        $this->entityManager->flush();
+        $this->entityManager->persist($this->userRecordMapper->toRecord($user));
     }
 
     public function findByEmail(string $email): ?User
@@ -78,25 +64,12 @@ final readonly class DoctrineUserRepository implements UserRepository
         return $this->toDomainUserOrNull($userRecord);
     }
 
-    private function toDomainUser(UserRecord $userRecord): User
-    {
-        return User::reconstitute(
-            UserId::fromString($userRecord->getId()),
-            $userRecord->getEmail(),
-            $userRecord->getPendingEmail(),
-            $userRecord->getHashedPassword(),
-            $userRecord->getRoles(),
-            $userRecord->getEmailVerificationSlug(),
-            $userRecord->getEmailVerifiedAt(),
-        );
-    }
-
     private function toDomainUserOrNull(?UserRecord $userRecord): ?User
     {
         if (!$userRecord instanceof UserRecord) {
             return null;
         }
 
-        return $this->toDomainUser($userRecord);
+        return $this->userRecordMapper->toDomain($userRecord);
     }
 }

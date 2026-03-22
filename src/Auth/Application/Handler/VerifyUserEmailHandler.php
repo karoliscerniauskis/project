@@ -6,6 +6,7 @@ namespace App\Auth\Application\Handler;
 
 use App\Auth\Application\Command\VerifyUserEmail;
 use App\Auth\Domain\Repository\UserRepository;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 
 final readonly class VerifyUserEmailHandler
@@ -13,6 +14,7 @@ final readonly class VerifyUserEmailHandler
     public function __construct(
         private UserRepository $userRepository,
         private Clock $clock,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -26,5 +28,6 @@ final readonly class VerifyUserEmailHandler
 
         $user->verifyEmail($this->clock->now());
         $this->userRepository->save($user);
+        $this->transactionManager->flush();
     }
 }

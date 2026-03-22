@@ -7,6 +7,7 @@ namespace App\Auth\Application\Handler;
 use App\Auth\Application\Command\ChangeUserPassword;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Security\UserPasswordHasher;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Id\UserId;
 
 final readonly class ChangeUserPasswordHandler
@@ -14,6 +15,7 @@ final readonly class ChangeUserPasswordHandler
     public function __construct(
         private UserRepository $userRepository,
         private UserPasswordHasher $userPasswordHasher,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -29,5 +31,6 @@ final readonly class ChangeUserPasswordHandler
         $hashedNewPassword = $this->userPasswordHasher->hashPassword($command->getNewPassword());
         $user->changePassword($hashedNewPassword);
         $this->userRepository->save($user);
+        $this->transactionManager->flush();
     }
 }

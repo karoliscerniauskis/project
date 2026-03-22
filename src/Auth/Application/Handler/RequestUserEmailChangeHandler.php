@@ -8,6 +8,7 @@ use App\Auth\Application\Command\RequestUserEmailChange;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Slug\EmailVerificationSlugGenerator;
 use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;
 
@@ -18,6 +19,7 @@ final readonly class RequestUserEmailChangeHandler
         private EmailVerificationSlugGenerator $emailVerificationSlugGenerator,
         private Clock $clock,
         private DomainEventDispatcher $domainEventDispatcher,
+        private TransactionManager $transactionManager,
     ) {
     }
 
@@ -45,6 +47,7 @@ final readonly class RequestUserEmailChangeHandler
         $slug = $this->emailVerificationSlugGenerator->generate();
         $user->requestEmailChange($command->getNewEmail(), $slug, $this->clock->now());
         $this->userRepository->save($user);
+        $this->transactionManager->flush();
         $this->domainEventDispatcher->dispatchAll($user->pullDomainEvents());
     }
 }
