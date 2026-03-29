@@ -7,7 +7,7 @@ namespace App\Auth\Application\Handler;
 use App\Auth\Application\Command\RequestUserEmailChange;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Slug\EmailVerificationSlugGenerator;
-use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;
@@ -18,36 +18,37 @@ final readonly class RequestUserEmailChangeHandler
         private UserRepository $userRepository,
         private EmailVerificationSlugGenerator $emailVerificationSlugGenerator,
         private Clock $clock,
-        private DomainEventDispatcher $domainEventDispatcher,
         private TransactionManager $transactionManager,
+        private OutboxWriter $outboxWriter,
     ) {
     }
 
     public function __invoke(RequestUserEmailChange $command): void
     {
-        $userId = UserId::fromString($command->getUserId());
-        $user = $this->userRepository->findById($userId);
+        $this->transactionManager->transactional(function () use ($command): void {
+            $userId = UserId::fromString($command->getUserId());
+            $user = $this->userRepository->findById($userId);
 
-        if ($user === null) {
-            return;
-        }
+            if ($user === null) {
+                return;
+            }
 
-        $existingByEmail = $this->userRepository->findByEmail($command->getNewEmail());
+            $existingByEmail = $this->userRepository->findByEmail($command->getNewEmail());
 
-        if ($existingByEmail !== null && !$existingByEmail->getId()->equals($user->getId())) {
-            return;
-        }
+            if ($existingByEmail !== null && !$existingByEmail->getId()->equals($user->getId())) {
+                return;
+            }
 
-        $existingByPendingEmail = $this->userRepository->findByPendingEmail($command->getNewEmail());
+            $existingByPendingEmail = $this->userRepository->findByPendingEmail($command->getNewEmail());
 
-        if ($existingByPendingEmail !== null && !$existingByPendingEmail->getId()->equals($user->getId())) {
-            return;
-        }
+            if ($existingByPendingEmail !== null && !$existingByPendingEmail->getId()->equals($user->getId())) {
+                return;
+            }
 
-        $slug = $this->emailVerificationSlugGenerator->generate();
-        $user->requestEmailChange($command->getNewEmail(), $slug, $this->clock->now());
-        $this->userRepository->save($user);
-        $this->transactionManager->flush();
-        $this->domainEventDispatcher->dispatchAll($user->pullDomainEvents());
+            $slug = $this->emailVerificationSlugGenerator->generate();
+            $user->requestEmailChange($command->getNewEmail(), $slug, $this->clock->now());
+            $this->userRepository->save($user);
+            $this->outboxWriter->storeAll($user->pullDomainEvents());
+        });
     }
 }

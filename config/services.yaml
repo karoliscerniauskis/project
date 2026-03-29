@@ -58,3 +58,19 @@ services:
         tags: [ 'messenger.message_handler' ]
         arguments:
             $emailFrom: '%app.email_from%'
+
+    App\Auth\Infrastructure\Doctrine\Outbox\AuthOutboxDomainEventFactory:
+        tags: ['app.outbox_domain_event_factory']
+
+    App\Provider\Infrastructure\Doctrine\Outbox\ProviderOutboxDomainEventFactory:
+        tags: ['app.outbox_domain_event_factory']
+
+    App\Voucher\Infrastructure\Doctrine\Outbox\VoucherOutboxDomainEventFactory:
+        tags: ['app.outbox_domain_event_factory']
+
+    App\Shared\Infrastructure\Doctrine\Outbox\DoctrineOutboxProcessor:
+        arguments:
+            $factories: !tagged_iterator app.outbox_domain_event_factory
+
+    App\Shared\Application\Transaction\TransactionManager:
+        alias: App\Shared\Infrastructure\Doctrine\Transaction\DoctrineTransactionManager

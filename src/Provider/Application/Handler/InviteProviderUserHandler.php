@@ -10,7 +10,7 @@ use App\Provider\Domain\Repository\ProviderInvitationRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Slug\ProviderInvitationSlugGenerator;
-use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
@@ -26,42 +26,43 @@ final readonly class InviteProviderUserHandler
         private UuidCreator $uuidCreator,
         private Clock $clock,
         private ProviderInvitationSlugGenerator $providerInvitationSlugGenerator,
-        private DomainEventDispatcher $domainEventDispatcher,
         private TransactionManager $transactionManager,
+        private OutboxWriter $outboxWriter,
     ) {
     }
 
     public function __invoke(InviteProviderUser $command): void
     {
-        $providerId = ProviderId::fromString($command->getProviderId());
-        $invitedByUserId = UserId::fromString($command->getInvitedByUserId());
+        $this->transactionManager->transactional(function () use ($command): void {
+            $providerId = ProviderId::fromString($command->getProviderId());
+            $invitedByUserId = UserId::fromString($command->getInvitedByUserId());
 
-        if (!$this->providerUserRepository->isAdmin($providerId, $invitedByUserId)) {
-            return;
-        }
+            if (!$this->providerUserRepository->isAdmin($providerId, $invitedByUserId)) {
+                return;
+            }
 
-        if ($this->providerInvitationRepository->existsAcceptedByProviderIdAndEmail($providerId, $command->getEmail())) {
-            return;
-        }
+            if ($this->providerInvitationRepository->existsAcceptedByProviderIdAndEmail($providerId, $command->getEmail())) {
+                return;
+            }
 
-        $existingPending = $this->providerInvitationRepository->findPendingByProviderIdAndEmail($providerId, $command->getEmail());
+            $existingPending = $this->providerInvitationRepository->findPendingByProviderIdAndEmail($providerId, $command->getEmail());
 
-        if ($existingPending !== null) {
-            return;
-        }
+            if ($existingPending !== null) {
+                return;
+            }
 
-        $invitation = ProviderInvitation::invite(
-            ProviderInvitationId::fromString($this->uuidCreator->create()),
-            $providerId,
-            $command->getEmail(),
-            ProviderUserRole::Member,
-            $this->providerInvitationSlugGenerator->generate(),
-            $invitedByUserId,
-            $this->clock->now(),
-            $this->clock->now()->modify('+7 days'),
-        );
-        $this->providerInvitationRepository->save($invitation);
-        $this->transactionManager->flush();
-        $this->domainEventDispatcher->dispatchAll($invitation->pullDomainEvents());
+            $invitation = ProviderInvitation::invite(
+                ProviderInvitationId::fromString($this->uuidCreator->create()),
+                $providerId,
+                $command->getEmail(),
+                ProviderUserRole::Member,
+                $this->providerInvitationSlugGenerator->generate(),
+                $invitedByUserId,
+                $this->clock->now(),
+                $this->clock->now()->modify('+7 days'),
+            );
+            $this->providerInvitationRepository->save($invitation);
+            $this->outboxWriter->storeAll($invitation->pullDomainEvents());
+        });
     }
 }

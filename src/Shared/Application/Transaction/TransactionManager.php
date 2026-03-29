@@ -6,5 +6,5 @@ namespace App\Shared\Application\Transaction;
 
 interface TransactionManager
 {
-    public function flush(): void;
+    public function transactional(callable $callback): mixed;
 }

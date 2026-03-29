@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Voucher\Application\Handler;
 
+use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
@@ -12,6 +13,7 @@ use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Command\CreateVoucher;
 use App\Voucher\Application\Exception\UnableToGenerateUniqueVoucherCode;
 use App\Voucher\Application\Exception\VoucherCodeAlreadyExists;
+use App\Voucher\Application\Transaction\VoucherTransactionManager;
 use App\Voucher\Domain\Code\VoucherCodeGenerator;
 use App\Voucher\Domain\Entity\Voucher;
 use App\Voucher\Domain\Repository\VoucherRepository;
@@ -25,6 +27,8 @@ final readonly class CreateVoucherHandler
         private UuidCreator $uuidCreator,
         private Clock $clock,
         private VoucherCodeGenerator $voucherCodeGenerator,
+        private VoucherTransactionManager $voucherTransactionManager,
+        private OutboxWriter $outboxWriter,
     ) {
     }
 
@@ -34,20 +38,23 @@ final readonly class CreateVoucherHandler
         $issuedToUserId = $issuedToUserIdRaw !== null ? UserId::fromString($issuedToUserIdRaw) : null;
 
         for ($i = 0; $i < self::ATTEMPTS_LIMIT; ++$i) {
-            $voucher = Voucher::create(
-                VoucherId::fromString($this->uuidCreator->create()),
-                $this->voucherCodeGenerator->generate(),
-                ProviderId::fromString($command->getProviderId()),
-                $issuedToUserId,
-                $command->getIssuedToEmail(),
-                $this->clock->now(),
-            );
-
             try {
-                $this->voucherRepository->save($voucher);
+                $this->voucherTransactionManager->transactional(function () use ($command, $issuedToUserId): void {
+                    $voucher = Voucher::create(
+                        VoucherId::fromString($this->uuidCreator->create()),
+                        $this->voucherCodeGenerator->generate(),
+                        ProviderId::fromString($command->getProviderId()),
+                        $issuedToUserId,
+                        $command->getIssuedToEmail(),
+                        $this->clock->now(),
+                    );
+                    $this->voucherRepository->save($voucher);
+                    $this->outboxWriter->storeAll($voucher->pullDomainEvents());
+                });
 
                 return;
             } catch (VoucherCodeAlreadyExists) {
+                continue;
             }
         }
 

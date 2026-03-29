@@ -6,6 +6,7 @@ namespace App\Auth\Domain\Event;
 
 use App\Shared\Domain\Event\AbstractDomainEvent;
 use DateTimeImmutable;
+use DateTimeInterface;
 
 final readonly class UserRegistered extends AbstractDomainEvent
 {
@@ -25,5 +26,14 @@ final readonly class UserRegistered extends AbstractDomainEvent
     public function getEmailVerificationSlug(): string
     {
         return $this->emailVerificationSlug;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'email' => $this->email,
+            'emailVerificationSlug' => $this->emailVerificationSlug,
+            'occurredOn' => $this->occurredOn->format(DateTimeInterface::ATOM),
+        ];
     }
 }

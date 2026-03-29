@@ -6,6 +6,7 @@ namespace App\Provider\Domain\Event;
 
 use App\Shared\Domain\Event\AbstractDomainEvent;
 use DateTimeImmutable;
+use DateTimeInterface;
 
 final readonly class ProviderApproved extends AbstractDomainEvent
 {
@@ -19,5 +20,13 @@ final readonly class ProviderApproved extends AbstractDomainEvent
     public function getProviderId(): string
     {
         return $this->providerId;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'providerId' => $this->providerId,
+            'occurredOn' => $this->occurredOn->format(DateTimeInterface::ATOM),
+        ];
     }
 }

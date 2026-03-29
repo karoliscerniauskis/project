@@ -10,6 +10,7 @@ use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Status\ProviderStatus;
+use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
@@ -23,27 +24,31 @@ final readonly class CreateProviderHandler
         private ProviderUserRepository $providerUserRepository,
         private UuidCreator $uuidCreator,
         private TransactionManager $transactionManager,
+        private OutboxWriter $outboxWriter,
     ) {
     }
 
     public function __invoke(CreateProvider $command): void
     {
-        $userId = UserId::fromString($command->getUserId());
+        $this->transactionManager->transactional(function () use ($command): void {
+            $userId = UserId::fromString($command->getUserId());
 
-        $provider = Provider::create(
-            ProviderId::fromString($this->uuidCreator->create()),
-            $command->getName(),
-            ProviderStatus::Pending,
-        );
+            $provider = Provider::create(
+                ProviderId::fromString($this->uuidCreator->create()),
+                $command->getName(),
+                ProviderStatus::Pending,
+            );
 
-        $providerUser = ProviderUser::assignAdmin(
-            ProviderUserId::fromString($this->uuidCreator->create()),
-            $provider->getId(),
-            $userId,
-        );
+            $providerUser = ProviderUser::assignAdmin(
+                ProviderUserId::fromString($this->uuidCreator->create()),
+                $provider->getId(),
+                $userId,
+            );
 
-        $this->providerRepository->save($provider);
-        $this->providerUserRepository->save($providerUser);
-        $this->transactionManager->flush();
+            $this->providerRepository->save($provider);
+            $this->outboxWriter->storeAll($provider->pullDomainEvents());
+            $this->providerUserRepository->save($providerUser);
+            $this->outboxWriter->storeAll($providerUser->pullDomainEvents());
+        });
     }
 }

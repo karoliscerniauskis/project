@@ -6,6 +6,7 @@ namespace App\Provider\Domain\Event;
 
 use App\Shared\Domain\Event\AbstractDomainEvent;
 use DateTimeImmutable;
+use DateTimeInterface;
 
 final readonly class ProviderInvitationCreated extends AbstractDomainEvent
 {
@@ -31,5 +32,15 @@ final readonly class ProviderInvitationCreated extends AbstractDomainEvent
     public function getSlug(): string
     {
         return $this->slug;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'providerInvitationId' => $this->providerInvitationId,
+            'email' => $this->email,
+            'slug' => $this->slug,
+            'occurredOn' => $this->occurredOn->format(DateTimeInterface::ATOM),
+        ];
     }
 }

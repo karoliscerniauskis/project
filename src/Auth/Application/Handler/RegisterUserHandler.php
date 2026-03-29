@@ -9,7 +9,7 @@ use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Security\UserPasswordHasher;
 use App\Auth\Domain\Slug\EmailVerificationSlugGenerator;
-use App\Shared\Application\Event\DomainEventDispatcher;
+use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;
@@ -23,24 +23,24 @@ final readonly class RegisterUserHandler
         private Clock $clock,
         private UserPasswordHasher $passwordHasher,
         private EmailVerificationSlugGenerator $emailVerificationSlugGenerator,
-        private DomainEventDispatcher $domainEventDispatcher,
         private TransactionManager $transactionManager,
+        private OutboxWriter $outboxWriter,
     ) {
     }
 
     public function __invoke(RegisterUser $command): void
     {
-        $user = User::register(
-            UserId::fromString($this->uuidCreator->create()),
-            $command->getEmail(),
-            $this->passwordHasher->hashPassword($command->getPassword()),
-            $command->getRoles(),
-            $this->emailVerificationSlugGenerator->generate(),
-            $this->clock->now(),
-        );
-
-        $this->userRepository->save($user);
-        $this->transactionManager->flush();
-        $this->domainEventDispatcher->dispatchAll($user->pullDomainEvents());
+        $this->transactionManager->transactional(function () use ($command): void {
+            $user = User::register(
+                UserId::fromString($this->uuidCreator->create()),
+                $command->getEmail(),
+                $this->passwordHasher->hashPassword($command->getPassword()),
+                $command->getRoles(),
+                $this->emailVerificationSlugGenerator->generate(),
+                $this->clock->now(),
+            );
+            $this->userRepository->save($user);
+            $this->outboxWriter->storeAll($user->pullDomainEvents());
+        });
     }
 }

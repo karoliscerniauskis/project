@@ -8,7 +8,7 @@ use DateTimeImmutable;
 
 abstract readonly class AbstractDomainEvent implements DomainEvent
 {
-    public function __construct(private DateTimeImmutable $occurredOn)
+    public function __construct(protected DateTimeImmutable $occurredOn)
     {
     }
 

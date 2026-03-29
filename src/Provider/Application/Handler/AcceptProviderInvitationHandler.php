@@ -9,6 +9,7 @@ use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderInvitationRepository;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
+use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Application\User\UserEmailFinder;
 use App\Shared\Domain\Clock\Clock;
@@ -26,42 +27,48 @@ final readonly class AcceptProviderInvitationHandler
         private Clock $clock,
         private UuidCreator $uuidCreator,
         private TransactionManager $transactionManager,
+        private OutboxWriter $outboxWriter,
     ) {
     }
 
     public function __invoke(AcceptProviderInvitation $command): void
     {
-        $invitation = $this->providerInvitationRepository->findBySlug($command->getSlug());
+        $this->transactionManager->transactional(function () use ($command): void {
+            $invitation = $this->providerInvitationRepository->findBySlug($command->getSlug());
 
-        if ($invitation === null) {
-            return;
-        }
+            if ($invitation === null) {
+                return;
+            }
 
-        $provider = $this->providerRepository->findById($invitation->getProviderId());
+            $provider = $this->providerRepository->findById($invitation->getProviderId());
 
-        if ($provider === null) {
-            return;
-        }
+            if ($provider === null) {
+                return;
+            }
 
-        $userId = UserId::fromString($command->getUserId());
-        $userEmail = $this->userEmailFinder->findByUserId($userId);
+            $userId = UserId::fromString($command->getUserId());
+            $userEmail = $this->userEmailFinder->findByUserId($userId);
 
-        if ($userEmail === null) {
-            return;
-        }
+            if ($userEmail === null) {
+                return;
+            }
 
-        if ($invitation->getEmail() !== $userEmail) {
-            return;
-        }
+            if ($invitation->getEmail() !== $userEmail) {
+                return;
+            }
 
-        $invitation->accept($userId, $this->clock->now());
-        $this->providerInvitationRepository->save($invitation);
-        $providerUser = ProviderUser::assignMember(
-            ProviderUserId::fromString($this->uuidCreator->create()),
-            $invitation->getProviderId(),
-            $userId,
-        );
-        $this->providerUserRepository->save($providerUser);
-        $this->transactionManager->flush();
+            $invitation->accept($userId, $this->clock->now());
+            $this->providerInvitationRepository->save($invitation);
+            $providerUser = ProviderUser::assignMember(
+                ProviderUserId::fromString($this->uuidCreator->create()),
+                $invitation->getProviderId(),
+                $userId,
+            );
+            $this->providerUserRepository->save($providerUser);
+            $this->outboxWriter->storeAll([
+                ...$invitation->pullDomainEvents(),
+                ...$providerUser->pullDomainEvents(),
+            ]);
+        });
     }
 }
