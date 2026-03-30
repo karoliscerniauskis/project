@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Provider\UI\Http;
 
 use App\Auth\Infrastructure\Security\SecurityUser;
-use App\Provider\Application\Command\InviteProviderUser;
-use App\Provider\UI\Http\Request\InviteProviderUserRequest;
+use App\Provider\Application\Command\CreateProvider;
+use App\Provider\UI\Http\Request\CreateProviderRequest;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\UI\Http\JsonDtoFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class InviteProviderUserController extends AbstractController
+final class CreateProviderController extends AbstractController
 {
     public function __construct(
         private readonly CommandBus $commandBus,
@@ -23,8 +23,8 @@ final class InviteProviderUserController extends AbstractController
     ) {
     }
 
-    #[Route('/api/provider/{providerId}/invite', name: 'api_provider_invite_user', methods: ['POST'])]
-    public function __invoke(string $providerId, Request $request): JsonResponse
+    #[Route('/api/provider', name: 'api_provider_create', methods: ['POST'])]
+    public function __invoke(Request $request): JsonResponse
     {
         $user = $this->getUser();
 
@@ -32,13 +32,9 @@ final class InviteProviderUserController extends AbstractController
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
         }
 
-        /** @var InviteProviderUserRequest $dto */
-        $dto = $this->jsonDtoFactory->create($request, InviteProviderUserRequest::class);
-        $this->commandBus->dispatch(new InviteProviderUser(
-            $providerId,
-            $user->getId(),
-            $dto->email,
-        ));
+        /** @var CreateProviderRequest $dto */
+        $dto = $this->jsonDtoFactory->create($request, CreateProviderRequest::class);
+        $this->commandBus->dispatch(new CreateProvider($user->getId(), $dto->name));
 
         return new JsonResponse(status: Response::HTTP_CREATED);
     }

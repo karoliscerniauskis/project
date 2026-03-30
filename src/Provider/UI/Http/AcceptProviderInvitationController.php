@@ -12,10 +12,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class AcceptProviderInvitationController extends AbstractController
+final class AcceptProviderInvitationController extends AbstractController
 {
     public function __construct(
-        private CommandBus $commandBus,
+        private readonly CommandBus $commandBus,
     ) {
     }
 
@@ -25,7 +25,7 @@ class AcceptProviderInvitationController extends AbstractController
         $user = $this->getUser();
 
         if (!$user instanceof SecurityUser) {
-            return new JsonResponse(null, Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
         }
 
         $this->commandBus->dispatch(new AcceptProviderInvitation(
@@ -33,6 +33,6 @@ class AcceptProviderInvitationController extends AbstractController
             $user->getId(),
         ));
 
-        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+        return new JsonResponse(status: Response::HTTP_NO_CONTENT);
     }
 }
