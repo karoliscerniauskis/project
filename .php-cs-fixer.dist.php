@@ -7,11 +7,18 @@ $finder = new PhpCsFixer\Finder()
     ])
     ->filter(function (\SplFileInfo $file) {
         $realPath = $file->getRealPath();
+
         if ($realPath === false) {
             return true;
         }
 
-        return $realPath !== realpath(__DIR__ . '/src/Kernel.php');
+        return !in_array(
+            $realPath,
+            [
+                realpath(__DIR__ . '/src/Kernel.php'),
+                realpath(__DIR__ . '/tests/bootstrap.php'),
+            ]
+        );
     })
 ;
 
