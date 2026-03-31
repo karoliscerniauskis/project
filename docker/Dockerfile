@@ -10,6 +10,10 @@ RUN apt-get update \
 # PHP extensions
 RUN install-php-extensions intl pdo_pgsql
 
+# Xdebug
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
 # php.ini
 COPY ./docker/php.ini /usr/local/etc/php/php.ini
 
