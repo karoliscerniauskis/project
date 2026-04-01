@@ -42,7 +42,7 @@ final readonly class AcceptProviderInvitationHandler
 
             $provider = $this->providerRepository->findById($invitation->getProviderId());
 
-            if ($provider === null) {
+            if ($provider === null || !$provider->isActive()) {
                 return;
             }
 

@@ -20,3 +20,6 @@ php bin/console lexik:jwt:generate-keypair --skip-if-exists
 
 # Commands
 php bin/console app:outbox:process
+
+# PHPUnit
+php bin/phpunit
