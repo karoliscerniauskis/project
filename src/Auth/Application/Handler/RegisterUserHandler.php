@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Auth\Application\Handler;
 
 use App\Auth\Application\Command\RegisterUser;
+use App\Auth\Application\Exception\UserEmailMustBeUnique;
 use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Security\UserPasswordHasher;
@@ -31,9 +32,15 @@ final readonly class RegisterUserHandler
     public function __invoke(RegisterUser $command): void
     {
         $this->transactionManager->transactional(function () use ($command): void {
+            $email = $command->getEmail();
+
+            if ($this->userRepository->findByEmail($email) instanceof User) {
+                throw UserEmailMustBeUnique::forEmail($email);
+            }
+
             $user = User::register(
                 UserId::fromString($this->uuidCreator->create()),
-                $command->getEmail(),
+                $email,
                 $this->passwordHasher->hashPassword($command->getPassword()),
                 $command->getRoles(),
                 $this->emailVerificationSlugGenerator->generate(),

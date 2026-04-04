@@ -48,6 +48,10 @@ final class RegisterUserHandlerTest extends TestCase
             ->method('generate')
             ->willReturn($verificationSlug);
         $userRepository->expects(self::once())
+            ->method('findByEmail')
+            ->with($email)
+            ->willReturn(null);
+        $userRepository->expects(self::once())
             ->method('save')
             ->with(self::callback(static function (User $user) use ($email, $hashedPassword, $verificationSlug, $roles): bool {
                 return $user->getEmail() === $email
