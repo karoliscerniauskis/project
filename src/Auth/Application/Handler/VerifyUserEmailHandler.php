@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Auth\Application\Handler;
 
 use App\Auth\Application\Command\VerifyUserEmail;
+use App\Auth\Application\Exception\UserEmailAlreadyVerified;
+use App\Auth\Application\Exception\UserEmailVerificationLinkInvalid;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
@@ -26,7 +28,11 @@ final readonly class VerifyUserEmailHandler
             $user = $this->userRepository->findByEmailVerificationSlug($command->getEmailVerificationSlug());
 
             if ($user === null) {
-                return;
+                throw UserEmailVerificationLinkInvalid::forSlug($command->getEmailVerificationSlug());
+            }
+
+            if ($user->isEmailVerified()) {
+                throw UserEmailAlreadyVerified::forEmail($user->getEmail());
             }
 
             $user->verifyEmail($this->clock->now());
