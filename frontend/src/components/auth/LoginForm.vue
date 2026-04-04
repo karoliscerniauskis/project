@@ -28,9 +28,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { login } from '@/api/auth.api'
 import { useFormErrors } from '@/composables/useFormErrors'
 import type { ApiFieldError } from '@/api/http'
+
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
@@ -52,6 +55,7 @@ async function onSubmit() {
         })
 
         localStorage.setItem('token', response.token)
+        await router.push('/providers')
     } catch (e) {
         error.value = extractMessage(e)
         fieldErrors.value = extractFieldErrors(e)

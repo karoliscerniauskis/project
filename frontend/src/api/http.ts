@@ -24,7 +24,14 @@ export async function apiRequest<TResponse>(
     url: string,
     options: RequestInit,
 ): Promise<TResponse> {
-    const response = await fetch(url, options)
+    const headers = new Headers(options.headers)
+    const token = localStorage.getItem('token')
+
+    if (token !== null && !headers.has('Authorization')) {
+        headers.set('Authorization', `Bearer ${token}`)
+    }
+
+    const response = await fetch(url, {...options, headers})
 
     const contentType = response.headers.get('content-type') ?? ''
     const data = contentType.includes('application/json')
