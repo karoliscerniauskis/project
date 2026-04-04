@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Infrastructure\Security;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -18,6 +19,7 @@ final readonly class SecurityUser implements UserInterface, PasswordAuthenticate
         private string $id,
         private ?string $password,
         private array $roles,
+        private ?DateTimeImmutable $emailVerifiedAt,
     ) {
         if ($this->userIdentifier === '') {
             throw new InvalidArgumentException('User identifier must be a non-empty string.');
@@ -46,5 +48,10 @@ final readonly class SecurityUser implements UserInterface, PasswordAuthenticate
     public function getId(): string
     {
         return $this->id;
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->emailVerifiedAt !== null;
     }
 }

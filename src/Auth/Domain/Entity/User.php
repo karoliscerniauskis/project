@@ -142,4 +142,9 @@ final class User extends AbstractAggregateRoot
     {
         $this->hashedPassword = $hashedPassword;
     }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->emailVerifiedAt !== null;
+    }
 }
