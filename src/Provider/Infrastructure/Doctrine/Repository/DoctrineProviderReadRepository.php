@@ -11,6 +11,7 @@ use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class DoctrineProviderReadRepository implements ProviderReadRepository
 {
@@ -36,10 +37,10 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
             ->getArrayResult();
         $providers = [];
 
-        /** @var array{id: string, name: string, status: string} $row */
+        /** @var array{id: Uuid, name: string, status: string} $row */
         foreach ($rows as $row) {
             $providers[] = new ProviderView(
-                $row['id'],
+                $row['id']->toRfc4122(),
                 $row['name'],
                 $row['status'],
             );
