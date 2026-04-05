@@ -153,6 +153,7 @@ deptrac:
             - SharedInfrastructure
             - SharedDomain
             - Doctrine
+            - Symfony
         # External
         Symfony:
         PHPStan:
