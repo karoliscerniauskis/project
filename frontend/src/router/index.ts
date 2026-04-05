@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginPage from '@/pages/auth/LoginPage.vue'
 import RegisterPage from '@/pages/auth/RegisterPage.vue'
 import VerifyEmailPage from '@/pages/auth/VerifyEmailPage.vue'
+import LogoutPage from '@/pages/auth/LogoutPage.vue'
 import ProvidersPage from '@/pages/providers/ProvidersPage.vue'
 
 export const router = createRouter({
@@ -27,6 +28,11 @@ export const router = createRouter({
             path: '/providers',
             name: 'providers',
             component: ProvidersPage,
+        },
+        {
+            path: '/logout',
+            name: 'logout',
+            component: LogoutPage,
         },
     ],
 })
