@@ -5,6 +5,7 @@ import VerifyEmailPage from '@/pages/auth/VerifyEmailPage.vue'
 import LogoutPage from '@/pages/auth/LogoutPage.vue'
 import ProvidersPage from '@/pages/providers/ProvidersPage.vue'
 import CreateProviderPage from '@/pages/providers/CreateProviderPage.vue'
+import ProviderPage from '@/pages/providers/ProviderPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -39,6 +40,12 @@ export const router = createRouter({
             path: '/provider/create',
             name: 'provider-create',
             component: CreateProviderPage,
+        },
+        {
+            path: '/providers/:id',
+            name: 'provider',
+            component: ProviderPage,
+            props: true,
         },
     ],
 })

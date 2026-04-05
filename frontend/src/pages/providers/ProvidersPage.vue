@@ -12,7 +12,14 @@
 
             <ul v-else>
                 <li v-for="provider in providers" :key="provider.id">
-                    <strong>{{ provider.name }}</strong>
+                    <template v-if="provider.status === 'active'">
+                        <RouterLink :to="`/providers/${provider.id}`">
+                            <strong>{{ provider.name }}</strong>
+                        </RouterLink>
+                    </template>
+                    <template v-else>
+                        <strong>{{ provider.name }}</strong>
+                    </template>
                     — {{ provider.status }}
                 </li>
             </ul>
