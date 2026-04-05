@@ -4,6 +4,7 @@ export type ProviderView = {
     id: string
     name: string
     status: string
+    isAdmin: boolean
 }
 
 export type ProvidersResponse = {
@@ -16,6 +17,10 @@ export type ProviderResponse = {
 
 export type CreateProviderPayload = {
     name: string
+}
+
+export type InviteProviderUserPayload = {
+    email: string
 }
 
 export function getProviders(): Promise<ProvidersResponse> {
@@ -38,6 +43,16 @@ export function getProvider(id: string): Promise<ProviderResponse> {
 
 export function createProvider(payload: CreateProviderPayload): Promise<void> {
     return apiRequest<void>('/api/provider', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+}
+
+export function inviteProviderUser(providerId: string, payload: InviteProviderUserPayload): Promise<void> {
+    return apiRequest<void>(`/api/provider/${providerId}/invite`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

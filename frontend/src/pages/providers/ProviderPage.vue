@@ -8,6 +8,10 @@
         <template v-else-if="provider">
             <h2>{{ provider.name }}</h2>
             <p>Status: {{ provider.status }}</p>
+
+            <p v-if="provider.isAdmin">
+                <RouterLink :to="`/providers/${provider.id}/invite`">Invite provider user</RouterLink>
+            </p>
         </template>
     </div>
 </template>
