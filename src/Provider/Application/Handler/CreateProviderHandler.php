@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Provider\Application\Handler;
 
 use App\Provider\Application\Command\CreateProvider;
+use App\Provider\Application\Exception\ProviderNameAlreadyExists;
 use App\Provider\Domain\Entity\Provider;
 use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderRepository;
@@ -31,6 +32,10 @@ final readonly class CreateProviderHandler
     public function __invoke(CreateProvider $command): void
     {
         $this->transactionManager->transactional(function () use ($command): void {
+            if ($this->providerRepository->existsByName($command->getName())) {
+                throw ProviderNameAlreadyExists::forName($command->getName());
+            }
+
             $userId = UserId::fromString($command->getUserId());
 
             $provider = Provider::create(

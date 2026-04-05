@@ -42,4 +42,11 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
 
         return $this->providerRecordMapper->toDomain($record);
     }
+
+    public function existsByName(string $name): bool
+    {
+        $record = $this->entityManager->getRepository(ProviderRecord::class)->findOneBy(['name' => $name]);
+
+        return $record instanceof ProviderRecord;
+    }
 }

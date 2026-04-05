@@ -30,6 +30,11 @@ final class CreateProviderHandlerTest extends TestCase
         $uuidCreator = $this->createMock(UuidCreator::class);
         $transactionManager = $this->createMock(TransactionManager::class);
         $outboxWriter = $this->createMock(OutboxWriter::class);
+        $providerRepository
+            ->expects(self::once())
+            ->method('existsByName')
+            ->with($name)
+            ->willReturn(false);
         $uuidCreator
             ->expects(self::exactly(2))
             ->method('create')

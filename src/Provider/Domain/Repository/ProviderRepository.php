@@ -12,4 +12,6 @@ interface ProviderRepository
     public function save(Provider $provider): void;
 
     public function findById(ProviderId $id): ?Provider;
+
+    public function existsByName(string $name): bool;
 }
