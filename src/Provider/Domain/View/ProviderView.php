@@ -10,6 +10,7 @@ final readonly class ProviderView
         private string $id,
         private string $name,
         private string $status,
+        private bool $isAdmin,
     ) {
     }
 
@@ -26,5 +27,10 @@ final readonly class ProviderView
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isAdmin;
     }
 }

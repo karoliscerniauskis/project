@@ -40,6 +40,7 @@ final class GetProvidersController extends AbstractController
                 'id' => $provider->getId(),
                 'name' => $provider->getName(),
                 'status' => $provider->getStatus(),
+                'isAdmin' => $provider->isAdmin(),
             ];
         }, $providersView->getProviders());
 
