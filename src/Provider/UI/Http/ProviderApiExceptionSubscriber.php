@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Provider\UI\Http;
 
+use App\Provider\Application\Exception\ProviderAccessDenied;
 use App\Provider\Application\Exception\ProviderNameAlreadyExists;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,6 +28,15 @@ class ProviderApiExceptionSubscriber implements EventSubscriberInterface
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),
             ], Response::HTTP_CONFLICT));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof ProviderAccessDenied) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_FORBIDDEN));
 
             return;
         }

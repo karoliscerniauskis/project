@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Provider\Application\Handler;
 
 use App\Provider\Application\Command\InviteProviderUser;
+use App\Provider\Application\Exception\ProviderAccessDenied;
 use App\Provider\Domain\Entity\ProviderInvitation;
 use App\Provider\Domain\Repository\ProviderInvitationRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
@@ -38,7 +39,7 @@ final readonly class InviteProviderUserHandler
             $invitedByUserId = UserId::fromString($command->getInvitedByUserId());
 
             if (!$this->providerUserRepository->isAdmin($providerId, $invitedByUserId)) {
-                return;
+                throw ProviderAccessDenied::create();
             }
 
             if ($this->providerInvitationRepository->existsAcceptedByProviderIdAndEmail($providerId, $command->getEmail())) {
