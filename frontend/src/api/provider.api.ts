@@ -7,12 +7,21 @@ export type ProviderView = {
     isAdmin: boolean
 }
 
+export type ProviderUserView = {
+    email: string
+    role: string
+}
+
 export type ProvidersResponse = {
     data: ProviderView[]
 }
 
 export type ProviderResponse = {
     data: ProviderView
+}
+
+export type ProviderUsersResponse = {
+    data: ProviderUserView[]
 }
 
 export type CreateProviderPayload = {
@@ -34,6 +43,15 @@ export function getProviders(): Promise<ProvidersResponse> {
 
 export function getProvider(id: string): Promise<ProviderResponse> {
     return apiRequest<ProviderResponse>(`/api/providers/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
+export function getProviderUsers(id: string): Promise<ProviderUsersResponse> {
+    return apiRequest<ProviderUsersResponse>(`/api/providers/${id}/users`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
