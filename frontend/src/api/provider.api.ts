@@ -12,6 +12,12 @@ export type ProviderUserView = {
     role: string
 }
 
+export type ProviderInvitationView = {
+    email: string
+    createdAt: string
+    expiresAt: string
+}
+
 export type ProvidersResponse = {
     data: ProviderView[]
 }
@@ -22,6 +28,10 @@ export type ProviderResponse = {
 
 export type ProviderUsersResponse = {
     data: ProviderUserView[]
+}
+
+export type ProviderInvitationsResponse = {
+    data: ProviderInvitationView[]
 }
 
 export type CreateProviderPayload = {
@@ -76,5 +86,14 @@ export function inviteProviderUser(providerId: string, payload: InviteProviderUs
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+    })
+}
+
+export function getProviderInvitations(id: string): Promise<ProviderInvitationsResponse> {
+    return apiRequest<ProviderInvitationsResponse>(`/api/providers/${id}/invitations`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
     })
 }

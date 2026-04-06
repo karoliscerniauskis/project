@@ -16,10 +16,22 @@
             <h3>Provider users</h3>
             <p v-if="usersLoading">Loading users...</p>
             <p v-else-if="usersError">{{ usersError }}</p>
+            <p v-else-if="users.length === 0">No provider users.</p>
 
             <ul v-else>
                 <li v-for="item in users" :key="`${item.email}-${item.role}`">
                     {{ item.email }} — {{ item.role }}
+                </li>
+            </ul>
+
+            <h3>Pending invitations</h3>
+            <p v-if="invitationsLoading">Loading invitations...</p>
+            <p v-else-if="invitationsError">{{ invitationsError }}</p>
+            <p v-else-if="invitations.length === 0">No pending invitations.</p>
+
+            <ul v-else>
+                <li v-for="item in invitations" :key="`${item.email}-${item.createdAt}`">
+                    {{ item.email }} — created {{ item.createdAt }}, expires {{ item.expiresAt }}
                 </li>
             </ul>
         </template>
@@ -32,8 +44,10 @@ import { useRoute } from 'vue-router'
 import {
     getProvider,
     getProviderUsers,
+    getProviderInvitations,
     type ProviderView,
     type ProviderUserView,
+    type ProviderInvitationView,
 } from '@/api/provider.api'
 
 const route = useRoute()
@@ -44,6 +58,10 @@ const provider = ref<ProviderView | null>(null)
 const usersLoading = ref(true)
 const usersError = ref('')
 const users = ref<ProviderUserView[]>([])
+
+const invitationsLoading = ref(true)
+const invitationsError = ref('')
+const invitations = ref<ProviderInvitationView[]>([])
 
 onMounted(async () => {
     const id = route.params.id
@@ -70,6 +88,15 @@ onMounted(async () => {
         usersError.value = e instanceof Error ? e.message : 'Failed to load provider users.'
     } finally {
         usersLoading.value = false
+    }
+
+    try {
+        const response = await getProviderInvitations(id)
+        invitations.value = response.data
+    } catch (e) {
+        invitationsError.value = e instanceof Error ? e.message : 'Failed to load invitations.'
+    } finally {
+        invitationsLoading.value = false
     }
 })
 </script>
