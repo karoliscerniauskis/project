@@ -31,27 +31,20 @@ final class GetProviderController extends AbstractController
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
         }
 
-        /** @var ProviderView|null $provider */
-        $provider = $this->queryBus->ask(
+        /** @var ProviderView|null $providerView */
+        $providerView = $this->queryBus->ask(
             new GetProvider(
                 ProviderId::fromString($providerId),
                 UserId::fromString($user->getId()),
             ),
         );
 
-        if ($provider === null) {
+        if ($providerView === null) {
             return new JsonResponse([
                 'message' => 'Provider not found.',
             ], Response::HTTP_NOT_FOUND);
         }
 
-        return new JsonResponse([
-            'data' => [
-                'id' => $provider->getId(),
-                'name' => $provider->getName(),
-                'status' => $provider->getStatus(),
-                'isAdmin' => $provider->isAdmin(),
-            ],
-        ]);
+        return new JsonResponse(['data' => $providerView->toArray()]);
     }
 }

@@ -35,17 +35,6 @@ final class GetProvidersController extends AbstractController
             new GetProviders(UserId::fromString($user->getId())),
         );
 
-        $data = array_map(static function ($provider): array {
-            return [
-                'id' => $provider->getId(),
-                'name' => $provider->getName(),
-                'status' => $provider->getStatus(),
-                'isAdmin' => $provider->isAdmin(),
-            ];
-        }, $providersView->getProviders());
-
-        return new JsonResponse([
-            'data' => $data,
-        ]);
+        return new JsonResponse(['data' => $providersView->toArray()]);
     }
 }

@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace App\Provider\Domain\View;
 
-final readonly class ProvidersView
+use App\Shared\Domain\View\ArrayableView;
+
+/**
+ * @implements ArrayableView<array<array{id: string, name: string, status: string, isAdmin: bool}>>
+ */
+final readonly class ProvidersView implements ArrayableView
 {
     /**
      * @param ProviderView[] $providers
@@ -20,5 +25,16 @@ final readonly class ProvidersView
     public function getProviders(): array
     {
         return $this->providers;
+    }
+
+    /**
+     * @return array<array{id: string, name: string, status: string, isAdmin: bool}>
+     */
+    public function toArray(): array
+    {
+        return array_map(
+            static fn (ProviderView $provider): array => $provider->toArray(),
+            $this->providers,
+        );
     }
 }

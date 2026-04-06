@@ -7,7 +7,6 @@ namespace App\Provider\UI\Http;
 use App\Auth\Infrastructure\Security\SecurityUser;
 use App\Provider\Application\Query\GetProviderUsers;
 use App\Provider\Domain\View\ProviderUsersView;
-use App\Provider\Domain\View\ProviderUserView;
 use App\Shared\Application\Bus\QueryBus;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
@@ -40,15 +39,6 @@ final class GetProviderUsersController extends AbstractController
             ),
         );
 
-        $data = array_map(static function (ProviderUserView $providerUser): array {
-            return [
-                'email' => $providerUser->getEmail(),
-                'role' => $providerUser->getRole(),
-            ];
-        }, $providerUsersView->getUsers());
-
-        return new JsonResponse([
-            'data' => $data,
-        ]);
+        return new JsonResponse(['data' => $providerUsersView->toArray()]);
     }
 }
