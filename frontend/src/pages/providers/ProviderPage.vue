@@ -20,7 +20,15 @@
 
             <ul v-else>
                 <li v-for="item in users" :key="`${item.email}-${item.role}`">
-                    {{ item.email }} — {{ item.role }}
+                    {{ item.email }} — {{ item.role }} — {{ item.status }}
+                    <button
+                        v-if="provider.isAdmin && item.status === 'active' && item.role !== 'admin'"
+                        type="button"
+                        :disabled="removingUserId === item.id"
+                        @click="removeUser(item.id)"
+                    >
+                        {{ removingUserId === item.id ? 'Removing...' : 'Remove from provider' }}
+                    </button>
                 </li>
             </ul>
 
@@ -50,6 +58,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
+    removeProviderUser,
     cancelProviderInvitation,
     getProvider,
     getProviderUsers,
@@ -73,6 +82,7 @@ const invitationsError = ref('')
 const invitations = ref<ProviderInvitationView[]>([])
 
 const cancellingEmail = ref('')
+const removingUserId = ref('')
 
 async function cancelInvitation(email: string): Promise<void> {
     if (provider.value === null) {
@@ -95,6 +105,29 @@ async function cancelInvitation(email: string): Promise<void> {
         invitationsError.value = message
     } finally {
         cancellingEmail.value = ''
+    }
+}
+
+async function removeUser(providerUserId: string): Promise<void> {
+    if (provider.value === null) {
+        return
+    }
+
+    const confirmed = window.confirm('Are you sure you want to remove this user from the provider?')
+
+    if (!confirmed) {
+        return
+    }
+
+    removingUserId.value = providerUserId
+
+    try {
+        await removeProviderUser(provider.value.id, providerUserId)
+        users.value = users.value.filter((item) => item.id !== providerUserId)
+    } catch (e) {
+        usersError.value = e instanceof Error ? e.message : 'Failed to remove provider user.'
+    } finally {
+        removingUserId.value = ''
     }
 }
 

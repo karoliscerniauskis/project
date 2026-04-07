@@ -8,6 +8,7 @@ export type ProviderView = {
 }
 
 export type ProviderUserView = {
+    id: string
     email: string
     role: string
     status: string
@@ -101,6 +102,15 @@ export function getProviderInvitations(id: string): Promise<ProviderInvitationsR
 
 export function cancelProviderInvitation(providerId: string, email: string): Promise<void> {
     return apiRequest<void>(`/api/providers/${providerId}/invitations/${encodeURIComponent(email)}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
+export function removeProviderUser(providerId: string, providerUserId: string): Promise<void> {
+    return apiRequest<void>(`/api/providers/${providerId}/users/${encodeURIComponent(providerUserId)}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
