@@ -32,6 +32,14 @@
             <ul v-else>
                 <li v-for="item in invitations" :key="`${item.email}-${item.createdAt}`">
                     {{ item.email }} — created {{ item.createdAt }}, expires {{ item.expiresAt }}
+                    <button
+                        v-if="provider.isAdmin"
+                        type="button"
+                        :disabled="cancellingEmail === item.email"
+                        @click="cancelInvitation(item.email)"
+                    >
+                        {{ cancellingEmail === item.email ? 'Cancelling...' : 'Cancel invitation' }}
+                    </button>
                 </li>
             </ul>
         </template>
@@ -42,6 +50,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
+    cancelProviderInvitation,
     getProvider,
     getProviderUsers,
     getProviderInvitations,
@@ -62,6 +71,32 @@ const users = ref<ProviderUserView[]>([])
 const invitationsLoading = ref(true)
 const invitationsError = ref('')
 const invitations = ref<ProviderInvitationView[]>([])
+
+const cancellingEmail = ref('')
+
+async function cancelInvitation(email: string): Promise<void> {
+    if (provider.value === null) {
+        return
+    }
+
+    const confirmed = window.confirm('Are you sure you want to cancel this invitation?')
+
+    if (!confirmed) {
+        return
+    }
+
+    cancellingEmail.value = email
+
+    try {
+        await cancelProviderInvitation(provider.value.id, email)
+        invitations.value = invitations.value.filter((item) => item.email !== email)
+    } catch (e) {
+        const message = e instanceof Error ? e.message : 'Failed to cancel invitation.'
+        invitationsError.value = message
+    } finally {
+        cancellingEmail.value = ''
+    }
+}
 
 onMounted(async () => {
     const id = route.params.id

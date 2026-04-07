@@ -97,3 +97,12 @@ export function getProviderInvitations(id: string): Promise<ProviderInvitationsR
         },
     })
 }
+
+export function cancelProviderInvitation(providerId: string, email: string): Promise<void> {
+    return apiRequest<void>(`/api/providers/${providerId}/invitations/${encodeURIComponent(email)}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
