@@ -7,15 +7,21 @@ namespace App\Provider\Domain\View;
 use App\Shared\Domain\View\ArrayableView;
 
 /**
- * @implements ArrayableView<array{email: string, role: string, status: string}>
+ * @implements ArrayableView<array{id: string, email: string, role: string, status: string}>
  */
 final readonly class ProviderUserView implements ArrayableView
 {
     public function __construct(
+        private string $id,
         private string $email,
         private string $role,
         private string $status,
     ) {
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
     }
 
     public function getEmail(): string
@@ -34,11 +40,12 @@ final readonly class ProviderUserView implements ArrayableView
     }
 
     /**
-     * @return array{email: string, role: string, status: string}
+     * @return array{id: string, email: string, role: string, status: string}
      */
     public function toArray(): array
     {
         return [
+            'id' => $this->getId(),
             'email' => $this->getEmail(),
             'role' => $this->getRole(),
             'status' => $this->getStatus(),

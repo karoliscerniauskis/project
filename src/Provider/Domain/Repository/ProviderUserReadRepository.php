@@ -9,5 +9,5 @@ use App\Shared\Domain\Id\ProviderId;
 
 interface ProviderUserReadRepository
 {
-    public function findByProviderId(ProviderId $providerId): ProviderUsersView;
+    public function findActiveMembersByProviderId(ProviderId $providerId): ProviderUsersView;
 }

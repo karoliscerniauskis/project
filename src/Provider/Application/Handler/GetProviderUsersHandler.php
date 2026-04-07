@@ -24,6 +24,6 @@ final readonly class GetProviderUsersHandler
             throw ProviderAccessDenied::create();
         }
 
-        return $this->providerUserReadRepository->findByProviderId($query->getProviderId());
+        return $this->providerUserReadRepository->findActiveMembersByProviderId($query->getProviderId());
     }
 }

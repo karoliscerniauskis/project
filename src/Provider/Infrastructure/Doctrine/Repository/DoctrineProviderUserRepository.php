@@ -10,6 +10,7 @@ use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Provider\Infrastructure\Doctrine\Mapper\ProviderUserRecordMapper;
 use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -23,6 +24,16 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
 
     public function save(ProviderUser $providerUser): void
     {
+        $existing = $this->entityManager
+            ->getRepository(ProviderUserRecord::class)
+            ->find($providerUser->getId()->toString());
+
+        if ($existing instanceof ProviderUserRecord) {
+            $this->providerUserRecordMapper->syncRecord($providerUser, $existing);
+
+            return;
+        }
+
         $this->entityManager->persist($this->providerUserRecordMapper->toRecord($providerUser));
     }
 
@@ -67,5 +78,18 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
         }
 
         return $userIds;
+    }
+
+    public function findById(ProviderUserId $providerUserId): ?ProviderUser
+    {
+        $record = $this->entityManager
+            ->getRepository(ProviderUserRecord::class)
+            ->find($providerUserId->toString());
+
+        if (!$record instanceof ProviderUserRecord) {
+            return null;
+        }
+
+        return $this->providerUserRecordMapper->toDomain($record);
     }
 }
