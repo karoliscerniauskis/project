@@ -21,7 +21,7 @@ final readonly class DoctrineProviderUserReadRepository implements ProviderUserR
     public function findByProviderId(ProviderId $providerId): ProviderUsersView
     {
         $rows = $this->entityManager->createQueryBuilder()
-            ->select('pu.userId AS userId', 'pu.role AS role', 'u.email AS email')
+            ->select('pu.userId AS userId', 'pu.role AS role', 'pu.status AS status', 'u.email AS email')
             ->from(ProviderUserRecord::class, 'pu')
             ->innerJoin(
                 'App\\Auth\\Infrastructure\\Doctrine\\Entity\\UserRecord',
@@ -37,14 +37,15 @@ final readonly class DoctrineProviderUserReadRepository implements ProviderUserR
         $users = [];
 
         foreach ($rows as $row) {
-            /** @var array{email: mixed, role: mixed} $row */
-            if (!is_string($row['email']) || !is_string($row['role'])) {
+            /** @var array{email: mixed, role: mixed, status: mixed} $row */
+            if (!is_string($row['email']) || !is_string($row['role']) || !is_string($row['status'])) {
                 continue;
             }
 
             $users[] = new ProviderUserView(
                 $row['email'],
                 $row['role'],
+                $row['status'],
             );
         }
 

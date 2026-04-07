@@ -10,6 +10,7 @@ export type ProviderView = {
 export type ProviderUserView = {
     email: string
     role: string
+    status: string
 }
 
 export type ProviderInvitationView = {

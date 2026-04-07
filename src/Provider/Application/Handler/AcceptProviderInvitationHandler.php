@@ -6,6 +6,7 @@ namespace App\Provider\Application\Handler;
 
 use App\Provider\Application\Command\AcceptProviderInvitation;
 use App\Provider\Domain\Entity\ProviderUser;
+use App\Provider\Domain\Invitation\ProviderInvitationStatus;
 use App\Provider\Domain\Repository\ProviderInvitationRepository;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
@@ -36,7 +37,7 @@ final readonly class AcceptProviderInvitationHandler
         $this->transactionManager->transactional(function () use ($command): void {
             $invitation = $this->providerInvitationRepository->findBySlug($command->getSlug());
 
-            if ($invitation === null) {
+            if ($invitation === null || $invitation->getStatus() !== ProviderInvitationStatus::Pending) {
                 return;
             }
 
@@ -49,11 +50,7 @@ final readonly class AcceptProviderInvitationHandler
             $userId = UserId::fromString($command->getUserId());
             $userEmail = $this->userEmailFinder->findByUserId($userId);
 
-            if ($userEmail === null) {
-                return;
-            }
-
-            if ($invitation->getEmail() !== $userEmail) {
+            if ($userEmail === null || $invitation->getEmail() !== $userEmail) {
                 return;
             }
 

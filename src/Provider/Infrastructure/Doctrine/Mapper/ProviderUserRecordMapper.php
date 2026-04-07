@@ -6,6 +6,7 @@ namespace App\Provider\Infrastructure\Doctrine\Mapper;
 
 use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Role\ProviderUserRole;
+use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
@@ -20,6 +21,7 @@ final readonly class ProviderUserRecordMapper
             ProviderId::fromString($record->getProviderId()),
             UserId::fromString($record->getUserId()),
             ProviderUserRole::from($record->getRole()),
+            ProviderUserStatus::from($record->getStatus()),
         );
     }
 
@@ -30,6 +32,7 @@ final readonly class ProviderUserRecordMapper
             $providerUser->getProviderId()->toString(),
             $providerUser->getUserId()->toString(),
             $providerUser->getRole()->value,
+            $providerUser->getStatus()->value,
         );
     }
 }

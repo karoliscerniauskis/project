@@ -6,6 +6,7 @@ namespace App\Tests\Provider\Domain\Entity;
 
 use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Role\ProviderUserRole;
+use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
@@ -34,13 +35,15 @@ final class ProviderUserTest extends TestCase
         $providerId = ProviderId::fromString('550e8400-e29b-41d4-a716-446655440001');
         $userId = UserId::fromString('550e8400-e29b-41d4-a716-446655440002');
         $role = ProviderUserRole::Admin;
-        $providerUser = ProviderUser::reconstitute($id, $providerId, $userId, $role);
+        $status = ProviderUserStatus::Active;
+        $providerUser = ProviderUser::reconstitute($id, $providerId, $userId, $role, $status);
 
         self::assertSame($id, $providerUser->getId());
         self::assertSame($providerId, $providerUser->getProviderId());
         self::assertSame($userId, $providerUser->getUserId());
         self::assertSame($role, $providerUser->getRole());
         self::assertTrue($providerUser->isAdmin());
+        self::assertTrue($providerUser->isActive());
     }
 
     public function testAssignAdminCreatesAdminProviderUser(): void

@@ -6,6 +6,7 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 
 use App\Provider\Domain\Repository\ProviderReadRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
+use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Provider\Domain\View\ProvidersView;
 use App\Provider\Domain\View\ProviderView;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
@@ -52,7 +53,7 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
         return new ProvidersView($providers);
     }
 
-    public function findByIdAndUserId(ProviderId $providerId, UserId $userId): ?ProviderView
+    public function findActiveByIdAndUserId(ProviderId $providerId, UserId $userId): ?ProviderView
     {
         /** @var array{id: Uuid, name: string, status: string, role: string}|null $row */
         $row = $this->entityManager->createQueryBuilder()
@@ -66,8 +67,10 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
             )
             ->andWhere('p.id = :providerId')
             ->andWhere('pu.userId = :userId')
+            ->andWhere('pu.status = :userStatus')
             ->setParameter('providerId', $providerId->toString())
             ->setParameter('userId', $userId->toString())
+            ->setParameter('userStatus', ProviderUserStatus::Active->value)
             ->getQuery()
             ->getOneOrNullResult();
 

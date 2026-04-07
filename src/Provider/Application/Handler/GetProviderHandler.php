@@ -17,7 +17,7 @@ final readonly class GetProviderHandler
 
     public function __invoke(GetProvider $query): ?ProviderView
     {
-        return $this->providerReadRepository->findByIdAndUserId(
+        return $this->providerReadRepository->findActiveByIdAndUserId(
             $query->getProviderId(),
             $query->getUserId(),
         );
