@@ -24,4 +24,6 @@ interface ProviderUserRepository
      * @return UserId[]
      */
     public function findUserIdsByProviderIdAndRole(ProviderId $providerId, ProviderUserRole $role): array;
+
+    public function findByProviderIdAndUserId(ProviderId $providerId, UserId $userId): ?ProviderUser;
 }

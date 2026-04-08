@@ -92,4 +92,20 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
 
         return $this->providerUserRecordMapper->toDomain($record);
     }
+
+    public function findByProviderIdAndUserId(ProviderId $providerId, UserId $userId): ?ProviderUser
+    {
+        $record = $this->entityManager
+            ->getRepository(ProviderUserRecord::class)
+            ->findOneBy([
+                'providerId' => $providerId->toString(),
+                'userId' => $userId->toString(),
+            ]);
+
+        if (!$record instanceof ProviderUserRecord) {
+            return null;
+        }
+
+        return $this->providerUserRecordMapper->toDomain($record);
+    }
 }

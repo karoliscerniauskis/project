@@ -97,6 +97,11 @@ final class AcceptProviderInvitationHandlerTest extends TestCase
 
                 return true;
             }));
+        $providerUserRepository
+            ->expects(self::once())
+            ->method('findByProviderIdAndUserId')
+            ->with($providerId, UserId::fromString($userId))
+            ->willReturn(null);
         $uuidCreator
             ->expects(self::once())
             ->method('create')

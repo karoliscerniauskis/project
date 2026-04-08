@@ -56,11 +56,21 @@ final readonly class AcceptProviderInvitationHandler
 
             $invitation->accept($userId, $this->clock->now());
             $this->providerInvitationRepository->save($invitation);
-            $providerUser = ProviderUser::assignMember(
-                ProviderUserId::fromString($this->uuidCreator->create()),
+            $providerUser = $this->providerUserRepository->findByProviderIdAndUserId(
                 $invitation->getProviderId(),
                 $userId,
             );
+
+            if ($providerUser === null) {
+                $providerUser = ProviderUser::assignMember(
+                    ProviderUserId::fromString($this->uuidCreator->create()),
+                    $invitation->getProviderId(),
+                    $userId,
+                );
+            } else {
+                $providerUser->reactivate();
+            }
+
             $this->providerUserRepository->save($providerUser);
             $this->outboxWriter->storeAll([
                 ...$invitation->pullDomainEvents(),

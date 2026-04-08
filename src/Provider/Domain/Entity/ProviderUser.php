@@ -121,4 +121,13 @@ final class ProviderUser extends AbstractAggregateRoot
     {
         return $this->status === ProviderUserStatus::Removed;
     }
+
+    public function reactivate(): void
+    {
+        if ($this->status !== ProviderUserStatus::Removed) {
+            return;
+        }
+
+        $this->status = ProviderUserStatus::Active;
+    }
 }
