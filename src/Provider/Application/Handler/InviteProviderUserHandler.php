@@ -13,6 +13,8 @@ use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Slug\ProviderInvitationSlugGenerator;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
+use App\Shared\Application\User\UserEmailFinder;
+use App\Shared\Application\User\UserIdFinder;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderInvitationId;
@@ -29,6 +31,8 @@ final readonly class InviteProviderUserHandler
         private ProviderInvitationSlugGenerator $providerInvitationSlugGenerator,
         private TransactionManager $transactionManager,
         private OutboxWriter $outboxWriter,
+        private UserEmailFinder $userEmailFinder,
+        private UserIdFinder $userIdFinder,
     ) {
     }
 
@@ -42,20 +46,34 @@ final readonly class InviteProviderUserHandler
                 throw ProviderAccessDenied::create();
             }
 
-            if ($this->providerInvitationRepository->existsAcceptedByProviderIdAndEmail($providerId, $command->getEmail())) {
+            $invitedEmail = $command->getEmail();
+            $invitedByEmail = $this->userEmailFinder->findByUserId($invitedByUserId);
+
+            if ($invitedByEmail !== null && $invitedByEmail === $invitedEmail) {
                 return;
             }
 
-            $existingPending = $this->providerInvitationRepository->findPendingByProviderIdAndEmail($providerId, $command->getEmail());
+            $existingPending = $this->providerInvitationRepository->findPendingByProviderIdAndEmail($providerId, $invitedEmail);
 
             if ($existingPending !== null) {
+                return;
+            }
+
+            $existingMember = null;
+            $invitedUserId = $this->userIdFinder->findIdByEmail($invitedEmail);
+
+            if ($invitedUserId !== null) {
+                $existingMember = $this->providerUserRepository->isActiveMember($providerId, $invitedUserId);
+            }
+
+            if ($existingMember) {
                 return;
             }
 
             $invitation = ProviderInvitation::invite(
                 ProviderInvitationId::fromString($this->uuidCreator->create()),
                 $providerId,
-                $command->getEmail(),
+                $invitedEmail,
                 ProviderUserRole::Member,
                 $this->providerInvitationSlugGenerator->generate(),
                 $invitedByUserId,

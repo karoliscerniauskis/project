@@ -8,10 +8,11 @@ use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Infrastructure\Doctrine\Entity\UserRecord;
 use App\Auth\Infrastructure\Doctrine\Mapper\UserRecordMapper;
+use App\Shared\Application\User\UserIdFinder;
 use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class DoctrineUserRepository implements UserRepository
+final readonly class DoctrineUserRepository implements UserRepository, UserIdFinder
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -71,5 +72,16 @@ final readonly class DoctrineUserRepository implements UserRepository
         }
 
         return $this->userRecordMapper->toDomain($userRecord);
+    }
+
+    public function findIdByEmail(string $email): ?UserId
+    {
+        $user = $this->findByEmail($email);
+
+        if (!$user instanceof User) {
+            return null;
+        }
+
+        return $user->getId();
     }
 }

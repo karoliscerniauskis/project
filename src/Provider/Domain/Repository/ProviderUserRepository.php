@@ -18,6 +18,8 @@ interface ProviderUserRepository
 
     public function isMember(ProviderId $providerId, UserId $userId): bool;
 
+    public function isActiveMember(ProviderId $providerId, UserId $userId): bool;
+
     public function isAdmin(ProviderId $providerId, UserId $userId): bool;
 
     /**

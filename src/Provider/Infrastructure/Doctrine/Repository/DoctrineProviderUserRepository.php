@@ -7,6 +7,7 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 use App\Provider\Domain\Entity\ProviderUser;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
+use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Provider\Infrastructure\Doctrine\Mapper\ProviderUserRecordMapper;
 use App\Shared\Domain\Id\ProviderId;
@@ -44,6 +45,19 @@ final readonly class DoctrineProviderUserRepository implements ProviderUserRepos
             ->findOneBy([
                 'providerId' => $providerId->toString(),
                 'userId' => $userId->toString(),
+            ]);
+
+        return $record instanceof ProviderUserRecord;
+    }
+
+    public function isActiveMember(ProviderId $providerId, UserId $userId): bool
+    {
+        $record = $this->entityManager
+            ->getRepository(ProviderUserRecord::class)
+            ->findOneBy([
+                'providerId' => $providerId->toString(),
+                'userId' => $userId->toString(),
+                'status' => ProviderUserStatus::Active->value,
             ]);
 
         return $record instanceof ProviderUserRecord;

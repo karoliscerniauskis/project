@@ -14,6 +14,8 @@ use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Slug\ProviderInvitationSlugGenerator;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
+use App\Shared\Application\User\UserEmailFinder;
+use App\Shared\Application\User\UserIdFinder;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderInvitationId;
@@ -31,6 +33,7 @@ final class InviteProviderUserHandlerTest extends TestCase
         $invitationId = '550e8400-e29b-41d4-a716-446655440003';
         $slug = 'slug';
         $email = 'user@example.com';
+        $adminEmail = 'admin@example.com';
         $createdAt = new DateTimeImmutable('2020-01-01 00:00:00');
         $expiresAt = new DateTimeImmutable('2020-01-08 00:00:00');
         $command = new InviteProviderUser($providerId, $invitedByUserId, $email);
@@ -41,6 +44,8 @@ final class InviteProviderUserHandlerTest extends TestCase
         $providerInvitationSlugGenerator = $this->createMock(ProviderInvitationSlugGenerator::class);
         $transactionManager = $this->createMock(TransactionManager::class);
         $outboxWriter = $this->createMock(OutboxWriter::class);
+        $userEmailFinder = $this->createMock(UserEmailFinder::class);
+        $userIdFinder = $this->createMock(UserIdFinder::class);
         $providerUserRepository
             ->expects(self::once())
             ->method('isAdmin')
@@ -49,14 +54,11 @@ final class InviteProviderUserHandlerTest extends TestCase
                 UserId::fromString($invitedByUserId),
             )
             ->willReturn(true);
-        $providerInvitationRepository
+        $userEmailFinder
             ->expects(self::once())
-            ->method('existsAcceptedByProviderIdAndEmail')
-            ->with(
-                ProviderId::fromString($providerId),
-                $email,
-            )
-            ->willReturn(false);
+            ->method('findByUserId')
+            ->with(UserId::fromString($invitedByUserId))
+            ->willReturn($adminEmail);
         $providerInvitationRepository
             ->expects(self::once())
             ->method('findPendingByProviderIdAndEmail')
@@ -77,6 +79,16 @@ final class InviteProviderUserHandlerTest extends TestCase
             ->expects(self::exactly(2))
             ->method('now')
             ->willReturnOnConsecutiveCalls($createdAt, $createdAt);
+        $userIdFinder
+            ->expects(self::once())
+            ->method('findIdByEmail')
+            ->with($email)
+            ->willReturn(UserId::fromString($invitedByUserId));
+        $providerUserRepository
+            ->expects(self::once())
+            ->method('isActiveMember')
+            ->with(ProviderId::fromString($providerId), UserId::fromString($invitedByUserId))
+            ->willReturn(false);
         $providerInvitationRepository
             ->expects(self::once())
             ->method('save')
@@ -123,6 +135,8 @@ final class InviteProviderUserHandlerTest extends TestCase
             $providerInvitationSlugGenerator,
             $transactionManager,
             $outboxWriter,
+            $userEmailFinder,
+            $userIdFinder,
         );
         $handler($command);
     }
