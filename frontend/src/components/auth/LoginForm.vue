@@ -55,6 +55,7 @@ async function onSubmit() {
         })
 
         localStorage.setItem('token', response.token)
+        localStorage.setItem('refresh_token', response.refresh_token)
         await router.push('/providers')
     } catch (e) {
         error.value = extractMessage(e)

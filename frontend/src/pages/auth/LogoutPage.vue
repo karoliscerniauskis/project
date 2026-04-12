@@ -16,6 +16,7 @@ const message = ref('')
 
 onMounted(async () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('refresh_token')
     message.value = 'You have been logged out.'
     loading.value = false
 

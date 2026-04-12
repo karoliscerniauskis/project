@@ -98,6 +98,10 @@ deptrac:
             collectors:
                 -   type: classLike
                     value: ^Hidehalo\\
+        -   name: Gesdinet
+            collectors:
+                -   type: classLike
+                    value: ^Gesdinet\\
     ruleset:
         # Shared
         SharedDomain:
@@ -125,6 +129,7 @@ deptrac:
             - SharedDomain
             - Symfony
             - Doctrine
+            - Gesdinet
         # Voucher
         VoucherDomain:
             - SharedDomain

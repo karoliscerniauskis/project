@@ -7,6 +7,12 @@ export type AuthCredentials = {
 
 export type LoginResponse = {
     token: string
+    refresh_token: string
+}
+
+export type RefreshResponse = {
+    token: string
+    refresh_token?: string
 }
 
 export function login(payload: AuthCredentials): Promise<LoginResponse> {
@@ -33,4 +39,23 @@ export function verifyEmail(slug: string): Promise<void> {
     return apiRequest<void>(`/api/auth/verify-email/${slug}`, {
         method: 'GET',
     })
+}
+
+export async function refreshToken(payload: { refresh_token: string }): Promise<RefreshResponse> {
+    const response = await fetch('/api/auth/token/refresh', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+
+    const data = await response.json().catch(() => null)
+
+    if (!response.ok) {
+        const message = typeof data === 'string' ? data : data?.message ?? 'Request failed'
+        throw new Error(message)
+    }
+
+    return data as RefreshResponse
 }
