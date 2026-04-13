@@ -7,6 +7,7 @@ import ProvidersPage from '@/pages/providers/ProvidersPage.vue'
 import CreateProviderPage from '@/pages/providers/CreateProviderPage.vue'
 import ProviderPage from '@/pages/providers/ProviderPage.vue'
 import InviteProviderUserPage from '@/pages/providers/InviteProviderUserPage.vue'
+import CreateVoucherPage from '@/pages/providers/CreateVoucherPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -52,6 +53,12 @@ export const router = createRouter({
             path: '/providers/:id/invite',
             name: 'provider-invite-user',
             component: InviteProviderUserPage,
+            props: true,
+        },
+        {
+            path: '/providers/:id/vouchers/create',
+            name: 'provider-voucher-create',
+            component: CreateVoucherPage,
             props: true,
         },
     ],

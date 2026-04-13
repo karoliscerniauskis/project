@@ -44,6 +44,10 @@ export type InviteProviderUserPayload = {
     email: string
 }
 
+export type CreateVoucherPayload = {
+    issuedToEmail: string
+}
+
 export function getProviders(): Promise<ProvidersResponse> {
     return apiRequest<ProvidersResponse>('/api/providers', {
         method: 'GET',
@@ -115,5 +119,15 @@ export function removeProviderUser(providerId: string, providerUserId: string): 
         headers: {
             'Content-Type': 'application/json',
         },
+    })
+}
+
+export function createVoucher(providerId: string, payload: CreateVoucherPayload): Promise<void> {
+    return apiRequest<void>(`/api/providers/${providerId}/vouchers`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
     })
 }
