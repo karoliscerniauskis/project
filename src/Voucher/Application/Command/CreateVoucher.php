@@ -8,8 +8,8 @@ final readonly class CreateVoucher
 {
     public function __construct(
         private string $providerId,
-        private ?string $issuedToUserId = null,
-        private ?string $issuedToEmail = null,
+        private string $createdByUserId,
+        private string $issuedToEmail,
     ) {
     }
 
@@ -18,12 +18,12 @@ final readonly class CreateVoucher
         return $this->providerId;
     }
 
-    public function getIssuedToUserId(): ?string
+    public function getCreatedByUserId(): string
     {
-        return $this->issuedToUserId;
+        return $this->createdByUserId;
     }
 
-    public function getIssuedToEmail(): ?string
+    public function getIssuedToEmail(): string
     {
         return $this->issuedToEmail;
     }

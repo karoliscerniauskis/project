@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Voucher\Application\Handler;
 
 use App\Shared\Application\Outbox\OutboxWriter;
+use App\Shared\Application\ProviderUser\ProviderUserFinder;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\UuidCreator;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Command\CreateVoucher;
+use App\Voucher\Application\Exception\ProviderUserNotFound;
 use App\Voucher\Application\Exception\UnableToGenerateUniqueVoucherCode;
 use App\Voucher\Application\Exception\VoucherCodeAlreadyExists;
 use App\Voucher\Application\Transaction\VoucherTransactionManager;
@@ -29,22 +31,28 @@ final readonly class CreateVoucherHandler
         private VoucherCodeGenerator $voucherCodeGenerator,
         private VoucherTransactionManager $voucherTransactionManager,
         private OutboxWriter $outboxWriter,
+        private ProviderUserFinder $providerUserFinder,
     ) {
     }
 
     public function __invoke(CreateVoucher $command): void
     {
-        $issuedToUserIdRaw = $command->getIssuedToUserId();
-        $issuedToUserId = $issuedToUserIdRaw !== null ? UserId::fromString($issuedToUserIdRaw) : null;
+        $providerId = ProviderId::fromString($command->getProviderId());
+        $createdByUserId = UserId::fromString($command->getCreatedByUserId());
+        $providerUserId = $this->providerUserFinder->findIdByProviderIdAndUserId($providerId, $createdByUserId);
+
+        if ($providerUserId === null) {
+            throw ProviderUserNotFound::forProviderAndUserId($providerId->toString(), $createdByUserId->toString());
+        }
 
         for ($i = 0; $i < self::ATTEMPTS_LIMIT; ++$i) {
             try {
-                $this->voucherTransactionManager->transactional(function () use ($command, $issuedToUserId): void {
+                $this->voucherTransactionManager->transactional(function () use ($command, $providerId, $providerUserId): void {
                     $voucher = Voucher::create(
                         VoucherId::fromString($this->uuidCreator->create()),
                         $this->voucherCodeGenerator->generate(),
-                        ProviderId::fromString($command->getProviderId()),
-                        $issuedToUserId,
+                        $providerId,
+                        $providerUserId,
                         $command->getIssuedToEmail(),
                         $this->clock->now(),
                     );

@@ -6,6 +6,7 @@ namespace App\Voucher\Domain\Entity;
 
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Event\VoucherCreated;
@@ -16,8 +17,8 @@ final class Voucher extends AbstractAggregateRoot
     private VoucherId $id;
     private string $code;
     private ProviderId $providerId;
-    private ?UserId $issuedToUserId = null;
-    private ?string $issuedToEmail = null;
+    private ProviderUserId $createdByProviderUserId;
+    private string $issuedToEmail;
     private ?UserId $claimedByUserId = null;
 
     private function __construct()
@@ -29,15 +30,15 @@ final class Voucher extends AbstractAggregateRoot
         VoucherId $id,
         string $code,
         ProviderId $providerId,
-        ?UserId $issuedToUserId,
-        ?string $issuedToEmail,
+        ProviderUserId $createdByProviderUserId,
+        string $issuedToEmail,
         DateTimeImmutable $occurredOn,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->code = $code;
         $self->providerId = $providerId;
-        $self->issuedToUserId = $issuedToUserId;
+        $self->createdByProviderUserId = $createdByProviderUserId;
         $self->issuedToEmail = $issuedToEmail;
         $self->record(new VoucherCreated($occurredOn));
 
@@ -48,15 +49,15 @@ final class Voucher extends AbstractAggregateRoot
         VoucherId $id,
         string $code,
         ProviderId $providerId,
-        ?UserId $issuedToUserId,
-        ?string $issuedToEmail,
+        ProviderUserId $createdByProviderUserId,
+        string $issuedToEmail,
         ?UserId $claimedByUserId,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->code = $code;
         $self->providerId = $providerId;
-        $self->issuedToUserId = $issuedToUserId;
+        $self->createdByProviderUserId = $createdByProviderUserId;
         $self->issuedToEmail = $issuedToEmail;
         $self->claimedByUserId = $claimedByUserId;
 
@@ -78,12 +79,12 @@ final class Voucher extends AbstractAggregateRoot
         return $this->providerId;
     }
 
-    public function getIssuedToUserId(): ?UserId
+    public function getCreatedByProviderUserId(): ProviderUserId
     {
-        return $this->issuedToUserId;
+        return $this->createdByProviderUserId;
     }
 
-    public function getIssuedToEmail(): ?string
+    public function getIssuedToEmail(): string
     {
         return $this->issuedToEmail;
     }

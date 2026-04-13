@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Provider\UI\Http;
 
-use App\Auth\Infrastructure\Security\SecurityUser;
 use App\Provider\Application\Query\GetProviderUsers;
 use App\Provider\Domain\View\ProviderUsersView;
 use App\Shared\Application\Bus\QueryBus;
+use App\Shared\Application\Security\AuthenticatedUser;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,7 +27,7 @@ final class GetProviderUsersController extends AbstractController
     {
         $user = $this->getUser();
 
-        if (!$user instanceof SecurityUser) {
+        if (!$user instanceof AuthenticatedUser) {
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
         }
 

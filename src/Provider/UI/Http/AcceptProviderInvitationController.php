@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Provider\UI\Http;
 
-use App\Auth\Infrastructure\Security\SecurityUser;
 use App\Provider\Application\Command\AcceptProviderInvitation;
 use App\Shared\Application\Bus\CommandBus;
+use App\Shared\Application\Security\AuthenticatedUser;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +24,7 @@ final class AcceptProviderInvitationController extends AbstractController
     {
         $user = $this->getUser();
 
-        if (!$user instanceof SecurityUser) {
+        if (!$user instanceof AuthenticatedUser) {
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
         }
 

@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Auth\Infrastructure\Security;
 
+use App\Shared\Application\Security\AuthenticatedUser;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final readonly class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface
+final readonly class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface, AuthenticatedUser
 {
     /**
      * @param string[] $roles

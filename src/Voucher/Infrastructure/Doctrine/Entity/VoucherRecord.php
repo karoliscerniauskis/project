@@ -20,11 +20,11 @@ class VoucherRecord
     #[ORM\Column(type: 'uuid')]
     private string $providerId;
 
-    #[ORM\Column(type: 'uuid', nullable: true)]
-    private ?string $issuedToUserId;
+    #[ORM\Column(type: 'uuid')]
+    private string $createdByProviderUserId;
 
-    #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $issuedToEmail;
+    #[ORM\Column(type: 'string')]
+    private string $issuedToEmail;
 
     #[ORM\Column(type: 'uuid', nullable: true)]
     private ?string $claimedByUserId;
@@ -33,14 +33,14 @@ class VoucherRecord
         string $id,
         string $code,
         string $providerId,
-        ?string $issuedToUserId = null,
-        ?string $issuedToEmail = null,
+        string $createdByProviderUserId,
+        string $issuedToEmail,
         ?string $claimedByUserId = null,
     ) {
         $this->id = $id;
         $this->code = $code;
         $this->providerId = $providerId;
-        $this->issuedToUserId = $issuedToUserId;
+        $this->createdByProviderUserId = $createdByProviderUserId;
         $this->issuedToEmail = $issuedToEmail;
         $this->claimedByUserId = $claimedByUserId;
     }
@@ -60,12 +60,12 @@ class VoucherRecord
         return $this->providerId;
     }
 
-    public function getIssuedToUserId(): ?string
+    public function getCreatedByProviderUserId(): string
     {
-        return $this->issuedToUserId;
+        return $this->createdByProviderUserId;
     }
 
-    public function getIssuedToEmail(): ?string
+    public function getIssuedToEmail(): string
     {
         return $this->issuedToEmail;
     }

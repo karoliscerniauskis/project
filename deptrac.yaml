@@ -11,27 +11,49 @@ deptrac:
                 -
                     type: directory
                     value: src/Shared/Domain/.*
-        -   name: SharedApplication
+        -
+            name: SharedApplication
             collectors:
-                -   type: directory
+                -
+                    type: directory
                     value: src/Shared/Application/.*
-        -   name: SharedInfrastructure
+        -
+            name: SharedInfrastructure
             collectors:
-                -   type: directory
+                -
+                    type: directory
                     value: src/Shared/Infrastructure/.*
+        -
+            name: SharedUI
+            collectors:
+                -
+                    type: directory
+                    value: src/Shared/UI/.*
         # Auth
-        -   name: AuthDomain
+        -
+            name: AuthDomain
             collectors:
-                -   type: directory
+                -
+                    type: directory
                     value: src/Auth/Domain/.*
-        -   name: AuthApplication
+        -
+            name: AuthApplication
             collectors:
-                -   type: directory
+                -
+                    type: directory
                     value: src/Auth/Application/.*
-        -   name: AuthInfrastructure
+        -
+            name: AuthInfrastructure
             collectors:
-                -   type: directory
+                -
+                    type: directory
                     value: src/Auth/Infrastructure/.*
+        -
+            name: AuthUI
+            collectors:
+                -
+                    type: directory
+                    value: src/Auth/UI/.*
         # Voucher
         -
             name: VoucherDomain
@@ -76,32 +98,55 @@ deptrac:
                 -
                     type: directory
                     value: src/Provider/Infrastructure/.*
+        -
+            name: ProviderUI
+            collectors:
+                -
+                    type: directory
+                    value: src/Provider/UI/.*
         # External
         -
             name: Symfony
             collectors:
-                -   type: classLike
+                -
+                    type: classLike
                     value: ^Symfony\\
-        -   name: PHPStan
+        -
+            name: PHPStan
             collectors:
-                -   type: classLike
+                -
+                    type: classLike
                     value: ^PHPStan\\
-        -   name: PhpParser
+        -
+            name: PhpParser
             collectors:
-                -   type: classLike
+                -
+                    type: classLike
                     value: ^PhpParser\\
-        -   name: Doctrine
+        -
+            name: Doctrine
             collectors:
-                -   type: classLike
+                -
+                    type: classLike
                     value: ^Doctrine\\
-        -   name: Hidehalo
+        -
+            name: Hidehalo
             collectors:
-                -   type: classLike
+                -
+                    type: classLike
                     value: ^Hidehalo\\
-        -   name: Gesdinet
+        -
+            name: Gesdinet
             collectors:
-                -   type: classLike
+                -
+                    type: classLike
                     value: ^Gesdinet\\
+        -
+            name: Lexik
+            collectors:
+                -
+                    type: classLike
+                    value: ^Lexik\\
     ruleset:
         # Shared
         SharedDomain:
@@ -114,6 +159,9 @@ deptrac:
             - PHPStan
             - PhpParser
             - Doctrine
+        SharedUI:
+            - Symfony
+            - SharedApplication
         # Auth
         AuthDomain:
             - SharedDomain
@@ -130,6 +178,14 @@ deptrac:
             - Symfony
             - Doctrine
             - Gesdinet
+        AuthUI:
+            - Symfony
+            - AuthInfrastructure
+            - AuthApplication
+            - SharedApplication
+            - SharedUI
+            - Doctrine
+            - Lexik
         # Voucher
         VoucherDomain:
             - SharedDomain
@@ -146,6 +202,11 @@ deptrac:
             - Symfony
             - Doctrine
             - Hidehalo
+        VoucherUI:
+            - VoucherApplication
+            - SharedApplication
+            - SharedUI
+            - Symfony
         # Provider
         ProviderDomain:
             - SharedDomain
@@ -156,8 +217,16 @@ deptrac:
         ProviderInfrastructure:
             - ProviderDomain
             - SharedInfrastructure
+            - SharedApplication
             - SharedDomain
             - Doctrine
+            - Symfony
+        ProviderUI:
+            - SharedApplication
+            - ProviderApplication
+            - ProviderDomain
+            - SharedUI
+            - SharedDomain
             - Symfony
         # External
         Symfony:

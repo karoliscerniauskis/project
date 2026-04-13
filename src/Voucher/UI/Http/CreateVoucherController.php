@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Provider\UI\Http;
+namespace App\Voucher\UI\Http;
 
-use App\Provider\Application\Command\CreateProvider;
-use App\Provider\UI\Http\Request\CreateProviderRequest;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\AuthenticatedUser;
 use App\Shared\UI\Http\JsonDtoFactory;
+use App\Voucher\Application\Command\CreateVoucher;
+use App\Voucher\UI\Http\Request\CreateVoucherRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class CreateProviderController extends AbstractController
+final class CreateVoucherController extends AbstractController
 {
     public function __construct(
         private readonly CommandBus $commandBus,
@@ -23,8 +23,8 @@ final class CreateProviderController extends AbstractController
     ) {
     }
 
-    #[Route('/api/provider', name: 'api_provider_create', methods: ['POST'])]
-    public function __invoke(Request $request): JsonResponse
+    #[Route('/api/providers/{providerId}/vouchers', name: 'api_provider_voucher_create', methods: ['POST'])]
+    public function __invoke(string $providerId, Request $request): JsonResponse
     {
         $user = $this->getUser();
 
@@ -32,9 +32,9 @@ final class CreateProviderController extends AbstractController
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
         }
 
-        /** @var CreateProviderRequest $dto */
-        $dto = $this->jsonDtoFactory->create($request, CreateProviderRequest::class);
-        $this->commandBus->dispatch(new CreateProvider($user->getId(), $dto->name));
+        /** @var CreateVoucherRequest $dto */
+        $dto = $this->jsonDtoFactory->create($request, CreateVoucherRequest::class);
+        $this->commandBus->dispatch(new CreateVoucher($providerId, $user->getId(), $dto->issuedToEmail));
 
         return new JsonResponse(status: Response::HTTP_CREATED);
     }
