@@ -40,7 +40,7 @@ final class Voucher extends AbstractAggregateRoot
         $self->providerId = $providerId;
         $self->createdByProviderUserId = $createdByProviderUserId;
         $self->issuedToEmail = $issuedToEmail;
-        $self->record(new VoucherCreated($occurredOn));
+        $self->record(new VoucherCreated($providerId->toString(), $issuedToEmail, $occurredOn));
 
         return $self;
     }
