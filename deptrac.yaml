@@ -203,8 +203,10 @@ deptrac:
             - Doctrine
             - Hidehalo
         VoucherUI:
+            - VoucherDomain
             - VoucherApplication
             - SharedApplication
+            - SharedDomain
             - SharedUI
             - Symfony
         # Provider

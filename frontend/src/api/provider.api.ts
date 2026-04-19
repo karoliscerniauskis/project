@@ -20,6 +20,13 @@ export type ProviderInvitationView = {
     expiresAt: string
 }
 
+export type ProviderVoucherView = {
+    code: string
+    issuedToEmail: string
+    claimedByUser: string | null
+    createdByUser: string
+}
+
 export type ProvidersResponse = {
     data: ProviderView[]
 }
@@ -34,6 +41,10 @@ export type ProviderUsersResponse = {
 
 export type ProviderInvitationsResponse = {
     data: ProviderInvitationView[]
+}
+
+export type ProviderVouchersResponse = {
+    data: ProviderVoucherView[]
 }
 
 export type CreateProviderPayload = {
@@ -68,6 +79,15 @@ export function getProvider(id: string): Promise<ProviderResponse> {
 
 export function getProviderUsers(id: string): Promise<ProviderUsersResponse> {
     return apiRequest<ProviderUsersResponse>(`/api/providers/${id}/users`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
+export function getProviderVouchers(id: string): Promise<ProviderVouchersResponse> {
+    return apiRequest<ProviderVouchersResponse>(`/api/providers/${id}/vouchers`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
