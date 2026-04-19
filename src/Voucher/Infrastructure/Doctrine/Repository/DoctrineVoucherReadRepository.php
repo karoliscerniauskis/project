@@ -6,6 +6,8 @@ namespace App\Voucher\Infrastructure\Doctrine\Repository;
 
 use App\Shared\Domain\Id\ProviderId;
 use App\Voucher\Domain\Repository\VoucherReadRepository;
+use App\Voucher\Domain\View\MyVouchersView;
+use App\Voucher\Domain\View\MyVoucherView;
 use App\Voucher\Domain\View\ProviderVouchersView;
 use App\Voucher\Domain\View\ProviderVoucherView;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
@@ -64,5 +66,37 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
         }
 
         return new ProviderVouchersView($vouchers);
+    }
+
+    public function findByUserEmail(string $email): MyVouchersView
+    {
+        /** @var array<int, array{code: string, providerName: string}> $rows */
+        $rows = $this->entityManager->createQueryBuilder()
+            ->select(
+                'v.code AS code',
+                'p.name AS providerName',
+            )
+            ->from(VoucherRecord::class, 'v')
+            ->innerJoin(
+                'App\\Provider\\Infrastructure\\Doctrine\\Entity\\ProviderRecord',
+                'p',
+                'WITH',
+                'p.id = v.providerId',
+            )
+            ->andWhere('v.issuedToEmail = :email')
+            ->setParameter('email', $email)
+            ->getQuery()
+            ->getArrayResult();
+
+        $vouchers = [];
+
+        foreach ($rows as $row) {
+            $vouchers[] = new MyVoucherView(
+                $row['code'],
+                $row['providerName'],
+            );
+        }
+
+        return new MyVouchersView($vouchers);
     }
 }
