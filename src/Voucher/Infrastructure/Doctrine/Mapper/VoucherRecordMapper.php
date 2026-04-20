@@ -9,6 +9,7 @@ use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Entity\Voucher;
+use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 
 final readonly class VoucherRecordMapper
@@ -24,6 +25,7 @@ final readonly class VoucherRecordMapper
             ProviderUserId::fromString($record->getCreatedByProviderUserId()),
             $record->getIssuedToEmail(),
             $claimedByUserId !== null ? UserId::fromString($claimedByUserId) : null,
+            VoucherStatus::from($record->getStatus()),
         );
     }
 
@@ -35,6 +37,7 @@ final readonly class VoucherRecordMapper
             $voucher->getProviderId()->toString(),
             $voucher->getCreatedByProviderUserId()->toString(),
             $voucher->getIssuedToEmail(),
+            $voucher->getStatus()->value,
             $voucher->getClaimedByUserId()?->toString(),
         );
     }

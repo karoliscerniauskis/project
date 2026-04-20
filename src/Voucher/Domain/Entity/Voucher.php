@@ -9,6 +9,7 @@ use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\VoucherId;
+use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Domain\Event\VoucherCreated;
 use DateTimeImmutable;
 
@@ -20,6 +21,7 @@ final class Voucher extends AbstractAggregateRoot
     private ProviderUserId $createdByProviderUserId;
     private string $issuedToEmail;
     private ?UserId $claimedByUserId = null;
+    private VoucherStatus $status;
 
     private function __construct()
     {
@@ -40,6 +42,7 @@ final class Voucher extends AbstractAggregateRoot
         $self->providerId = $providerId;
         $self->createdByProviderUserId = $createdByProviderUserId;
         $self->issuedToEmail = $issuedToEmail;
+        $self->status = VoucherStatus::Active;
         $self->record(new VoucherCreated($providerId->toString(), $issuedToEmail, $occurredOn));
 
         return $self;
@@ -52,6 +55,7 @@ final class Voucher extends AbstractAggregateRoot
         ProviderUserId $createdByProviderUserId,
         string $issuedToEmail,
         ?UserId $claimedByUserId,
+        VoucherStatus $status,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -60,6 +64,7 @@ final class Voucher extends AbstractAggregateRoot
         $self->createdByProviderUserId = $createdByProviderUserId;
         $self->issuedToEmail = $issuedToEmail;
         $self->claimedByUserId = $claimedByUserId;
+        $self->status = $status;
 
         return $self;
     }
@@ -92,5 +97,25 @@ final class Voucher extends AbstractAggregateRoot
     public function getClaimedByUserId(): ?UserId
     {
         return $this->claimedByUserId;
+    }
+
+    public function getStatus(): VoucherStatus
+    {
+        return $this->status;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === VoucherStatus::Active;
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->status === VoucherStatus::Canceled;
+    }
+
+    public function isUsed(): bool
+    {
+        return $this->status === VoucherStatus::Used;
     }
 }

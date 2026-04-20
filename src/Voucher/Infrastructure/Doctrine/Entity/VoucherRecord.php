@@ -29,12 +29,16 @@ class VoucherRecord
     #[ORM\Column(type: 'uuid', nullable: true)]
     private ?string $claimedByUserId;
 
+    #[ORM\Column(type: 'string')]
+    private string $status;
+
     public function __construct(
         string $id,
         string $code,
         string $providerId,
         string $createdByProviderUserId,
         string $issuedToEmail,
+        string $status,
         ?string $claimedByUserId = null,
     ) {
         $this->id = $id;
@@ -42,6 +46,7 @@ class VoucherRecord
         $this->providerId = $providerId;
         $this->createdByProviderUserId = $createdByProviderUserId;
         $this->issuedToEmail = $issuedToEmail;
+        $this->status = $status;
         $this->claimedByUserId = $claimedByUserId;
     }
 
@@ -73,5 +78,10 @@ class VoucherRecord
     public function getClaimedByUserId(): ?string
     {
         return $this->claimedByUserId;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
     }
 }
