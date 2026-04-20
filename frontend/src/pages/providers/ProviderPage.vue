@@ -25,6 +25,10 @@
                 </RouterLink>
             </p>
 
+            <p>
+                <RouterLink :to="`/providers/${provider.id}/vouchers/validate`">Validate voucher</RouterLink>
+            </p>
+
             <h3>Provider users</h3>
             <p v-if="usersLoading">Loading users...</p>
             <p v-else-if="usersError">{{ usersError }}</p>
