@@ -11,7 +11,9 @@ use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Domain\Event\VoucherCreated;
+use App\Voucher\Domain\Event\VoucherUsed;
 use DateTimeImmutable;
+use LogicException;
 
 final class Voucher extends AbstractAggregateRoot
 {
@@ -104,6 +106,11 @@ final class Voucher extends AbstractAggregateRoot
         return $this->status;
     }
 
+    public function setStatus(VoucherStatus $status): void
+    {
+        $this->status = $status;
+    }
+
     public function isActive(): bool
     {
         return $this->status === VoucherStatus::Active;
@@ -117,5 +124,19 @@ final class Voucher extends AbstractAggregateRoot
     public function isUsed(): bool
     {
         return $this->status === VoucherStatus::Used;
+    }
+
+    public function use(DateTimeImmutable $occurredOn): void
+    {
+        if (!$this->isActive()) {
+            throw new LogicException('Voucher is not active.');
+        }
+
+        $this->status = VoucherStatus::Used;
+        $this->record(new VoucherUsed(
+            $this->code,
+            $this->issuedToEmail,
+            $occurredOn,
+        ));
     }
 }

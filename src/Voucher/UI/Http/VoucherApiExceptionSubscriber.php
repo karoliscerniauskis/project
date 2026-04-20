@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Voucher\UI\Http;
 
 use App\Voucher\Application\Exception\ProviderUserNotFound;
+use App\Voucher\Application\Exception\VoucherNotActive;
+use App\Voucher\Application\Exception\VoucherNotFound;
+use App\Voucher\Application\Exception\VoucherProviderMismatch;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,13 +25,38 @@ final readonly class VoucherApiExceptionSubscriber implements EventSubscriberInt
 
     public function onException(ExceptionEvent $event): void
     {
-        $throwable = $event->getThrowable();
-
-        if ($throwable instanceof ProviderUserNotFound) {
+        if ($event->getThrowable()->getPrevious() instanceof ProviderUserNotFound) {
             $event->setResponse(new JsonResponse([
-                'message' => $throwable->getMessage(),
-                'errors' => $throwable->getErrors(),
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
             ], Response::HTTP_FORBIDDEN));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof VoucherNotFound) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_NOT_FOUND));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof VoucherProviderMismatch) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_FORBIDDEN));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof VoucherNotActive) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_CONFLICT));
 
             return;
         }

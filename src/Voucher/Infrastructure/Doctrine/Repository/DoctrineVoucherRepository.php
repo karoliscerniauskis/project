@@ -20,8 +20,15 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository
 
     public function save(Voucher $voucher): void
     {
-        $voucherRecord = $this->voucherRecordMapper->toRecord($voucher);
-        $this->entityManager->persist($voucherRecord);
+        $existing = $this->entityManager->getRepository(VoucherRecord::class)->find($voucher->getId()->toString());
+
+        if ($existing instanceof VoucherRecord) {
+            $this->voucherRecordMapper->syncRecord($voucher, $existing);
+
+            return;
+        }
+
+        $this->entityManager->persist($this->voucherRecordMapper->toRecord($voucher));
     }
 
     public function findByCode(string $code): ?Voucher
