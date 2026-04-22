@@ -19,6 +19,7 @@
                     <th>Issued to</th>
                     <th>Claimed by user</th>
                     <th>Created by</th>
+                    <th>Status</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -27,6 +28,7 @@
                     <td>{{ voucher.issuedToEmail }}</td>
                     <td>{{ voucher.claimedByUser ?? '-' }}</td>
                     <td>{{ voucher.createdByUser }}</td>
+                    <td>{{ voucher.status }}</td>
                 </tr>
                 </tbody>
             </table>

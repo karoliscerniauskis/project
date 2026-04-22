@@ -25,6 +25,7 @@ export type ProviderVoucherView = {
     issuedToEmail: string
     claimedByUser: string | null
     createdByUser: string
+    status: string
 }
 
 export type ProvidersResponse = {

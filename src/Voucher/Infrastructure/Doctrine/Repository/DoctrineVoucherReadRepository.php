@@ -22,13 +22,14 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
     public function findByProviderId(ProviderId $providerId): ProviderVouchersView
     {
-        /** @var array<int, array{code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string}> $rows */
+        /** @var array<int, array{code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.code AS code',
                 'v.issuedToEmail AS issuedToEmail',
                 'claimedUser.email AS claimedByUser',
                 'createdUser.email AS createdByUser',
+                'v.status AS status',
             )
             ->from(VoucherRecord::class, 'v')
             ->leftJoin(
@@ -62,6 +63,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 $row['issuedToEmail'],
                 $row['claimedByUser'],
                 $row['createdByUser'],
+                $row['status'],
             );
         }
 
