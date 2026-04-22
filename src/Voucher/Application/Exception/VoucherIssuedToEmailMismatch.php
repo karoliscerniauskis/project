@@ -7,13 +7,13 @@ namespace App\Voucher\Application\Exception;
 use App\Shared\Application\Exception\AbstractApiException;
 use App\Shared\Domain\Id\VoucherId;
 
-final class VoucherNotFound extends AbstractApiException
+final class VoucherIssuedToEmailMismatch extends AbstractApiException
 {
     private function __construct(string $value, string $field)
     {
         parent::__construct(
-            'Voucher was not found.',
-            [self::getError($field, sprintf('Voucher "%s" was not found.', $value))],
+            'Voucher cannot be claimed by this user.',
+            [self::getError($field, sprintf('Voucher "%s" is not assigned to this email.', $value))],
         );
     }
 

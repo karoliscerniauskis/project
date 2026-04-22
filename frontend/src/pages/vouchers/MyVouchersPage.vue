@@ -19,6 +19,11 @@
                 <tr v-for="voucher in vouchers" :key="voucher.code">
                     <td>{{ voucher.code }}</td>
                     <td>{{ voucher.providerName }}</td>
+                    <td>
+                        <RouterLink :to="`/vouchers/${voucher.id}/claim`">
+                            Claim
+                        </RouterLink>
+                    </td>
                 </tr>
                 </tbody>
             </table>

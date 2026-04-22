@@ -11,6 +11,7 @@ import CreateVoucherPage from '@/pages/providers/CreateVoucherPage.vue'
 import ProviderVouchersPage from '@/pages/providers/ProviderVouchersPage.vue'
 import MyVouchersPage from '@/pages/vouchers/MyVouchersPage.vue'
 import ValidateVoucherPage from '@/pages/providers/ValidateVoucherPage.vue'
+import ClaimVoucherPage from '@/pages/vouchers/ClaimVoucherPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -79,6 +80,12 @@ export const router = createRouter({
             path: '/providers/:id/vouchers/validate',
             name: 'provider-voucher-validate',
             component: ValidateVoucherPage,
+            props: true,
+        },
+        {
+            path: '/vouchers/:voucherId/claim',
+            name: 'voucher-claim',
+            component: ClaimVoucherPage,
             props: true,
         },
     ],

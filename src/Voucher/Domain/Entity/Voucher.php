@@ -11,6 +11,7 @@ use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Domain\Event\VoucherCanceled;
+use App\Voucher\Domain\Event\VoucherClaimed;
 use App\Voucher\Domain\Event\VoucherCreated;
 use App\Voucher\Domain\Event\VoucherUsed;
 use DateTimeImmutable;
@@ -125,6 +126,24 @@ final class Voucher extends AbstractAggregateRoot
     public function isUsed(): bool
     {
         return $this->status === VoucherStatus::Used;
+    }
+
+    public function claim(UserId $claimedByUserId, DateTimeImmutable $occurredOn): void
+    {
+        if (!$this->isActive()) {
+            throw new LogicException('Voucher is not active.');
+        }
+
+        if ($this->claimedByUserId !== null) {
+            throw new LogicException('Voucher is already claimed.');
+        }
+
+        $this->claimedByUserId = $claimedByUserId;
+        $this->record(new VoucherClaimed(
+            $this->code,
+            $this->issuedToEmail,
+            $occurredOn,
+        ));
     }
 
     public function use(DateTimeImmutable $occurredOn): void

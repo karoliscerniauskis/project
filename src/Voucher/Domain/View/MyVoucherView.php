@@ -7,22 +7,24 @@ namespace App\Voucher\Domain\View;
 use App\Shared\Domain\View\ArrayableView;
 
 /**
- * @implements ArrayableView<array{code: string, providerName: string}>
+ * @implements ArrayableView<array{id: string, code: string, providerName: string}>
  */
 final readonly class MyVoucherView implements ArrayableView
 {
     public function __construct(
+        private string $id,
         private string $code,
         private string $providerName,
     ) {
     }
 
     /**
-     * @return array{code: string, providerName: string}
+     * @return array{id: string, code: string, providerName: string}
      */
     public function toArray(): array
     {
         return [
+            'id' => $this->id,
             'code' => $this->code,
             'providerName' => $this->providerName,
         ];

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Voucher\Infrastructure\Doctrine\Repository;
 
+use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Entity\Voucher;
 use App\Voucher\Domain\Repository\VoucherRepository;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
@@ -34,6 +35,17 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository
     public function findByCode(string $code): ?Voucher
     {
         $voucherRecord = $this->entityManager->getRepository(VoucherRecord::class)->findOneBy(['code' => $code]);
+
+        if (!$voucherRecord instanceof VoucherRecord) {
+            return null;
+        }
+
+        return $this->voucherRecordMapper->toDomain($voucherRecord);
+    }
+
+    public function findById(VoucherId $id): ?Voucher
+    {
+        $voucherRecord = $this->entityManager->getRepository(VoucherRecord::class)->find($id->toString());
 
         if (!$voucherRecord instanceof VoucherRecord) {
             return null;
