@@ -17,6 +17,6 @@ final readonly class GetMyVouchersHandler
 
     public function __invoke(GetMyVouchers $query): MyVouchersView
     {
-        return $this->voucherReadRepository->findByUserEmail($query->getUserEmail());
+        return $this->voucherReadRepository->findByUserEmailAndUserId($query->getUserEmail(), $query->getUserId());
     }
 }

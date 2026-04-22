@@ -91,4 +91,11 @@ class VoucherRecord
 
         return $this;
     }
+
+    public function setClaimedByUserId(?string $claimedByUserId): self
+    {
+        $this->claimedByUserId = $claimedByUserId;
+
+        return $this;
+    }
 }

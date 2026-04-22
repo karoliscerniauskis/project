@@ -1,7 +1,8 @@
 import { apiRequest } from './http'
 
 export type MyVoucherView = {
-    code: string
+    id: string
+    code: string | null
     providerName: string
 }
 
@@ -36,6 +37,15 @@ export function validateVoucher(providerId: string, payload: ValidateVoucherPayl
 export function getMyVouchers(): Promise<MyVouchersResponse> {
     return apiRequest<MyVouchersResponse>('/api/me/vouchers', {
         method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
+export function claimVoucher(voucherId: string): Promise<void> {
+    return apiRequest<void>(`/api/vouchers/${encodeURIComponent(voucherId)}/claim`, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },

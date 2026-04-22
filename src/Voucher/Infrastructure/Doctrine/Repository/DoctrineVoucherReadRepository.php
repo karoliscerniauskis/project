@@ -12,6 +12,7 @@ use App\Voucher\Domain\View\ProviderVouchersView;
 use App\Voucher\Domain\View\ProviderVoucherView;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Uid\UuidV7;
 
 final readonly class DoctrineVoucherReadRepository implements VoucherReadRepository
 {
@@ -70,12 +71,14 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
         return new ProviderVouchersView($vouchers);
     }
 
-    public function findByUserEmail(string $email): MyVouchersView
+    public function findByUserEmailAndUserId(string $email, string $userId): MyVouchersView
     {
-        /** @var array<int, array{code: string, providerName: string}> $rows */
+        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
+                'v.id AS id',
                 'v.code AS code',
+                'v.claimedByUserId AS claimedByUserId',
                 'p.name AS providerName',
             )
             ->from(VoucherRecord::class, 'v')
@@ -94,7 +97,8 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
         foreach ($rows as $row) {
             $vouchers[] = new MyVoucherView(
-                $row['code'],
+                $row['id']->toRfc4122(),
+                $row['claimedByUserId']?->toRfc4122() === $userId ? $row['code'] : null,
                 $row['providerName'],
             );
         }

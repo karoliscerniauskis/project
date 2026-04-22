@@ -31,7 +31,7 @@ final class GetMyVouchersController extends AbstractController
 
         /** @var MyVouchersView $myVouchersView */
         $myVouchersView = $this->queryBus->ask(
-            new GetMyVouchers($user->getUserIdentifier()),
+            new GetMyVouchers($user->getUserIdentifier(), $user->getId()),
         );
 
         return new JsonResponse(['data' => $myVouchersView->toArray()]);

@@ -8,7 +8,7 @@ use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Infrastructure\Doctrine\Outbox\AbstractOutboxDomainEventFactory;
 use App\Shared\Infrastructure\Doctrine\Outbox\Entity\OutboxMessageRecord;
 use App\Shared\Infrastructure\Doctrine\Outbox\OutboxDomainEventFactory;
-use App\Voucher\Domain\Event\VoucherActivated;
+use App\Voucher\Domain\Event\VoucherClaimed;
 use App\Voucher\Domain\Event\VoucherCreated;
 use App\Voucher\Domain\Event\VoucherDeactivated;
 use App\Voucher\Domain\Event\VoucherExpired;
@@ -19,7 +19,7 @@ final readonly class VoucherOutboxDomainEventFactory extends AbstractOutboxDomai
     public function supports(string $eventName): bool
     {
         return in_array($eventName, [
-            VoucherActivated::class,
+            VoucherClaimed::class,
             VoucherCreated::class,
             VoucherDeactivated::class,
             VoucherExpired::class,
@@ -29,7 +29,9 @@ final readonly class VoucherOutboxDomainEventFactory extends AbstractOutboxDomai
     public function fromRecord(OutboxMessageRecord $record): DomainEvent
     {
         return match ($record->getEventName()) {
-            VoucherActivated::class => new VoucherActivated(
+            VoucherClaimed::class => new VoucherClaimed(
+                $this->stringPayloadValue($record->getPayload(), 'voucherCode'),
+                $this->stringPayloadValue($record->getPayload(), 'issuedToEmail'),
                 $record->getOccurredAt(),
             ),
             VoucherCreated::class => new VoucherCreated(

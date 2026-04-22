@@ -16,9 +16,15 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="voucher in vouchers" :key="voucher.code">
-                    <td>{{ voucher.code }}</td>
+                <tr v-for="voucher in vouchers" :key="voucher.id">
+                    <td>{{ voucher.code ?? 'Claim to reveal' }}</td>
                     <td>{{ voucher.providerName }}</td>
+                    <td>
+                        <RouterLink v-if="voucher.code === null" :to="`/vouchers/${voucher.id}/claim`">
+                            Claim
+                        </RouterLink>
+                        <span v-else>Claimed</span>
+                    </td>
                 </tr>
                 </tbody>
             </table>

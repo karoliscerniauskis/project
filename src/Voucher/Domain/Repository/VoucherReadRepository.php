@@ -12,5 +12,5 @@ interface VoucherReadRepository
 {
     public function findByProviderId(ProviderId $providerId): ProviderVouchersView;
 
-    public function findByUserEmail(string $email): MyVouchersView;
+    public function findByUserEmailAndUserId(string $email, string $userId): MyVouchersView;
 }
