@@ -96,6 +96,15 @@ export function getProviderVouchers(id: string): Promise<ProviderVouchersRespons
     })
 }
 
+export function deactivateProviderVoucher(providerId: string, code: string): Promise<void> {
+    return apiRequest<void>(`/api/providers/${providerId}/vouchers/${encodeURIComponent(code)}/deactivate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
 export function createProvider(payload: CreateProviderPayload): Promise<void> {
     return apiRequest<void>('/api/provider', {
         method: 'POST',

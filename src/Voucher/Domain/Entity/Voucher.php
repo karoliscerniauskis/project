@@ -10,6 +10,7 @@ use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Enum\VoucherStatus;
+use App\Voucher\Domain\Event\VoucherCanceled;
 use App\Voucher\Domain\Event\VoucherCreated;
 use App\Voucher\Domain\Event\VoucherUsed;
 use DateTimeImmutable;
@@ -134,6 +135,20 @@ final class Voucher extends AbstractAggregateRoot
 
         $this->status = VoucherStatus::Used;
         $this->record(new VoucherUsed(
+            $this->code,
+            $this->issuedToEmail,
+            $occurredOn,
+        ));
+    }
+
+    public function cancel(DateTimeImmutable $occurredOn): void
+    {
+        if (!$this->isActive()) {
+            throw new LogicException('Voucher is not active.');
+        }
+
+        $this->status = VoucherStatus::Canceled;
+        $this->record(new VoucherCanceled(
             $this->code,
             $this->issuedToEmail,
             $occurredOn,
