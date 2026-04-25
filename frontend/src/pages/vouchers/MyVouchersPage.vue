@@ -20,9 +20,14 @@
                     <td>{{ voucher.code ?? 'Claim to reveal' }}</td>
                     <td>{{ voucher.providerName }}</td>
                     <td>
-                        <RouterLink v-if="voucher.code === null" :to="`/vouchers/${voucher.id}/claim`">
-                            Claim
-                        </RouterLink>
+                        <template v-if="voucher.code === null">
+                            <RouterLink :to="`/vouchers/${voucher.id}/claim`">
+                                Claim
+                            </RouterLink>
+                            <RouterLink :to="`/vouchers/${voucher.id}/transfer`">
+                                Transfer
+                            </RouterLink>
+                        </template>
                         <span v-else>Claimed</span>
                     </td>
                 </tr>

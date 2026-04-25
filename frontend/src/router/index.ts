@@ -12,6 +12,7 @@ import ProviderVouchersPage from '@/pages/providers/ProviderVouchersPage.vue'
 import MyVouchersPage from '@/pages/vouchers/MyVouchersPage.vue'
 import ValidateVoucherPage from '@/pages/providers/ValidateVoucherPage.vue'
 import ClaimVoucherPage from '@/pages/vouchers/ClaimVoucherPage.vue'
+import TransferVoucherPage from '@/pages/vouchers/TransferVoucherPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -86,6 +87,12 @@ export const router = createRouter({
             path: '/vouchers/:voucherId/claim',
             name: 'voucher-claim',
             component: ClaimVoucherPage,
+            props: true,
+        },
+        {
+            path: '/vouchers/:voucherId/transfer',
+            name: 'voucher-transfer',
+            component: TransferVoucherPage,
             props: true,
         },
     ],

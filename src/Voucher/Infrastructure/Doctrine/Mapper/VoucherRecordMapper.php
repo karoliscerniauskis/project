@@ -46,5 +46,6 @@ final readonly class VoucherRecordMapper
     {
         $record->setStatus($voucher->getStatus()->value);
         $record->setClaimedByUserId($voucher->getClaimedByUserId()?->toString());
+        $record->setIssuedToEmail($voucher->getIssuedToEmail());
     }
 }

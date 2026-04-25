@@ -98,4 +98,11 @@ class VoucherRecord
 
         return $this;
     }
+
+    public function setIssuedToEmail(string $issuedToEmail): self
+    {
+        $this->issuedToEmail = $issuedToEmail;
+
+        return $this;
+    }
 }

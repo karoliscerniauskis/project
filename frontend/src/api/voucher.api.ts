@@ -24,6 +24,10 @@ export type ValidateVoucherResponse = {
     data: VoucherValidationView
 }
 
+export type TransferVoucherPayload = {
+    recipientEmail: string
+}
+
 export function validateVoucher(providerId: string, payload: ValidateVoucherPayload): Promise<ValidateVoucherResponse> {
     return apiRequest<ValidateVoucherResponse>(`/api/providers/${providerId}/vouchers/validate`, {
         method: 'POST',
@@ -49,5 +53,15 @@ export function claimVoucher(voucherId: string): Promise<void> {
         headers: {
             'Content-Type': 'application/json',
         },
+    })
+}
+
+export function transferVoucher(voucherId: string, payload: TransferVoucherPayload): Promise<void> {
+    return apiRequest<void>(`/api/vouchers/${encodeURIComponent(voucherId)}/transfer`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
     })
 }

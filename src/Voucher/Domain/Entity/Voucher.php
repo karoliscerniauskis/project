@@ -13,6 +13,7 @@ use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Domain\Event\VoucherCanceled;
 use App\Voucher\Domain\Event\VoucherClaimed;
 use App\Voucher\Domain\Event\VoucherCreated;
+use App\Voucher\Domain\Event\VoucherTransferred;
 use App\Voucher\Domain\Event\VoucherUsed;
 use DateTimeImmutable;
 use LogicException;
@@ -170,6 +171,28 @@ final class Voucher extends AbstractAggregateRoot
         $this->record(new VoucherCanceled(
             $this->code,
             $this->issuedToEmail,
+            $occurredOn,
+        ));
+    }
+
+    public function transfer(string $issuedToEmail, string $transferredFromEmail, DateTimeImmutable $occurredOn): void
+    {
+        if (!$this->isActive()) {
+            throw new LogicException('Voucher is not active.');
+        }
+
+        if ($this->claimedByUserId !== null) {
+            throw new LogicException('Voucher is already claimed.');
+        }
+
+        if ($this->issuedToEmail !== $transferredFromEmail) {
+            throw new LogicException('Voucher is not issued to the user.');
+        }
+
+        $this->issuedToEmail = $issuedToEmail;
+        $this->record(new VoucherTransferred(
+            $transferredFromEmail,
+            $issuedToEmail,
             $occurredOn,
         ));
     }
