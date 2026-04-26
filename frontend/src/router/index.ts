@@ -13,6 +13,7 @@ import MyVouchersPage from '@/pages/vouchers/MyVouchersPage.vue'
 import ValidateVoucherPage from '@/pages/providers/ValidateVoucherPage.vue'
 import ClaimVoucherPage from '@/pages/vouchers/ClaimVoucherPage.vue'
 import TransferVoucherPage from '@/pages/vouchers/TransferVoucherPage.vue'
+import NotificationsPage from '@/pages/notifications/NotificationsPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -94,6 +95,11 @@ export const router = createRouter({
             name: 'voucher-transfer',
             component: TransferVoucherPage,
             props: true,
+        },
+        {
+            path: '/me/notifications',
+            name: 'my-notifications',
+            component: NotificationsPage,
         },
     ],
 })

@@ -3,6 +3,7 @@
         <nav>
             <RouterLink to="/providers">Providers</RouterLink>
             <RouterLink to="/me/vouchers">My vouchers</RouterLink>
+            <RouterLink to="/me/notifications">Notifications</RouterLink>
             <RouterLink to="/login">Login</RouterLink>
             <RouterLink to="/register">Register</RouterLink>
             <RouterLink to="/logout">Logout</RouterLink>

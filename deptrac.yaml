@@ -162,6 +162,7 @@ deptrac:
         SharedUI:
             - Symfony
             - SharedApplication
+            - SharedDomain
         # Auth
         AuthDomain:
             - SharedDomain
