@@ -28,7 +28,10 @@ export type TransferVoucherPayload = {
     recipientEmail: string
 }
 
-export function validateVoucher(providerId: string, payload: ValidateVoucherPayload): Promise<ValidateVoucherResponse> {
+export function validateVoucher(
+    providerId: string,
+    payload: ValidateVoucherPayload
+): Promise<ValidateVoucherResponse> {
     return apiRequest<ValidateVoucherResponse>(`/api/providers/${providerId}/vouchers/validate`, {
         method: 'POST',
         headers: {

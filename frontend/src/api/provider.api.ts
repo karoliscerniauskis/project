@@ -97,12 +97,15 @@ export function getProviderVouchers(id: string): Promise<ProviderVouchersRespons
 }
 
 export function deactivateProviderVoucher(providerId: string, code: string): Promise<void> {
-    return apiRequest<void>(`/api/providers/${providerId}/vouchers/${encodeURIComponent(code)}/deactivate`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
+    return apiRequest<void>(
+        `/api/providers/${providerId}/vouchers/${encodeURIComponent(code)}/deactivate`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+    )
 }
 
 export function createProvider(payload: CreateProviderPayload): Promise<void> {
@@ -115,7 +118,10 @@ export function createProvider(payload: CreateProviderPayload): Promise<void> {
     })
 }
 
-export function inviteProviderUser(providerId: string, payload: InviteProviderUserPayload): Promise<void> {
+export function inviteProviderUser(
+    providerId: string,
+    payload: InviteProviderUserPayload
+): Promise<void> {
     return apiRequest<void>(`/api/provider/${providerId}/invite`, {
         method: 'POST',
         headers: {
@@ -135,21 +141,27 @@ export function getProviderInvitations(id: string): Promise<ProviderInvitationsR
 }
 
 export function cancelProviderInvitation(providerId: string, email: string): Promise<void> {
-    return apiRequest<void>(`/api/providers/${providerId}/invitations/${encodeURIComponent(email)}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
+    return apiRequest<void>(
+        `/api/providers/${providerId}/invitations/${encodeURIComponent(email)}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+    )
 }
 
 export function removeProviderUser(providerId: string, providerUserId: string): Promise<void> {
-    return apiRequest<void>(`/api/providers/${providerId}/users/${encodeURIComponent(providerUserId)}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
+    return apiRequest<void>(
+        `/api/providers/${providerId}/users/${encodeURIComponent(providerUserId)}`,
+        {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }
+    )
 }
 
 export function createVoucher(providerId: string, payload: CreateVoucherPayload): Promise<void> {

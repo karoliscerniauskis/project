@@ -22,6 +22,7 @@ export function login(payload: AuthCredentials): Promise<LoginResponse> {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+        skipRefresh: true,
     })
 }
 
@@ -32,6 +33,7 @@ export function register(payload: AuthCredentials): Promise<void> {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
+        skipRefresh: true,
     })
 }
 
@@ -53,7 +55,7 @@ export async function refreshToken(payload: { refresh_token: string }): Promise<
     const data = await response.json().catch(() => null)
 
     if (!response.ok) {
-        const message = typeof data === 'string' ? data : data?.message ?? 'Request failed'
+        const message = typeof data === 'string' ? data : (data?.message ?? 'Request failed')
         throw new Error(message)
     }
 

@@ -1,7 +1,9 @@
 <template>
     <div>
         <p v-if="loading">Logging out...</p>
-        <p v-else>{{ message }}</p>
+        <p v-else>
+            {{ message }}
+        </p>
     </div>
 </template>
 

@@ -7,7 +7,9 @@
                 <RouterLink to="/login">Go to login</RouterLink>
             </p>
         </template>
-        <p v-else-if="error">{{ error }}</p>
+        <p v-else-if="error">
+            {{ error }}
+        </p>
     </div>
 </template>
 

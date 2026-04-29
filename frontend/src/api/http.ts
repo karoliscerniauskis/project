@@ -24,7 +24,7 @@ export class ApiError extends Error {
 
 export async function apiRequest<TResponse>(
     url: string,
-    options: ApiRequestOptions,
+    options: ApiRequestOptions
 ): Promise<TResponse> {
     const headers = new Headers(options.headers)
     const token = getAccessToken()
@@ -33,14 +33,14 @@ export async function apiRequest<TResponse>(
         headers.set('Authorization', `Bearer ${token}`)
     }
 
-    const response = await fetch(url, {...options, headers})
+    const response = await fetch(url, { ...options, headers })
 
     const contentType = response.headers.get('content-type') ?? ''
     const data = contentType.includes('application/json')
         ? await response.json().catch(() => null)
         : await response.text().catch(() => null)
 
-    if (response.status === 401) {
+    if (response.status === 401 && !options.skipRefresh) {
         try {
             refreshPromise ??= refreshAccessToken()
             const newToken = await refreshPromise
@@ -66,11 +66,14 @@ export async function apiRequest<TResponse>(
         throw new ApiError('Session expired', 401, data)
     }
 
+    if (response.status === 401) {
+        const message = typeof data === 'string' ? data : (data?.message ?? 'Invalid credentials')
+
+        throw new ApiError(message, 401, data)
+    }
+
     if (!response.ok) {
-        const message =
-            typeof data === 'string'
-                ? data
-                : data?.message ?? 'Request failed'
+        const message = typeof data === 'string' ? data : (data?.message ?? 'Request failed')
 
         throw new ApiError(message, response.status, data)
     }
@@ -132,10 +135,7 @@ async function parseResponse<TResponse>(response: Response): Promise<TResponse> 
         : await response.text().catch(() => null)
 
     if (!response.ok) {
-        const message =
-            typeof data === 'string'
-                ? data
-                : data?.message ?? 'Request failed'
+        const message = typeof data === 'string' ? data : (data?.message ?? 'Request failed')
 
         throw new ApiError(message, response.status, data)
     }

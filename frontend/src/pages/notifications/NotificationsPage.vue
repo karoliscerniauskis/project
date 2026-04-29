@@ -1,124 +1,152 @@
 <template>
-    <div class="notifications-page">
-        <div class="notifications-header">
-            <div>
-                <h1>Notifications</h1>
-                <p class="muted">
-                    {{ unreadCount }} unread notification{{ unreadCount === 1 ? '' : 's' }}
-                </p>
+    <main class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-900">Notifications</h1>
+                        <p class="text-slate-600 mt-1">
+                            {{ unreadCount }} unread notification{{ unreadCount === 1 ? '' : 's' }}
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        :disabled="loading"
+                        class="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+                        @click="loadNotifications"
+                    >
+                        Refresh
+                    </button>
+                </div>
             </div>
 
-            <button type="button" @click="loadNotifications" :disabled="loading">
-                Refresh
-            </button>
-        </div>
+            <LoadingSpinner v-if="loading" message="Loading notifications..." />
 
-        <p v-if="loading">Loading...</p>
-        <p v-else-if="error" class="error">{{ error }}</p>
+            <ErrorMessage v-else-if="error" :message="error" />
 
-        <template v-else>
-            <p v-if="notifications.length === 0">No notifications found.</p>
+            <EmptyState
+                v-else-if="notifications.length === 0"
+                title="No notifications"
+                description="You're all caught up!"
+            >
+                <template #icon>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                </template>
+            </EmptyState>
 
-            <ul v-else class="notification-list">
+            <ul v-else class="space-y-4">
                 <li
                     v-for="notification in notifications"
                     :key="notification.id"
-                    class="notification-card"
-                    :class="{ unread: notification.readAt === null }"
+                    class="bg-white rounded-xl shadow-sm overflow-hidden transition-all"
+                    :class="notification.readAt === null ? 'ring-2 ring-blue-200' : ''"
                 >
-                    <div class="notification-content">
-                        <div class="notification-title-row">
-                            <h2>{{ notification.title }}</h2>
-                            <span v-if="notification.readAt === null" class="badge">Unread</span>
+                    <div class="p-6">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3">
+                                    <h2 class="text-lg font-semibold text-slate-900">
+                                        {{ notification.title }}
+                                    </h2>
+                                    <span
+                                        v-if="notification.readAt === null"
+                                        class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold"
+                                    >
+                                        Unread
+                                    </span>
+                                </div>
+                            </div>
+                            <button
+                                v-if="notification.readAt === null"
+                                type="button"
+                                :disabled="markingId === notification.id"
+                                class="ml-4 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                                @click="markAsRead(notification.id)"
+                            >
+                                {{ markingId === notification.id ? 'Marking...' : 'Mark as read' }}
+                            </button>
                         </div>
 
-                        <p>{{ notification.message }}</p>
+                        <p class="text-slate-700 mb-3">
+                            {{ notification.message }}
+                        </p>
 
-                        <p class="muted">
+                        <p class="text-sm text-slate-500">
                             {{ formatDate(notification.createdAt) }}
                         </p>
 
-                        <details v-if="Object.keys(notification.payload).length > 0">
-                            <summary>Details</summary>
-                            <pre>{{ notification.payload }}</pre>
+                        <details v-if="Object.keys(notification.payload).length > 0" class="mt-4">
+                            <summary
+                                class="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-900"
+                            >
+                                View Details
+                            </summary>
+                            <pre
+                                class="mt-2 p-4 bg-slate-50 rounded-lg text-xs text-slate-700 overflow-x-auto"
+                            >
+                                {{ JSON.stringify(notification.payload, null, 2) }}
+                            </pre>
                         </details>
                     </div>
-
-                    <button
-                        v-if="notification.readAt === null"
-                        type="button"
-                        :disabled="markingId === notification.id"
-                        @click="markAsRead(notification.id)"
-                    >
-                        {{ markingId === notification.id ? 'Marking...' : 'Mark as read' }}
-                    </button>
                 </li>
             </ul>
-        </template>
-    </div>
+        </div>
+    </main>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import {
-    getMyNotifications,
-    markNotificationAsRead,
-    type NotificationView,
-} from '@/api/notification.api'
+import { computed, ref } from 'vue'
+import { getMyNotifications, markNotificationAsRead } from '@/api/notification.api'
+import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDate } from '@/utils/formatters'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import ErrorMessage from '@/components/common/ErrorMessage.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
 
-const loading = ref(true)
-const error = ref('')
 const markingId = ref<string | null>(null)
-const notifications = ref<NotificationView[]>([])
 
-const unreadCount = computed(() => (
-    notifications.value.filter((notification) => notification.readAt === null).length
-))
+const {
+    loading,
+    error,
+    data: notificationsResponse,
+    refresh: loadNotifications,
+} = useAsyncData(() => getMyNotifications())
 
-onMounted(loadNotifications)
+const notifications = computed(() => notificationsResponse.value?.data ?? [])
 
-async function loadNotifications(): Promise<void> {
-    loading.value = true
-    error.value = ''
-
-    try {
-        const response = await getMyNotifications()
-        notifications.value = response.data
-    } catch (e) {
-        error.value = e instanceof Error ? e.message : 'Failed to load notifications.'
-    } finally {
-        loading.value = false
-    }
-}
+const unreadCount = computed(
+    () => notifications.value.filter(notification => notification.readAt === null).length
+)
 
 async function markAsRead(notificationId: string): Promise<void> {
     markingId.value = notificationId
-    error.value = ''
 
     try {
         await markNotificationAsRead(notificationId)
 
-        notifications.value = notifications.value.map((notification) => {
-            if (notification.id !== notificationId) {
-                return notification
-            }
+        if (notificationsResponse.value?.data) {
+            notificationsResponse.value.data = notificationsResponse.value.data.map(
+                notification => {
+                    if (notification.id !== notificationId) {
+                        return notification
+                    }
 
-            return {
-                ...notification,
-                readAt: new Date().toISOString(),
-            }
-        })
+                    return {
+                        ...notification,
+                        readAt: new Date().toISOString(),
+                    }
+                }
+            )
+        }
     } catch (e) {
-        error.value = e instanceof Error ? e.message : 'Failed to mark notification as read.'
+        console.error('Failed to mark notification as read:', e)
     } finally {
         markingId.value = null
     }
-}
-
-function formatDate(value: string): string {
-    return new Intl.DateTimeFormat('lt-LT', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value))
 }
 </script>

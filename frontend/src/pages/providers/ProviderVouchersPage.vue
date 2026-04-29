@@ -1,95 +1,141 @@
 <template>
-    <div>
-        <h1>Provider vouchers</h1>
+    <main class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-slate-900">Provider Vouchers</h1>
+                        <p class="text-slate-600 mt-1">
+                            Manage and monitor vouchers for this provider
+                        </p>
+                    </div>
+                    <RouterLink
+                        :to="`/providers/${providerId}`"
+                        class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                    >
+                        ← Back to Provider
+                    </RouterLink>
+                </div>
+            </div>
 
-        <p v-if="loading">Loading...</p>
-        <p v-else-if="error">{{ error }}</p>
+            <LoadingSpinner v-if="loading" message="Loading vouchers..." />
 
-        <template v-else>
-            <p>
-                <RouterLink :to="`/providers/${providerId}`">Back to provider</RouterLink>
-            </p>
+            <ErrorMessage v-else-if="error" :message="error" />
 
-            <p v-if="vouchers.length === 0">No vouchers found.</p>
+            <EmptyState
+                v-else-if="vouchers.length === 0"
+                title="No vouchers found"
+                description="This provider hasn't created any vouchers yet."
+            />
 
-            <table v-else>
-                <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Issued to</th>
-                    <th>Claimed by user</th>
-                    <th>Created by</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="voucher in vouchers" :key="voucher.code">
-                    <td>{{ voucher.code }}</td>
-                    <td>{{ voucher.issuedToEmail }}</td>
-                    <td>{{ voucher.claimedByUser ?? '-' }}</td>
-                    <td>{{ voucher.createdByUser }}</td>
-                    <td>{{ voucher.status }}</td>
-                    <td>
-                        <button
-                            v-if="voucher.status === 'active'"
-                            :disabled="deactivatingCode === voucher.code"
-                            @click="deactivateVoucher(voucher.code)"
-                        >
-                            {{ deactivatingCode === voucher.code ? 'Deactivating...' : 'Deactivate' }}
-                        </button>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-        </template>
-    </div>
+            <DataTable v-else :columns="columns" :data="vouchers" row-key="code">
+                <template #cell-code="{ value }">
+                    <span class="font-mono text-sm text-slate-900">
+                        {{ value }}
+                    </span>
+                </template>
+
+                <template #cell-claimedByUser="{ value }">
+                    <span class="text-sm text-slate-600">
+                        {{ value ?? '-' }}
+                    </span>
+                </template>
+
+                <template #cell-status="{ value }">
+                    <StatusBadge :status="value as VoucherStatus" />
+                </template>
+
+                <template #cell-actions="{ row }">
+                    <BaseButton
+                        v-if="row.status === 'active'"
+                        variant="danger"
+                        size="sm"
+                        :disabled="deactivatingCode === row.code"
+                        :loading="deactivatingCode === row.code"
+                        @click="deactivateVoucher(row.code)"
+                    >
+                        Deactivate
+                    </BaseButton>
+                    <span v-else class="text-slate-400">-</span>
+                </template>
+            </DataTable>
+        </div>
+    </main>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { deactivateProviderVoucher, getProviderVouchers, type ProviderVoucherView } from '@/api/provider.api'
+import { deactivateProviderVoucher, getProviderVouchers } from '@/api/provider.api'
+import { useAsyncData } from '@/composables/useAsyncData'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import ErrorMessage from '@/components/common/ErrorMessage.vue'
+import EmptyState from '@/components/common/EmptyState.vue'
+import DataTable from '@/components/common/DataTable.vue'
+import StatusBadge from '@/components/common/StatusBadge.vue'
+import BaseButton from '@/components/common/BaseButton.vue'
+import type { VoucherStatus } from '@/utils/status'
 
 const route = useRoute()
-const loading = ref(true)
-const error = ref('')
 const providerId = ref('')
-const vouchers = ref<ProviderVoucherView[]>([])
 const deactivatingCode = ref('')
 
-onMounted(async () => {
+// Validate provider ID on mount
+onMounted(() => {
     const id = route.params.id
-
     if (typeof id !== 'string' || id.length === 0) {
-        loading.value = false
-        error.value = 'Invalid provider id.'
-        return
-    }
-
-    providerId.value = id
-
-    try {
-        const response = await getProviderVouchers(id)
-        vouchers.value = response.data
-    } catch (e) {
-        error.value = e instanceof Error ? e.message : 'Failed to load vouchers.'
-    } finally {
-        loading.value = false
+        providerId.value = ''
+    } else {
+        providerId.value = id
     }
 })
+
+// Fetch vouchers with automatic loading/error handling
+const {
+    loading,
+    error,
+    data: vouchersResponse,
+    refresh,
+} = useAsyncData(
+    () => {
+        if (!providerId.value) {
+            throw new Error('Invalid provider id.')
+        }
+        return getProviderVouchers(providerId.value)
+    },
+    { immediate: false }
+)
+
+// Trigger initial load after providerId is set
+onMounted(() => {
+    if (providerId.value) {
+        refresh()
+    }
+})
+
+// Extract vouchers array from response
+const vouchers = computed(() => vouchersResponse.value?.data ?? [])
+
+// Define table columns
+const columns = [
+    { key: 'code', label: 'Code' },
+    { key: 'issuedToEmail', label: 'Issued To' },
+    { key: 'claimedByUser', label: 'Claimed By' },
+    { key: 'createdByUser', label: 'Created By' },
+    { key: 'status', label: 'Status' },
+    { key: 'actions', label: 'Actions' },
+]
 
 async function deactivateVoucher(code: string): Promise<void> {
     if (!providerId.value) {
         return
     }
 
-    error.value = ''
     deactivatingCode.value = code
 
     try {
         await deactivateProviderVoucher(providerId.value, code)
-        const response = await getProviderVouchers(providerId.value)
-        vouchers.value = response.data
+        await refresh()
     } catch (e) {
         error.value = e instanceof Error ? e.message : 'Failed to deactivate voucher.'
     } finally {
