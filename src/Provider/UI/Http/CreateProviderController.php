@@ -33,7 +33,7 @@ final class CreateProviderController extends AbstractController
         description: 'Creates a new provider owned by the authenticated user.',
         summary: 'Create provider',
         security: [['Bearer' => []]],
-        tags: ['Providers'],
+        tags: ['Provider'],
     )]
     #[OA\RequestBody(
         required: true,
