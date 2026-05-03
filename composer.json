@@ -77,6 +77,15 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "test:reset-db": [
+            "APP_ENV=test php bin/console doctrine:database:drop --force --if-exists",
+            "APP_ENV=test php bin/console doctrine:database:create --if-not-exists",
+            "APP_ENV=test php bin/console doctrine:schema:create"
+        ],
+        "test": [
+            "@test:reset-db",
+            "APP_ENV=test php bin/phpunit"
         ]
     },
     "conflict": {

@@ -44,6 +44,18 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  db_test:
+    image: postgres:17-alpine
+    container_name: db_test
+    environment:
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: app_db_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_test:/var/lib/postgresql/data
+
   mailer:
     image: axllent/mailpit
     container_name: mailer
@@ -56,4 +68,5 @@ services:
 
 volumes:
   pgdata:
+  pgdata_test:
   frontend_node_modules:
