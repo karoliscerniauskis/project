@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Provider\UI\Http;
 
 use App\Provider\Application\Command\RemoveProviderUser;
+use App\Provider\UI\Http\OpenApi\ProviderAccessDeniedResponse;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\AuthenticatedUser;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +26,48 @@ final class RemoveProviderUserController extends AbstractController
     }
 
     #[Route('/api/providers/{providerId}/users/{providerUserId}', name: 'api_provider_user_remove', methods: ['DELETE'])]
+    #[OA\Delete(
+        path: '/api/providers/{providerId}/users/{providerUserId}',
+        description: 'Removes a non-administrator user from the selected provider. The authenticated user must be a provider administrator.',
+        summary: 'Remove provider user',
+        security: [['Bearer' => []]],
+        tags: ['Provider'],
+    )]
+    #[OA\Parameter(
+        name: 'providerId',
+        description: 'Provider identifier.',
+        in: 'path',
+        required: true,
+        schema: new OA\Schema(
+            type: 'string',
+            format: 'uuid',
+            example: '019d882d-1d68-7e2f-94ce-0cd2f4d0c369',
+        ),
+    )]
+    #[OA\Parameter(
+        name: 'providerUserId',
+        description: 'Provider user identifier.',
+        in: 'path',
+        required: true,
+        schema: new OA\Schema(
+            type: 'string',
+            format: 'uuid',
+            example: '019d882d-1d68-7e2f-94ce-0cd2f4d0c368',
+        ),
+    )]
+    #[OA\Response(
+        response: Response::HTTP_NO_CONTENT,
+        description: 'Provider user removed successfully.',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_UNAUTHORIZED,
+        description: 'Authentication is required.',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_FORBIDDEN,
+        description: 'Provider access is required.',
+        content: new OA\JsonContent(ref: new Model(type: ProviderAccessDeniedResponse::class)),
+    )]
     public function __invoke(string $providerId, string $providerUserId): JsonResponse
     {
         $user = $this->getUser();

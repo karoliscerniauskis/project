@@ -39,7 +39,8 @@ final class CancelProviderInvitationController extends AbstractController
         required: true,
         schema: new OA\Schema(
             type: 'string',
-            example: 'provider-id',
+            format: 'uuid',
+            example: '019d882d-1d68-7e2f-94ce-0cd2f4d0c369',
         ),
     )]
     #[OA\Parameter(
