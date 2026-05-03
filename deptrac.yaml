@@ -198,6 +198,8 @@ deptrac:
             - SharedUI
             - Doctrine
             - Lexik
+            - Nelmio
+            - OpenApi
         # Voucher
         VoucherDomain:
             - SharedDomain

@@ -6,9 +6,13 @@ namespace App\Auth\UI\Http;
 
 use App\Auth\Application\Command\RequestUserEmailChange;
 use App\Auth\Infrastructure\Security\SecurityUser;
+use App\Auth\UI\Http\OpenApi\UserEmailAlreadyExistsResponse;
 use App\Auth\UI\Http\Request\ChangeUserEmailRequest;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\UI\Http\JsonDtoFactory;
+use App\Shared\UI\Http\OpenApi\ApiValidationFailedResponse;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +28,35 @@ final class ChangeUserEmailController extends AbstractController
     }
 
     #[Route('/api/auth/change-email', name: 'api_auth_change_email', methods: ['POST'])]
+    #[OA\Post(
+        path: '/api/auth/change-email',
+        description: 'Requests an email change for the authenticated user. A verification email will be sent to the new email address.',
+        summary: 'Change user email',
+        security: [['Bearer' => []]],
+        tags: ['Auth'],
+    )]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(ref: new Model(type: ChangeUserEmailRequest::class)),
+    )]
+    #[OA\Response(
+        response: Response::HTTP_ACCEPTED,
+        description: 'Email change request accepted. Verification email sent.',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_UNAUTHORIZED,
+        description: 'Authentication is required.',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_UNPROCESSABLE_ENTITY,
+        description: 'Validation failed.',
+        content: new OA\JsonContent(ref: new Model(type: ApiValidationFailedResponse::class)),
+    )]
+    #[OA\Response(
+        response: Response::HTTP_CONFLICT,
+        description: 'Email already exists.',
+        content: new OA\JsonContent(ref: new Model(type: UserEmailAlreadyExistsResponse::class)),
+    )]
     public function __invoke(Request $request): JsonResponse
     {
         $user = $this->getUser();
