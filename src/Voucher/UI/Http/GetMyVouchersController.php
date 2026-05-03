@@ -8,6 +8,9 @@ use App\Shared\Application\Bus\QueryBus;
 use App\Shared\Application\Security\AuthenticatedUser;
 use App\Voucher\Application\Query\GetMyVouchers;
 use App\Voucher\Domain\View\MyVouchersView;
+use App\Voucher\UI\Http\OpenApi\MyVouchersResponse;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +24,22 @@ final class GetMyVouchersController extends AbstractController
     }
 
     #[Route('/api/me/vouchers', name: 'api_me_vouchers_list', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/me/vouchers',
+        description: 'Returns vouchers owned by the authenticated user.',
+        summary: 'List my vouchers',
+        security: [['Bearer' => []]],
+        tags: ['Voucher'],
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Vouchers returned successfully.',
+        content: new OA\JsonContent(ref: new Model(type: MyVouchersResponse::class)),
+    )]
+    #[OA\Response(
+        response: Response::HTTP_UNAUTHORIZED,
+        description: 'Authentication is required.',
+    )]
     public function __invoke(): JsonResponse
     {
         $user = $this->getUser();

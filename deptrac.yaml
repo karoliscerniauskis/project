@@ -221,6 +221,8 @@ deptrac:
             - SharedDomain
             - SharedUI
             - Symfony
+            - Nelmio
+            - OpenApi
         # Provider
         ProviderDomain:
             - SharedDomain
