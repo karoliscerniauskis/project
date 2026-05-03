@@ -147,6 +147,16 @@ deptrac:
                 -
                     type: classLike
                     value: ^Lexik\\
+        -
+            name: Nelmio
+            collectors:
+                -   type: classLike
+                    value: ^Nelmio\\
+        -
+            name: OpenApi
+            collectors:
+                -   type: classLike
+                    value: ^OpenApi\\
     ruleset:
         # Shared
         SharedDomain:
@@ -163,6 +173,7 @@ deptrac:
             - Symfony
             - SharedApplication
             - SharedDomain
+            - OpenApi
         # Auth
         AuthDomain:
             - SharedDomain
@@ -231,6 +242,8 @@ deptrac:
             - SharedUI
             - SharedDomain
             - Symfony
+            - Nelmio
+            - OpenApi
         # External
         Symfony:
         PHPStan:
