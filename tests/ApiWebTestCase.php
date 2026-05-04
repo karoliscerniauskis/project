@@ -13,6 +13,7 @@ use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderInvitationId;
 use App\Shared\Domain\Id\UuidCreator;
+use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -338,5 +339,53 @@ abstract class ApiWebTestCase extends WebTestCase
         self::assertInstanceOf(ProviderUserRecord::class, $providerUser);
 
         return $providerUser;
+    }
+
+    protected static function createVoucherRecord(
+        string $code,
+        string $providerId,
+        string $createdByProviderUserId,
+        string $issuedToEmail,
+        string $status,
+        ?string $claimedByUserId = null,
+    ): string {
+        $voucherId = self::getUuidCreator()->create();
+        $voucher = new VoucherRecord(
+            $voucherId,
+            $code,
+            $providerId,
+            $createdByProviderUserId,
+            $issuedToEmail,
+            $status,
+            $claimedByUserId,
+        );
+
+        $entityManager = self::getEntityManager();
+        $entityManager->persist($voucher);
+        $entityManager->flush();
+
+        return $voucherId;
+    }
+
+    protected static function getVoucherByCode(string $code): VoucherRecord
+    {
+        $voucher = self::getEntityManager()
+            ->getRepository(VoucherRecord::class)
+            ->findOneBy(['code' => $code]);
+
+        self::assertInstanceOf(VoucherRecord::class, $voucher);
+
+        return $voucher;
+    }
+
+    protected static function getVoucherByIssuedToEmail(string $issuedToEmail): VoucherRecord
+    {
+        $voucher = self::getEntityManager()
+            ->getRepository(VoucherRecord::class)
+            ->findOneBy(['issuedToEmail' => $issuedToEmail]);
+
+        self::assertInstanceOf(VoucherRecord::class, $voucher);
+
+        return $voucher;
     }
 }
