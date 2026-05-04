@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Auth\Application\Handler;
 
 use App\Auth\Application\Command\ChangeUserPassword;
+use App\Auth\Application\Exception\InvalidCredentials;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Security\UserPasswordHasher;
 use App\Shared\Application\Outbox\OutboxWriter;
@@ -28,7 +29,7 @@ final readonly class ChangeUserPasswordHandler
             $user = $this->userRepository->findById($userId);
 
             if ($user === null || !$this->userPasswordHasher->isPasswordValid($command->getCurrentPassword(), $user->getHashedPassword())) {
-                return;
+                throw InvalidCredentials::create();
             }
 
             $hashedNewPassword = $this->userPasswordHasher->hashPassword($command->getNewPassword());

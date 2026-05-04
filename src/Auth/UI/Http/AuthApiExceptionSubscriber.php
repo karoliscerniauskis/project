@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\UI\Http;
 
+use App\Auth\Application\Exception\InvalidCredentials;
 use App\Auth\Application\Exception\UserEmailAlreadyVerified;
 use App\Auth\Application\Exception\UserEmailMustBeUnique;
 use App\Auth\Application\Exception\UserEmailMustBeVerified;
@@ -54,6 +55,15 @@ final readonly class AuthApiExceptionSubscriber implements EventSubscriberInterf
 
         if ($event->getThrowable()->getPrevious() instanceof UserEmailAlreadyVerified) {
             $event->setResponse(new JsonResponse(status: Response::HTTP_NO_CONTENT));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof InvalidCredentials) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_UNAUTHORIZED));
 
             return;
         }

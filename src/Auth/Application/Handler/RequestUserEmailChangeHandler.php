@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Auth\Application\Handler;
 
 use App\Auth\Application\Command\RequestUserEmailChange;
+use App\Auth\Application\Exception\UserEmailMustBeUnique;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Auth\Domain\Slug\EmailVerificationSlugGenerator;
 use App\Shared\Application\Outbox\OutboxWriter;
@@ -36,13 +37,13 @@ final readonly class RequestUserEmailChangeHandler
             $existingByEmail = $this->userRepository->findByEmail($command->getNewEmail());
 
             if ($existingByEmail !== null && !$existingByEmail->getId()->equals($user->getId())) {
-                return;
+                throw UserEmailMustBeUnique::forEmail($command->getNewEmail());
             }
 
             $existingByPendingEmail = $this->userRepository->findByPendingEmail($command->getNewEmail());
 
             if ($existingByPendingEmail !== null && !$existingByPendingEmail->getId()->equals($user->getId())) {
-                return;
+                throw UserEmailMustBeUnique::forEmail($command->getNewEmail());
             }
 
             $slug = $this->emailVerificationSlugGenerator->generate();

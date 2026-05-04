@@ -181,7 +181,7 @@ final class RegisterUserControllerTest extends ApiWebTestCase
         self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
         self::assertSame(
             [
-                'message' => 'Registration failed.',
+                'message' => 'Email already exists.',
                 'errors' => [
                     [
                         'field' => 'email',

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Auth\UI\Http;
 
 use App\Auth\Application\Command\VerifyUserEmail;
+use App\Auth\UI\Http\OpenApi\UserEmailVerificationLinkInvalidResponse;
 use App\Shared\Application\Bus\CommandBus;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,7 +39,12 @@ final readonly class VerifyUserEmailController
     )]
     #[OA\Response(
         response: Response::HTTP_NO_CONTENT,
-        description: 'Email verified successfully. If the verification link is invalid or expired, no content is returned as well.',
+        description: 'Email verified successfully.',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_NOT_FOUND,
+        description: 'Verification link is invalid or expired.',
+        content: new OA\JsonContent(ref: new Model(type: UserEmailVerificationLinkInvalidResponse::class)),
     )]
     public function __invoke(string $emailVerificationSlug): JsonResponse
     {

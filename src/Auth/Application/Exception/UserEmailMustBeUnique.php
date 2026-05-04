@@ -11,7 +11,7 @@ final class UserEmailMustBeUnique extends AbstractApiException
     private function __construct(string $email)
     {
         parent::__construct(
-            'Registration failed.',
+            'Email already exists.',
             [self::getError('email', sprintf('Email "%s" is already registered.', $email))],
         );
     }
