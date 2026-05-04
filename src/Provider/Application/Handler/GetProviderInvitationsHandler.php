@@ -20,7 +20,7 @@ final readonly class GetProviderInvitationsHandler
 
     public function __invoke(GetProviderInvitations $query): ProviderInvitationsView
     {
-        if (!$this->providerUserRepository->isMember($query->getProviderId(), $query->getUserId())) {
+        if (!$this->providerUserRepository->isActiveMember($query->getProviderId(), $query->getUserId())) {
             throw ProviderAccessDenied::create();
         }
 
