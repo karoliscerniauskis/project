@@ -277,4 +277,22 @@ abstract class ApiWebTestCase extends WebTestCase
 
         return $response['token'];
     }
+
+    protected static function createProviderUserRecord(
+        string $providerId,
+        string $userId,
+        string $role,
+        string $status,
+    ): void {
+        $providerUser = new ProviderUserRecord(
+            self::getUuidCreator()->create(),
+            $providerId,
+            $userId,
+            $role,
+            $status,
+        );
+        $entityManager = self::getEntityManager();
+        $entityManager->persist($providerUser);
+        $entityManager->flush();
+    }
 }
