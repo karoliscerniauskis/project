@@ -20,7 +20,7 @@ final readonly class GetProviderUsersHandler
 
     public function __invoke(GetProviderUsers $query): ProviderUsersView
     {
-        if (!$this->providerUserRepository->isMember($query->getProviderId(), $query->getUserId())) {
+        if (!$this->providerUserRepository->isActiveMember($query->getProviderId(), $query->getUserId())) {
             throw ProviderAccessDenied::create();
         }
 
