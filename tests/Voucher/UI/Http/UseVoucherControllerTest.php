@@ -176,10 +176,10 @@ final class UseVoucherControllerTest extends ApiWebTestCase
         self::assertSame('active', $voucher->getStatus());
     }
 
-    public function testUseInactiveVoucherReturnsConflict(): void
+    public function testUseUsedVoucherReturnsConflict(): void
     {
         $client = self::createClient();
-        $providerMemberEmail = 'use-voucher-inactive-member@example.com';
+        $providerMemberEmail = 'use-voucher-used-member@example.com';
         $providerMemberUserId = self::registerVerifyAndGetUserId(
             $client,
             $providerMemberEmail,
@@ -187,7 +187,7 @@ final class UseVoucherControllerTest extends ApiWebTestCase
         );
         $token = self::login($client, $providerMemberEmail, 'securePassword123');
         $providerId = self::createProviderRecord(
-            'Use Inactive Voucher Provider',
+            'Use Used Voucher Provider',
             ProviderStatus::Active->value,
         );
         self::createProviderUserRecord(
@@ -198,10 +198,10 @@ final class UseVoucherControllerTest extends ApiWebTestCase
         );
         $providerUser = self::getExistingProviderUser($providerId, $providerMemberUserId);
         self::createVoucherRecord(
-            code: 'USE-INACTIVE-001',
+            code: 'USE-USED-001',
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
-            issuedToEmail: 'use-voucher-inactive-recipient@example.com',
+            issuedToEmail: 'use-voucher-used-recipient@example.com',
             status: VoucherStatus::Used->value,
         );
         $client->request(
@@ -214,13 +214,13 @@ final class UseVoucherControllerTest extends ApiWebTestCase
                 'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
             ],
             self::json([
-                'code' => 'USE-INACTIVE-001',
+                'code' => 'USE-USED-001',
             ]),
         );
 
         self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
 
-        $voucher = self::getVoucherByCode('USE-INACTIVE-001');
+        $voucher = self::getVoucherByCode('USE-USED-001');
 
         self::assertSame(VoucherStatus::Used->value, $voucher->getStatus());
     }

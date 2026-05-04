@@ -196,23 +196,23 @@ final class ClaimVoucherControllerTest extends ApiWebTestCase
         self::assertSame($firstUserId, $voucher->getClaimedByUserId());
     }
 
-    public function testClaimInactiveVoucherReturnsConflict(): void
+    public function testClaimUsedVoucherReturnsConflict(): void
     {
         $client = self::createClient();
-        $providerMemberEmail = 'claim-voucher-inactive-provider-member@example.com';
+        $providerMemberEmail = 'claim-voucher-used-provider-member@example.com';
         $providerMemberUserId = self::registerVerifyAndGetUserId(
             $client,
             $providerMemberEmail,
             'securePassword123',
         );
-        $claimingUserEmail = 'claim-voucher-inactive-recipient@example.com';
+        $claimingUserEmail = 'claim-voucher-used-recipient@example.com';
         $token = self::registerVerifyAndLoginUser(
             $client,
             $claimingUserEmail,
             'securePassword123',
         );
         $providerId = self::createProviderRecord(
-            'Claim Inactive Voucher Provider',
+            'Claim Used Voucher Provider',
             ProviderStatus::Active->value,
         );
         self::createProviderUserRecord(
@@ -224,7 +224,7 @@ final class ClaimVoucherControllerTest extends ApiWebTestCase
         $providerUser = self::getExistingProviderUser($providerId, $providerMemberUserId);
         $voucherStatus = VoucherStatus::Used->value;
         $voucherId = self::createVoucherRecord(
-            code: 'CLAIM-INACTIVE-001',
+            code: 'CLAIM-USED-001',
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: $claimingUserEmail,
@@ -242,7 +242,7 @@ final class ClaimVoucherControllerTest extends ApiWebTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
 
-        $voucher = self::getVoucherByCode('CLAIM-INACTIVE-001');
+        $voucher = self::getVoucherByCode('CLAIM-USED-001');
 
         self::assertNull($voucher->getClaimedByUserId());
         self::assertSame($voucherStatus, $voucher->getStatus());
