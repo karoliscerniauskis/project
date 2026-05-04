@@ -57,7 +57,7 @@ final class ClaimVoucherControllerTest extends ApiWebTestCase
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: $claimingUserEmail,
-            status: 'active',
+            status: VoucherStatus::Active->value,
         );
         $client->request(
             'POST',
@@ -108,7 +108,7 @@ final class ClaimVoucherControllerTest extends ApiWebTestCase
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: 'different-recipient@example.com',
-            status: 'active',
+            status: VoucherStatus::Active->value,
         );
         $client->request(
             'POST',
@@ -176,7 +176,7 @@ final class ClaimVoucherControllerTest extends ApiWebTestCase
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: $secondUserEmail,
-            status: 'active',
+            status: VoucherStatus::Active->value,
             claimedByUserId: $firstUserId,
         );
         $client->request(
