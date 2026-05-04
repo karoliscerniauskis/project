@@ -144,7 +144,7 @@ final class TransferVoucherControllerTest extends ApiWebTestCase
         self::assertNull($voucher->getClaimedByUserId());
     }
 
-    public function testTransferVoucherByUserWhoDoesNotOwnVoucherReturnsConflict(): void
+    public function testTransferVoucherByUserWhoDoesNotOwnVoucherReturnsForbidden(): void
     {
         $client = self::createClient();
         $ownerEmail = 'transfer-voucher-real-owner@example.com';
@@ -198,7 +198,7 @@ final class TransferVoucherControllerTest extends ApiWebTestCase
             ]),
         );
 
-        self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
         self::assertSame(
             [
                 'message' => 'Forbidden.',

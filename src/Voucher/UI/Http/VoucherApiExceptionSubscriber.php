@@ -86,7 +86,7 @@ final readonly class VoucherApiExceptionSubscriber implements EventSubscriberInt
             $event->setResponse(new JsonResponse([
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),
-            ], Response::HTTP_CONFLICT));
+            ], Response::HTTP_FORBIDDEN));
 
             return;
         }
