@@ -35,7 +35,9 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
                 'pu.providerId = p.id',
             )
             ->andWhere('pu.userId = :userId')
+            ->andWhere('pu.status = :userStatus')
             ->setParameter('userId', $userId->toString())
+            ->setParameter('userStatus', ProviderUserStatus::Active->value)
             ->getQuery()
             ->getArrayResult();
         $providers = [];
