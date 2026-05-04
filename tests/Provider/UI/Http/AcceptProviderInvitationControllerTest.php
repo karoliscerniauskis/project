@@ -84,7 +84,7 @@ final class AcceptProviderInvitationControllerTest extends ApiWebTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
-        $invitation = self::getInvitationBySlug($invitationSlug);
+        $invitation = self::getProviderInvitationBySlug($invitationSlug);
 
         self::assertSame(ProviderInvitationStatus::Accepted->value, $invitation->getStatus());
         self::assertSame($invitedUserId, $invitation->getAcceptedUserId());
@@ -131,7 +131,7 @@ final class AcceptProviderInvitationControllerTest extends ApiWebTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
-        $invitation = self::getInvitationBySlug($invitationSlug);
+        $invitation = self::getProviderInvitationBySlug($invitationSlug);
 
         self::assertSame(ProviderInvitationStatus::Pending->value, $invitation->getStatus());
         self::assertNull($invitation->getAcceptedUserId());
@@ -170,7 +170,7 @@ final class AcceptProviderInvitationControllerTest extends ApiWebTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
-        $invitation = self::getInvitationBySlug($invitationSlug);
+        $invitation = self::getProviderInvitationBySlug($invitationSlug);
 
         self::assertSame(ProviderInvitationStatus::Pending->value, $invitation->getStatus());
         self::assertNull($invitation->getAcceptedUserId());
@@ -212,7 +212,7 @@ final class AcceptProviderInvitationControllerTest extends ApiWebTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
-        $invitation = self::getInvitationBySlug($invitationSlug);
+        $invitation = self::getProviderInvitationBySlug($invitationSlug);
 
         self::assertSame(ProviderInvitationStatus::Accepted->value, $invitation->getStatus());
         self::assertSame($acceptedUserId, $invitation->getAcceptedUserId());

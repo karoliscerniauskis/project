@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests;
 
+use App\Auth\Domain\Security\UserPasswordHasher;
 use App\Auth\Infrastructure\Doctrine\Entity\UserRecord;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderInvitationRecord;
@@ -224,7 +225,7 @@ abstract class ApiWebTestCase extends WebTestCase
         $entityManager->flush();
     }
 
-    protected static function getInvitationBySlug(string $slug): ProviderInvitationRecord
+    protected static function getProviderInvitationBySlug(string $slug): ProviderInvitationRecord
     {
         $invitation = self::getEntityManager()
             ->getRepository(ProviderInvitationRecord::class)
@@ -233,5 +234,47 @@ abstract class ApiWebTestCase extends WebTestCase
         self::assertInstanceOf(ProviderInvitationRecord::class, $invitation);
 
         return $invitation;
+    }
+
+    protected static function createAdminUserAndLogin(
+        KernelBrowser $client,
+        string $email,
+        string $password,
+    ): string {
+        $passwordHasher = self::getContainer()->get(UserPasswordHasher::class);
+
+        self::assertInstanceOf(UserPasswordHasher::class, $passwordHasher);
+
+        $user = new UserRecord(
+            self::getUuidCreator()->create(),
+            $email,
+            null,
+            $passwordHasher->hashPassword($password),
+            ['ROLE_ADMIN', 'ROLE_USER'],
+            null,
+            new DateTimeImmutable(),
+        );
+        $entityManager = self::getEntityManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+        $client->request(
+            'POST',
+            '/api/auth/login',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            self::json([
+                'email' => $email,
+                'password' => $password,
+            ]),
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $response = self::getJsonResponse($client->getResponse()->getContent());
+
+        self::assertIsString($response['token']);
+
+        return $response['token'];
     }
 }

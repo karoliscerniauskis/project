@@ -6,6 +6,8 @@ namespace App\Provider\UI\Http;
 
 use App\Provider\Application\Command\ApproveProvider;
 use App\Shared\Application\Bus\CommandBus;
+use App\Shared\Domain\Id\UuidValidator;
+use App\Shared\UI\Http\InvalidRequestParameterException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +17,7 @@ final readonly class ApproveProviderController
 {
     public function __construct(
         private CommandBus $commandBus,
+        private UuidValidator $uuidValidator,
     ) {
     }
 
@@ -51,6 +54,10 @@ final readonly class ApproveProviderController
     )]
     public function __invoke(string $providerId): JsonResponse
     {
+        if (!$this->uuidValidator->isValid($providerId)) {
+            throw new InvalidRequestParameterException('providerId', sprintf('Invalid Provider "%s".', $providerId));
+        }
+
         $this->commandBus->dispatch(new ApproveProvider($providerId));
 
         return new JsonResponse(status: Response::HTTP_NO_CONTENT);

@@ -31,6 +31,14 @@ final readonly class ApiExceptionSubscriber implements EventSubscriberInterface
             return;
         }
 
+        if ($exception instanceof InvalidRequestParameterException) {
+            $event->setResponse(new JsonResponse([
+                'message' => $exception->getMessage(),
+            ], Response::HTTP_BAD_REQUEST));
+
+            return;
+        }
+
         if ($exception instanceof ValidationException) {
             $event->setResponse(new JsonResponse([
                 'message' => $exception->getMessage(),
