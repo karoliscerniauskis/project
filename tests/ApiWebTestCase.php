@@ -295,4 +295,15 @@ abstract class ApiWebTestCase extends WebTestCase
         $entityManager->persist($providerUser);
         $entityManager->flush();
     }
+
+    protected static function getProviderByName(string $name): ProviderRecord
+    {
+        $provider = self::getEntityManager()
+            ->getRepository(ProviderRecord::class)
+            ->findOneBy(['name' => $name]);
+
+        self::assertInstanceOf(ProviderRecord::class, $provider);
+
+        return $provider;
+    }
 }
