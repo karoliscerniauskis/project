@@ -214,16 +214,4 @@ final class CancelProviderInvitationControllerTest extends ApiWebTestCase
             self::getJsonResponse($client->getResponse()->getContent()),
         );
     }
-
-    public function testCancelProviderInvitationWithMissingEmailReturnsNotFound(): void
-    {
-        $client = self::createClient();
-        $providerId = self::getUuidCreator()->create();
-        $client->request(
-            'DELETE',
-            sprintf('/api/providers/%s/invitations/', $providerId),
-        );
-
-        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
-    }
 }

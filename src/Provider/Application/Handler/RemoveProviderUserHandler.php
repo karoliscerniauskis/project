@@ -26,7 +26,11 @@ final readonly class RemoveProviderUserHandler
 
             $providerUser = $this->providerUserRepository->findById($command->getProviderUserId());
 
-            if ($providerUser === null || $providerUser->isAdmin()) {
+            if (
+                $providerUser === null
+                || $providerUser->isAdmin()
+                || $providerUser->getProviderId()->toString() !== $command->getProviderId()->toString()
+            ) {
                 return;
             }
 

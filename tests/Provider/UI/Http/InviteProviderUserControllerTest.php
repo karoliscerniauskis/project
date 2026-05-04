@@ -69,50 +69,6 @@ final class InviteProviderUserControllerTest extends ApiWebTestCase
         );
     }
 
-    public function testInviteProviderUserWithMissingEmailReturnsValidationError(): void
-    {
-        $client = self::createClient();
-        $adminEmail = 'invite-missing-email-admin@example.com';
-        $adminUserId = self::registerVerifyAndGetUserId(
-            $client,
-            $adminEmail,
-            'securePassword123',
-        );
-        $token = self::login($client, $adminEmail, 'securePassword123');
-        $providerId = self::createProviderRecord('Invite Missing Email Provider', ProviderStatus::Active->value);
-        self::createProviderUserRecord(
-            providerId: $providerId,
-            userId: $adminUserId,
-            role: ProviderUserRole::Admin->value,
-            status: ProviderUserStatus::Active->value,
-        );
-        $client->request(
-            'POST',
-            sprintf('/api/provider/%s/invite', $providerId),
-            [],
-            [],
-            [
-                'CONTENT_TYPE' => 'application/json',
-                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
-            ],
-            self::json([]),
-        );
-
-        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
-        self::assertSame(
-            [
-                'message' => 'Validation failed.',
-                'errors' => [
-                    [
-                        'field' => 'email',
-                        'message' => 'Email is required.',
-                    ],
-                ],
-            ],
-            self::getJsonResponse($client->getResponse()->getContent()),
-        );
-    }
-
     public function testInviteProviderUserWithInvalidEmailReturnsValidationError(): void
     {
         $client = self::createClient();

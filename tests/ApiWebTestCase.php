@@ -330,4 +330,13 @@ abstract class ApiWebTestCase extends WebTestCase
                 'email' => $email,
             ]);
     }
+
+    protected static function getExistingProviderUser(string $providerId, string $userId): ProviderUserRecord
+    {
+        $providerUser = self::getProviderUser($providerId, $userId);
+
+        self::assertInstanceOf(ProviderUserRecord::class, $providerUser);
+
+        return $providerUser;
+    }
 }
