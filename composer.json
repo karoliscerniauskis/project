@@ -86,6 +86,10 @@
         "test": [
             "@test:reset-db",
             "APP_ENV=test php bin/phpunit"
+        ],
+        "test:coverage": [
+            "@test:reset-db",
+            "APP_ENV=test php bin/phpunit --coverage-text"
         ]
     },
     "conflict": {

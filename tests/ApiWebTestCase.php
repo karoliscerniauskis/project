@@ -5,6 +5,14 @@ declare(strict_types=1);
 namespace App\Tests;
 
 use App\Auth\Infrastructure\Doctrine\Entity\UserRecord;
+use App\Provider\Domain\Role\ProviderUserRole;
+use App\Provider\Infrastructure\Doctrine\Entity\ProviderInvitationRecord;
+use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
+use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
+use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\ProviderInvitationId;
+use App\Shared\Domain\Id\UuidCreator;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -105,6 +113,15 @@ abstract class ApiWebTestCase extends WebTestCase
         return $entityManager;
     }
 
+    protected static function getUuidCreator(): UuidCreator
+    {
+        $uuidCreator = self::getContainer()->get(UuidCreator::class);
+
+        self::assertInstanceOf(UuidCreator::class, $uuidCreator);
+
+        return $uuidCreator;
+    }
+
     protected static function getUserRecord(string $email): UserRecord
     {
         $userRecord = self::getEntityManager()
@@ -114,5 +131,107 @@ abstract class ApiWebTestCase extends WebTestCase
         self::assertInstanceOf(UserRecord::class, $userRecord);
 
         return $userRecord;
+    }
+
+    protected static function getProviderUser(string $providerId, string $userId): ?ProviderUserRecord
+    {
+        $providerUser = self::getEntityManager()
+            ->getRepository(ProviderUserRecord::class)
+            ->findOneBy([
+                'providerId' => $providerId,
+                'userId' => $userId,
+            ]);
+
+        return $providerUser instanceof ProviderUserRecord ? $providerUser : null;
+    }
+
+    protected static function registerVerifyAndGetUserId(
+        KernelBrowser $client,
+        string $email,
+        string $password,
+    ): string {
+        self::registerVerifyAndLoginUser($client, $email, $password);
+        $userRecord = self::getUserRecord($email);
+
+        return $userRecord->getId();
+    }
+
+    protected static function login(
+        KernelBrowser $client,
+        string $email,
+        string $password,
+    ): string {
+        $client->request(
+            'POST',
+            '/api/auth/login',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            self::json([
+                'email' => $email,
+                'password' => $password,
+            ]),
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $response = self::getJsonResponse($client->getResponse()->getContent());
+
+        self::assertIsString($response['token']);
+
+        return $response['token'];
+    }
+
+    protected static function createProviderRecord(string $name, string $status): string
+    {
+        $providerId = ProviderId::fromString(self::getUuidCreator()->create())->toString();
+        $provider = new ProviderRecord(
+            $providerId,
+            $name,
+            $status,
+        );
+        $entityManager = self::getEntityManager();
+        $entityManager->persist($provider);
+        $entityManager->flush();
+
+        return $providerId;
+    }
+
+    protected static function createProviderInvitationRecord(
+        string $providerId,
+        string $email,
+        string $slug,
+        string $status,
+        string $invitedByUserId,
+        ?string $acceptedUserId = null,
+        ?DateTimeImmutable $acceptedAt = null,
+    ): void {
+        $invitation = new ProviderInvitationRecord(
+            ProviderInvitationId::fromString(self::getUuidCreator()->create())->toString(),
+            $providerId,
+            $email,
+            ProviderUserRole::Member->value,
+            $slug,
+            $status,
+            $invitedByUserId,
+            $acceptedUserId,
+            new DateTimeImmutable('-1 hour'),
+            $acceptedAt,
+            new DateTimeImmutable('+1 day'),
+        );
+        $entityManager = self::getEntityManager();
+        $entityManager->persist($invitation);
+        $entityManager->flush();
+    }
+
+    protected static function getInvitationBySlug(string $slug): ProviderInvitationRecord
+    {
+        $invitation = self::getEntityManager()
+            ->getRepository(ProviderInvitationRecord::class)
+            ->findOneBy(['slug' => $slug]);
+
+        self::assertInstanceOf(ProviderInvitationRecord::class, $invitation);
+
+        return $invitation;
     }
 }
