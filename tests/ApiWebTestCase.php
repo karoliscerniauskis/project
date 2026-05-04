@@ -306,4 +306,28 @@ abstract class ApiWebTestCase extends WebTestCase
 
         return $provider;
     }
+
+    protected static function getProviderInvitationByEmail(string $providerId, string $email): ProviderInvitationRecord
+    {
+        $invitation = self::getEntityManager()
+            ->getRepository(ProviderInvitationRecord::class)
+            ->findOneBy([
+                'providerId' => $providerId,
+                'email' => $email,
+            ]);
+
+        self::assertInstanceOf(ProviderInvitationRecord::class, $invitation);
+
+        return $invitation;
+    }
+
+    protected static function countProviderInvitationsByEmail(string $providerId, string $email): int
+    {
+        return self::getEntityManager()
+            ->getRepository(ProviderInvitationRecord::class)
+            ->count([
+                'providerId' => $providerId,
+                'email' => $email,
+            ]);
+    }
 }
