@@ -6,6 +6,7 @@ namespace App\Provider\Domain\Entity;
 
 use App\Provider\Domain\Event\ProviderApproved;
 use App\Provider\Domain\Event\ProviderCreated;
+use App\Provider\Domain\Event\ProviderDeactivated;
 use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
@@ -82,13 +83,18 @@ final class Provider extends AbstractAggregateRoot
         ));
     }
 
-    public function deactivate(): void
+    public function deactivate(DateTimeImmutable $occurredOn): void
     {
         if ($this->status !== ProviderStatus::Active) {
             return;
         }
 
         $this->status = ProviderStatus::Inactive;
+        $this->record(new ProviderDeactivated(
+            $this->id->toString(),
+            $this->name,
+            $occurredOn,
+        ));
     }
 
     public function isActive(): bool

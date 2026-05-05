@@ -27,7 +27,7 @@ final readonly class DoctrineAdminUserFinder implements AdminUserFinder
             ->createQueryBuilder()
             ->select('id')
             ->from('auth_user')
-            ->where('roles::jsonb ? :role')
+            ->where('jsonb_exists(roles::jsonb, :role)')
             ->setParameter('role', self::ROLE_ADMIN)
             ->executeQuery()
             ->fetchFirstColumn();

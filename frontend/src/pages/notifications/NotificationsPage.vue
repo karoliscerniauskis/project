@@ -72,26 +72,13 @@
                             {{ formatDate(notification.createdAt) }}
                         </p>
 
-                        <RouterLink
+                        <a
                             v-if="getPayloadString(notification.payload, 'url')"
-                            :to="getPayloadString(notification.payload, 'url') ?? '/'"
-                            class="mt-4 inline-block px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
+                            :href="getPayloadString(notification.payload, 'url') ?? '/'"
+                            class="mt-4 inline-block px-4 py-2 bg-slate-900 !text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
                         >
                             Open
-                        </RouterLink>
-
-                        <details v-if="Object.keys(notification.payload).length > 0" class="mt-4">
-                            <summary
-                                class="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-900"
-                            >
-                                View Details
-                            </summary>
-                            <pre
-                                class="mt-2 p-4 bg-slate-50 rounded-lg text-xs text-slate-700 overflow-x-auto"
-                            >
-                                {{ JSON.stringify(notification.payload, null, 2) }}
-                            </pre>
-                        </details>
+                        </a>
                     </div>
                 </li>
             </ul>
