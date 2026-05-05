@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Provider\Application\Command;
 
-final readonly class ApproveProvider
+final readonly class DeactivateProvider
 {
     public function __construct(
         private string $providerId,
-        private string $userId,
+        public string $userId,
     ) {
     }
 

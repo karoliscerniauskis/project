@@ -87,4 +87,28 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
             $row['role'] === ProviderUserRole::Admin->value,
         );
     }
+
+    public function findAllForAdmin(): ProvidersView
+    {
+        /** @var array<int, array{id: Uuid, name: string, status: string}> $rows */
+        $rows = $this->entityManager->createQueryBuilder()
+            ->select('p.id AS id', 'p.name AS name', 'p.status AS status')
+            ->from(ProviderRecord::class, 'p')
+            ->orderBy('p.name', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        $providers = [];
+
+        foreach ($rows as $row) {
+            $providers[] = new ProviderView(
+                $row['id']->toRfc4122(),
+                $row['name'],
+                $row['status'],
+                true,
+            );
+        }
+
+        return new ProvidersView($providers);
+    }
 }

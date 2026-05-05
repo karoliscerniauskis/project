@@ -14,4 +14,6 @@ interface ProviderReadRepository
     public function findByUserId(UserId $userId): ProvidersView;
 
     public function findActiveByIdAndUserId(ProviderId $providerId, UserId $userId): ?ProviderView;
+
+    public function findAllForAdmin(): ProvidersView;
 }

@@ -182,3 +182,30 @@ export function acceptProviderInvitation(slug: string): Promise<void> {
         },
     })
 }
+
+export function getAdminProviders(): Promise<ProvidersResponse> {
+    return apiRequest<ProvidersResponse>('/api/admin/providers', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
+export function approveProvider(providerId: string): Promise<void> {
+    return apiRequest<void>(`/api/admin/provider/${encodeURIComponent(providerId)}/approve`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}
+
+export function deactivateProvider(providerId: string): Promise<void> {
+    return apiRequest<void>(`/api/admin/provider/${encodeURIComponent(providerId)}/deactivate`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}

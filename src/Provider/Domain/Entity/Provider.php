@@ -75,6 +75,15 @@ final class Provider extends AbstractAggregateRoot
         ));
     }
 
+    public function deactivate(): void
+    {
+        if ($this->status !== ProviderStatus::Active) {
+            return;
+        }
+
+        $this->status = ProviderStatus::Inactive;
+    }
+
     public function isActive(): bool
     {
         return $this->status === ProviderStatus::Active;

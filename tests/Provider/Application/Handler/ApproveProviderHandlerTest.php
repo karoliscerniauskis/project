@@ -11,9 +11,11 @@ use App\Provider\Domain\Event\ProviderApproved;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Application\Outbox\OutboxWriter;
+use App\Shared\Application\Security\AdminRoleChecker;
 use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
+use App\Shared\Domain\Id\UserId;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
@@ -23,8 +25,9 @@ final class ApproveProviderHandlerTest extends TestCase
     {
         $occurredOn = new DateTimeImmutable('2020-01-01 00:00:00');
         $providerId = '550e8400-e29b-41d4-a716-446655440000';
+        $userId = '550e8400-e29b-41d4-a716-446655440001';
         $name = 'Provider';
-        $command = new ApproveProvider($providerId);
+        $command = new ApproveProvider($providerId, $userId);
         $provider = Provider::reconstitute(
             ProviderId::fromString($providerId),
             $name,
@@ -34,6 +37,12 @@ final class ApproveProviderHandlerTest extends TestCase
         $clock = $this->createMock(Clock::class);
         $transactionManager = $this->createMock(TransactionManager::class);
         $outboxWriter = $this->createMock(OutboxWriter::class);
+        $adminRoleChecker = $this->createMock(AdminRoleChecker::class);
+        $adminRoleChecker
+            ->expects(self::once())
+            ->method('isAdmin')
+            ->with(UserId::fromString($userId))
+            ->willReturn(true);
         $providerRepository
             ->expects(self::once())
             ->method('findById')
@@ -78,6 +87,7 @@ final class ApproveProviderHandlerTest extends TestCase
             $clock,
             $transactionManager,
             $outboxWriter,
+            $adminRoleChecker,
         );
         $handler($command);
     }

@@ -28,10 +28,25 @@
                     >
                         Notifications
                     </RouterLink>
+                    <RouterLink
+                        v-if="isAdminUser"
+                        to="/admin/providers"
+                        class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+                        active-class="!text-slate-950"
+                    >
+                        Admin
+                    </RouterLink>
                 </div>
             </div>
 
             <div class="flex items-center gap-4">
+                <span
+                    v-if="isAuthenticated && username !== null"
+                    class="hidden max-w-56 truncate rounded-xl bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 sm:inline"
+                    :title="username"
+                >
+                    {{ username }}
+                </span>
                 <RouterLink
                     v-if="!isAuthenticated"
                     to="/login"
@@ -61,8 +76,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { getUsername, isAdmin } from '@/utils/auth'
 
 const isAuthenticated = computed(() => {
     return localStorage.getItem('token') !== null
+})
+
+const isAdminUser = computed(() => {
+    return isAdmin()
+})
+
+const username = computed(() => {
+    return getUsername()
 })
 </script>

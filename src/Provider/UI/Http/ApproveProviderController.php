@@ -6,18 +6,20 @@ namespace App\Provider\UI\Http;
 
 use App\Provider\Application\Command\ApproveProvider;
 use App\Shared\Application\Bus\CommandBus;
+use App\Shared\Application\Security\AuthenticatedUser;
 use App\Shared\Domain\Id\UuidValidator;
 use App\Shared\UI\Http\InvalidRequestParameterException;
 use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final readonly class ApproveProviderController
+final class ApproveProviderController extends AbstractController
 {
     public function __construct(
-        private CommandBus $commandBus,
-        private UuidValidator $uuidValidator,
+        private readonly CommandBus $commandBus,
+        private readonly UuidValidator $uuidValidator,
     ) {
     }
 
@@ -54,11 +56,17 @@ final readonly class ApproveProviderController
     )]
     public function __invoke(string $providerId): JsonResponse
     {
+        $user = $this->getUser();
+
+        if (!$user instanceof AuthenticatedUser) {
+            return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
+        }
+
         if (!$this->uuidValidator->isValid($providerId)) {
             throw new InvalidRequestParameterException('providerId', sprintf('Invalid Provider "%s".', $providerId));
         }
 
-        $this->commandBus->dispatch(new ApproveProvider($providerId));
+        $this->commandBus->dispatch(new ApproveProvider($providerId, $user->getId()));
 
         return new JsonResponse(status: Response::HTTP_NO_CONTENT);
     }
