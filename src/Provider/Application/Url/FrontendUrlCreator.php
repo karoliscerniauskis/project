@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Provider\Application\Url;
+
+interface FrontendUrlCreator
+{
+    public function acceptProviderInvitation(string $slug): string;
+}

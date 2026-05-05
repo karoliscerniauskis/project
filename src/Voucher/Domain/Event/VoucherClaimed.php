@@ -11,11 +11,17 @@ use DateTimeInterface;
 final readonly class VoucherClaimed extends AbstractDomainEvent
 {
     public function __construct(
+        private string $providerId,
         private string $voucherCode,
         private string $issuedToEmail,
         DateTimeImmutable $occurredOn,
     ) {
         parent::__construct($occurredOn);
+    }
+
+    public function getProviderId(): string
+    {
+        return $this->providerId;
     }
 
     public function getVoucherCode(): string
@@ -31,6 +37,7 @@ final readonly class VoucherClaimed extends AbstractDomainEvent
     public function toArray(): array
     {
         return [
+            'providerId' => $this->providerId,
             'voucherCode' => $this->voucherCode,
             'issuedToEmail' => $this->issuedToEmail,
             'occurredOn' => $this->occurredOn->format(DateTimeInterface::ATOM),

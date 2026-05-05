@@ -14,6 +14,7 @@ import ValidateVoucherPage from '@/pages/providers/ValidateVoucherPage.vue'
 import ClaimVoucherPage from '@/pages/vouchers/ClaimVoucherPage.vue'
 import TransferVoucherPage from '@/pages/vouchers/TransferVoucherPage.vue'
 import NotificationsPage from '@/pages/notifications/NotificationsPage.vue'
+import AcceptProviderInvitationPage from '@/pages/providers/AcceptProviderInvitationPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -100,6 +101,12 @@ export const router = createRouter({
             path: '/me/notifications',
             name: 'my-notifications',
             component: NotificationsPage,
+        },
+        {
+            path: '/provider-invitations/:slug/accept',
+            name: 'provider-invitation-accept',
+            component: AcceptProviderInvitationPage,
+            props: true,
         },
     ],
 })

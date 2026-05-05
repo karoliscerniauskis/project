@@ -24,19 +24,7 @@
                 v-else-if="transferred"
                 class="bg-green-50 border border-green-200 rounded-xl p-8 text-center"
             >
-                <svg
-                    class="mx-auto h-12 w-12 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                </svg>
+                <div class="mx-auto flex h-12 w-12 items-center justify-center text-4xl">✅</div>
                 <h3 class="mt-4 text-lg font-semibold text-green-900">
                     Voucher transferred successfully!
                 </h3>
@@ -52,20 +40,10 @@
             </div>
 
             <div v-else class="bg-white rounded-xl shadow-sm p-8">
-                <div class="mb-6">
-                    <svg
-                        class="mx-auto h-16 w-16 text-slate-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-                        />
-                    </svg>
+                <div
+                    class="text-center mb-8 mx-auto flex h-16 w-16 items-center justify-center text-5xl"
+                >
+                    🔁
                 </div>
 
                 <div v-if="formError" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">

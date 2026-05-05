@@ -173,3 +173,12 @@ export function createVoucher(providerId: string, payload: CreateVoucherPayload)
         body: JSON.stringify(payload),
     })
 }
+
+export function acceptProviderInvitation(slug: string): Promise<void> {
+    return apiRequest<void>(`/api/provider/invitations/${encodeURIComponent(slug)}/accept`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}

@@ -63,6 +63,7 @@ export async function apiRequest<TResponse>(
         }
 
         clearTokens()
+        redirectToLogin()
         throw new ApiError('Session expired', 401, data)
     }
 
@@ -126,6 +127,16 @@ async function refreshAccessToken(): Promise<string | null> {
 function clearTokens(): void {
     localStorage.removeItem('token')
     localStorage.removeItem('refresh_token')
+}
+
+function redirectToLogin(): void {
+    const currentPath = `${window.location.pathname}${window.location.search}`
+
+    if (window.location.pathname === '/login') {
+        return
+    }
+
+    window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`
 }
 
 async function parseResponse<TResponse>(response: Response): Promise<TResponse> {

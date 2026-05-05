@@ -4,24 +4,22 @@ declare(strict_types=1);
 
 namespace App\Provider\Application\Handler;
 
+use App\Provider\Application\Url\FrontendUrlCreator;
 use App\Provider\Domain\Event\ProviderInvitationCreated;
 use App\Shared\Application\Email\EmailSender;
-use App\Shared\Application\Url\UrlCreator;
 
 final readonly class SendProviderInvitationEmailHandler
 {
     public function __construct(
         private EmailSender $emailSender,
-        private UrlCreator $urlCreator,
+        private FrontendUrlCreator $frontendUrlCreator,
         private string $emailFrom,
     ) {
     }
 
     public function __invoke(ProviderInvitationCreated $event): void
     {
-        $inviteUrl = $this->urlCreator->absolute('api_provider_accept_invitation', [
-            'slug' => $event->getSlug(),
-        ]);
+        $inviteUrl = $this->frontendUrlCreator->acceptProviderInvitation($event->getSlug());
         $this->emailSender->send(
             $this->emailFrom,
             $event->getEmail(),

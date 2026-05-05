@@ -4,14 +4,14 @@
             <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-3xl font-bold text-slate-900">Claim Voucher</h1>
-                        <p class="text-slate-600 mt-1">Claim this voucher to reveal its code</p>
+                        <h1 class="text-3xl font-bold text-slate-900">Provider Invitation</h1>
+                        <p class="text-slate-600 mt-1">Accept your invitation to join a provider</p>
                     </div>
                     <RouterLink
-                        to="/me/vouchers"
+                        to="/providers"
                         class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
                     >
-                        ← Back
+                        Providers
                     </RouterLink>
                 </div>
             </div>
@@ -21,21 +21,24 @@
             <ErrorMessage v-else-if="error" :message="error" />
 
             <div
-                v-else-if="claimed"
+                v-else-if="accepted"
                 class="bg-green-50 border border-green-200 rounded-xl p-8 text-center"
             >
                 <div class="mx-auto flex h-12 w-12 items-center justify-center text-4xl">✅</div>
+
                 <h3 class="mt-4 text-lg font-semibold text-green-900">
-                    Voucher claimed successfully!
+                    Invitation accepted successfully!
                 </h3>
+
                 <p class="mt-2 text-green-700">
-                    You can now view your voucher code in your vouchers list.
+                    You can now access this provider from your providers list.
                 </p>
+
                 <RouterLink
-                    to="/me/vouchers"
+                    to="/providers"
                     class="mt-6 inline-block px-6 py-3 bg-green-600 !text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                 >
-                    View My Vouchers
+                    View Providers
                 </RouterLink>
             </div>
 
@@ -44,11 +47,13 @@
                     <div class="mx-auto flex h-16 w-16 items-center justify-center text-5xl">
                         🎟️
                     </div>
+
                     <h2 class="mt-4 text-xl font-semibold text-slate-900">
-                        Ready to claim this voucher?
+                        Accept provider invitation?
                     </h2>
+
                     <p class="mt-2 text-slate-600">
-                        Once claimed, the voucher code will be revealed to you.
+                        After accepting, you will become a member of this provider.
                     </p>
                 </div>
 
@@ -56,9 +61,9 @@
                     type="button"
                     :disabled="submitting"
                     class="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-lg"
-                    @click="onClaim"
+                    @click="onAccept"
                 >
-                    {{ submitting ? 'Claiming...' : 'Claim Voucher' }}
+                    {{ submitting ? 'Accepting...' : 'Accept Invitation' }}
                 </button>
             </div>
         </div>
@@ -68,32 +73,33 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { claimVoucher } from '@/api/voucher.api'
+import { acceptProviderInvitation } from '@/api/provider.api'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import ErrorMessage from '@/components/common/ErrorMessage.vue'
 
 const route = useRoute()
+
 const loading = ref(true)
 const submitting = ref(false)
 const error = ref('')
-const voucherId = ref('')
-const claimed = ref(false)
+const slug = ref('')
+const accepted = ref(false)
 
 onMounted(() => {
-    const id = route.params.voucherId
+    const routeSlug = route.params.slug
 
-    if (typeof id !== 'string' || id.length === 0) {
-        error.value = 'Invalid voucher id.'
+    if (typeof routeSlug !== 'string' || routeSlug.length === 0) {
+        error.value = 'Invalid invitation link.'
         loading.value = false
         return
     }
 
-    voucherId.value = id
+    slug.value = routeSlug
     loading.value = false
 })
 
-async function onClaim(): Promise<void> {
-    if (!voucherId.value) {
+async function onAccept(): Promise<void> {
+    if (!slug.value) {
         return
     }
 
@@ -101,10 +107,10 @@ async function onClaim(): Promise<void> {
     error.value = ''
 
     try {
-        await claimVoucher(voucherId.value)
-        claimed.value = true
+        await acceptProviderInvitation(slug.value)
+        accepted.value = true
     } catch (e) {
-        error.value = e instanceof Error ? e.message : 'Failed to claim voucher.'
+        error.value = e instanceof Error ? e.message : 'Failed to accept invitation.'
     } finally {
         submitting.value = false
     }

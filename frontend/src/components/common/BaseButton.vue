@@ -47,8 +47,7 @@ const baseClasses =
     'inline-flex items-center justify-center font-semibold transition-all rounded-full focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed'
 
 const variantClasses: Record<Variant, string> = {
-    primary:
-        'bg-[#0071e3] text-white hover:bg-[#0077ed] active:bg-[#006edb]',
+    primary: 'bg-[#0071e3] text-white hover:bg-[#0077ed] active:bg-[#006edb]',
     secondary:
         'bg-transparent border-2 border-[#0071e3] text-[#0071e3] hover:bg-[#0071e3] hover:text-white',
     danger: 'bg-[#ff3b30] text-white hover:bg-[#ff453a] active:bg-[#ff2d20]',

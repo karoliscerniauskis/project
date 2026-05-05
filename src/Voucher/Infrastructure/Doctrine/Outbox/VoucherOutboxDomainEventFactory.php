@@ -32,6 +32,7 @@ final readonly class VoucherOutboxDomainEventFactory extends AbstractOutboxDomai
     {
         return match ($record->getEventName()) {
             VoucherClaimed::class => new VoucherClaimed(
+                $this->stringPayloadValue($record->getPayload(), 'providerId'),
                 $this->stringPayloadValue($record->getPayload(), 'voucherCode'),
                 $this->stringPayloadValue($record->getPayload(), 'issuedToEmail'),
                 $record->getOccurredAt(),

@@ -141,6 +141,7 @@ final class Voucher extends AbstractAggregateRoot
 
         $this->claimedByUserId = $claimedByUserId;
         $this->record(new VoucherClaimed(
+            $this->providerId->toString(),
             $this->code,
             $this->issuedToEmail,
             $occurredOn,

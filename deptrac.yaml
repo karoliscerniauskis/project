@@ -235,6 +235,7 @@ deptrac:
             - SharedDomain
         ProviderInfrastructure:
             - ProviderDomain
+            - ProviderApplication
             - SharedInfrastructure
             - SharedApplication
             - SharedDomain
