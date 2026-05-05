@@ -7,4 +7,6 @@ namespace App\Provider\Application\Url;
 interface FrontendUrlCreator
 {
     public function acceptProviderInvitation(string $slug): string;
+
+    public function provider(string $providerId): string;
 }

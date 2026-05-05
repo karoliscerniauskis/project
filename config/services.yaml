@@ -93,3 +93,7 @@ services:
     App\Provider\Infrastructure\Url\FrontendUrlCreator:
         arguments:
             $frontendUrl: '%app.frontend_url%'
+
+    App\Voucher\Infrastructure\Url\FrontendUrlCreator:
+        arguments:
+            $frontendUrl: '%app.frontend_url%'

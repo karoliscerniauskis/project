@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Provider\Application\Handler;
 
+use App\Provider\Application\Url\FrontendUrlCreator;
 use App\Provider\Domain\Event\ProviderApproved;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
@@ -19,6 +20,7 @@ final readonly class SendProviderApprovedEmailHandler
         private ProviderUserRepository $providerUserRepository,
         private UserEmailFinder $userEmailFinder,
         private EmailSender $emailSender,
+        private FrontendUrlCreator $frontendUrlCreator,
         private string $emailFrom,
     ) {
     }
@@ -33,6 +35,7 @@ final readonly class SendProviderApprovedEmailHandler
         }
 
         $providerName = $provider->getName();
+        $providerUrl = $this->frontendUrlCreator->provider($providerId->toString());
         $adminUserIds = $this->providerUserRepository->findUserIdsByProviderIdAndRole(
             $providerId,
             ProviderUserRole::Admin,
@@ -49,7 +52,11 @@ final readonly class SendProviderApprovedEmailHandler
                 $this->emailFrom,
                 $email,
                 'Your provider has been approved',
-                sprintf('Your provider "%s" has been approved and is now active.', $providerName),
+                sprintf(
+                    'Your provider "%s" has been approved and is now active. View it here: %s',
+                    $providerName,
+                    $providerUrl,
+                ),
             );
         }
     }
