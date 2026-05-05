@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Provider\Domain\Entity;
 
 use App\Provider\Domain\Event\ProviderApproved;
+use App\Provider\Domain\Event\ProviderCreated;
 use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
@@ -25,11 +26,17 @@ final class Provider extends AbstractAggregateRoot
         ProviderId $id,
         string $name,
         ProviderStatus $status,
+        DateTimeImmutable $occurredOn,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->name = $name;
         $self->status = $status;
+        $self->record(new ProviderCreated(
+            $id->toString(),
+            $name,
+            $occurredOn,
+        ));
 
         return $self;
     }

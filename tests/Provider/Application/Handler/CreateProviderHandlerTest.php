@@ -8,12 +8,15 @@ use App\Provider\Application\Command\CreateProvider;
 use App\Provider\Application\Handler\CreateProviderHandler;
 use App\Provider\Domain\Entity\Provider;
 use App\Provider\Domain\Entity\ProviderUser;
+use App\Provider\Domain\Event\ProviderCreated;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
+use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UuidCreator;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 final class CreateProviderHandlerTest extends TestCase
@@ -24,12 +27,14 @@ final class CreateProviderHandlerTest extends TestCase
         $providerId = '550e8400-e29b-41d4-a716-446655440001';
         $providerUserId = '550e8400-e29b-41d4-a716-446655440002';
         $name = 'Provider';
+        $occurredOn = new DateTimeImmutable('2020-01-01 00:00:00');
         $command = new CreateProvider($userId, $name);
         $providerRepository = $this->createMock(ProviderRepository::class);
         $providerUserRepository = $this->createMock(ProviderUserRepository::class);
         $uuidCreator = $this->createMock(UuidCreator::class);
         $transactionManager = $this->createMock(TransactionManager::class);
         $outboxWriter = $this->createMock(OutboxWriter::class);
+        $clock = $this->createMock(Clock::class);
         $providerRepository
             ->expects(self::once())
             ->method('existsByName')
@@ -58,10 +63,33 @@ final class CreateProviderHandlerTest extends TestCase
                 self::assertSame($userId, $providerUser->getUserId()->toString());
                 self::assertTrue($providerUser->isAdmin());
             });
+        $clock
+            ->expects(self::once())
+            ->method('now')
+            ->willReturn($occurredOn);
+        $storeAllCall = 0;
         $outboxWriter
             ->expects(self::exactly(2))
             ->method('storeAll')
-            ->with([]);
+            ->willReturnCallback(static function (array $events) use ($providerId, $name, $occurredOn, &$storeAllCall): void {
+                if ($storeAllCall === 0) {
+                    self::assertCount(1, $events);
+                    self::assertInstanceOf(ProviderCreated::class, $events[0]);
+
+                    /** @var ProviderCreated $event */
+                    $event = $events[0];
+
+                    self::assertSame($providerId, $event->getProviderId());
+                    self::assertSame($name, $event->getProviderName());
+                    self::assertSame($occurredOn, $event->getOccurredOn());
+                }
+
+                if ($storeAllCall === 1) {
+                    self::assertSame([], $events);
+                }
+
+                ++$storeAllCall;
+            });
         $transactionManager
             ->expects(self::once())
             ->method('transactional')
@@ -74,6 +102,7 @@ final class CreateProviderHandlerTest extends TestCase
             $uuidCreator,
             $transactionManager,
             $outboxWriter,
+            $clock,
         );
         $handler($command);
     }

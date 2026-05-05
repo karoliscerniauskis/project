@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Provider\Infrastructure\Doctrine\Outbox;
 
 use App\Provider\Domain\Event\ProviderApproved;
+use App\Provider\Domain\Event\ProviderCreated;
 use App\Provider\Domain\Event\ProviderInvitationCreated;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Infrastructure\Doctrine\Outbox\AbstractOutboxDomainEventFactory;
@@ -19,6 +20,7 @@ final readonly class ProviderOutboxDomainEventFactory extends AbstractOutboxDoma
         return in_array($eventName, [
             ProviderApproved::class,
             ProviderInvitationCreated::class,
+            ProviderCreated::class,
         ], true);
     }
 
@@ -27,6 +29,11 @@ final readonly class ProviderOutboxDomainEventFactory extends AbstractOutboxDoma
         return match ($record->getEventName()) {
             ProviderApproved::class => new ProviderApproved(
                 $this->stringPayloadValue($record->getPayload(), 'providerId'),
+                $record->getOccurredAt(),
+            ),
+            ProviderCreated::class => new ProviderCreated(
+                $this->stringPayloadValue($record->getPayload(), 'providerId'),
+                $this->stringPayloadValue($record->getPayload(), 'providerName'),
                 $record->getOccurredAt(),
             ),
             ProviderInvitationCreated::class => new ProviderInvitationCreated(

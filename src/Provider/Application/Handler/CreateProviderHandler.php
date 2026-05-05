@@ -13,6 +13,7 @@ use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
+use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
@@ -26,6 +27,7 @@ final readonly class CreateProviderHandler
         private UuidCreator $uuidCreator,
         private TransactionManager $transactionManager,
         private OutboxWriter $outboxWriter,
+        private Clock $clock,
     ) {
     }
 
@@ -42,6 +44,7 @@ final readonly class CreateProviderHandler
                 ProviderId::fromString($this->uuidCreator->create()),
                 $command->getName(),
                 ProviderStatus::Pending,
+                $this->clock->now(),
             );
 
             $providerUser = ProviderUser::assignAdmin(
