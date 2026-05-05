@@ -9,6 +9,7 @@ use App\Voucher\Application\Url\FrontendUrlCreator as FrontendUrlCreatorInterfac
 final readonly class FrontendUrlCreator implements FrontendUrlCreatorInterface
 {
     private const string MY_VOUCHERS_FORMAT = '%s/me/vouchers';
+    private const string PROVIDER_VOUCHERS_FORMAT = '%s/providers/%s/vouchers';
 
     public function __construct(
         private string $frontendUrl,
@@ -20,6 +21,15 @@ final readonly class FrontendUrlCreator implements FrontendUrlCreatorInterface
         return sprintf(
             self::MY_VOUCHERS_FORMAT,
             $this->frontendUrl,
+        );
+    }
+
+    public function providerVouchers(string $providerId): string
+    {
+        return sprintf(
+            self::PROVIDER_VOUCHERS_FORMAT,
+            $this->frontendUrl,
+            rawurlencode($providerId),
         );
     }
 }

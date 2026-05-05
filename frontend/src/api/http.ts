@@ -29,7 +29,7 @@ export async function apiRequest<TResponse>(
     const headers = new Headers(options.headers)
     const token = getAccessToken()
 
-    if (token !== null && !headers.has('Authorization')) {
+    if (!options.skipAuth && token !== null && !headers.has('Authorization')) {
         headers.set('Authorization', `Bearer ${token}`)
     }
 
@@ -86,6 +86,7 @@ let refreshPromise: Promise<string | null> | null = null
 
 type ApiRequestOptions = RequestInit & {
     skipRefresh?: boolean
+    skipAuth?: boolean
 }
 
 function getAccessToken(): string | null {

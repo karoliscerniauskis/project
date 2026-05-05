@@ -72,6 +72,14 @@
                             {{ formatDate(notification.createdAt) }}
                         </p>
 
+                        <RouterLink
+                            v-if="getPayloadString(notification.payload, 'url')"
+                            :to="getPayloadString(notification.payload, 'url') ?? '/'"
+                            class="mt-4 inline-block px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium"
+                        >
+                            Open
+                        </RouterLink>
+
                         <details v-if="Object.keys(notification.payload).length > 0" class="mt-4">
                             <summary
                                 class="cursor-pointer text-sm font-medium text-slate-600 hover:text-slate-900"
@@ -140,5 +148,11 @@ async function markAsRead(notificationId: string): Promise<void> {
     } finally {
         markingId.value = null
     }
+}
+
+function getPayloadString(payload: Record<string, unknown>, key: string): string | null {
+    const value = payload[key]
+
+    return typeof value === 'string' && value.length > 0 ? value : null
 }
 </script>

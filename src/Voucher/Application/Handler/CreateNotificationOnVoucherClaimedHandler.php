@@ -7,6 +7,7 @@ namespace App\Voucher\Application\Handler;
 use App\Shared\Application\Notification\NotificationSender;
 use App\Shared\Application\ProviderUser\ProviderAdminFinder;
 use App\Shared\Domain\Id\ProviderId;
+use App\Voucher\Application\Url\FrontendUrlCreator;
 use App\Voucher\Domain\Event\VoucherClaimed;
 
 final readonly class CreateNotificationOnVoucherClaimedHandler
@@ -14,6 +15,7 @@ final readonly class CreateNotificationOnVoucherClaimedHandler
     public function __construct(
         private ProviderAdminFinder $providerAdminFinder,
         private NotificationSender $notificationSender,
+        private FrontendUrlCreator $frontendUrlCreator,
     ) {
     }
 
@@ -37,6 +39,7 @@ final readonly class CreateNotificationOnVoucherClaimedHandler
                     'providerId' => $event->getProviderId(),
                     'voucherCode' => $event->getVoucherCode(),
                     'issuedToEmail' => $event->getIssuedToEmail(),
+                    'url' => $this->frontendUrlCreator->providerVouchers($event->getProviderId()),
                 ],
             );
         }

@@ -23,6 +23,7 @@ export function login(payload: AuthCredentials): Promise<LoginResponse> {
         },
         body: JSON.stringify(payload),
         skipRefresh: true,
+        skipAuth: true,
     })
 }
 
@@ -34,6 +35,7 @@ export function register(payload: AuthCredentials): Promise<void> {
         },
         body: JSON.stringify(payload),
         skipRefresh: true,
+        skipAuth: true,
     })
 }
 
