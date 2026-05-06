@@ -49,8 +49,6 @@ final class ProcessOutboxCommand extends Command
         while (true) {
             try {
                 $this->outboxProcessor->processPending();
-                $output->writeln('Outbox processed.');
-                $this->logger->info('Outbox processed successfully.');
             } catch (Throwable $exception) {
                 $output->writeln(sprintf(
                     '<error>Outbox processing failed: %s</error>',
