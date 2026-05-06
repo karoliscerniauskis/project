@@ -11,10 +11,14 @@ use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Infrastructure\Doctrine\Outbox\Entity\OutboxMessageRecord;
 use App\Shared\Infrastructure\Doctrine\Outbox\Repository\DoctrineOutboxMessageRepository;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
+use Throwable;
 
 final readonly class DoctrineOutboxProcessor implements OutboxProcessor
 {
+    private const int MAX_RETRY_COUNT = 3;
+
     /**
      * @param iterable<OutboxDomainEventFactory> $factories
      */
@@ -24,6 +28,7 @@ final readonly class DoctrineOutboxProcessor implements OutboxProcessor
         private DomainEventDispatcher $domainEventDispatcher,
         private Clock $clock,
         private iterable $factories,
+        private LoggerInterface $logger,
     ) {
     }
 
@@ -31,11 +36,54 @@ final readonly class DoctrineOutboxProcessor implements OutboxProcessor
     {
         $this->transactionManager->transactional(function (): void {
             foreach ($this->outboxMessageRepository->findPending() as $record) {
-                $record->markProcessing($this->clock->now());
-                $this->domainEventDispatcher->dispatch($this->fromRecord($record));
-                $record->markProcessed($this->clock->now());
+                try {
+                    $this->processRecord($record);
+                } catch (Throwable $exception) {
+                    $this->handleFailedRecord($record, $exception);
+                }
             }
         });
+    }
+
+    private function processRecord(OutboxMessageRecord $record): void
+    {
+        $this->transactionManager->transactional(function () use ($record): void {
+            $record->markProcessing($this->clock->now());
+            $this->domainEventDispatcher->dispatch($this->fromRecord($record));
+            $record->markProcessed($this->clock->now());
+        });
+    }
+
+    private function handleFailedRecord(OutboxMessageRecord $record, Throwable $exception): void
+    {
+        $this->logger->error('Outbox message processing failed.', [
+            'outboxMessageId' => $record->getId(),
+            'eventName' => $record->getEventName(),
+            'retryCount' => $record->getRetryCount(),
+            'exception' => $exception,
+        ]);
+
+        try {
+            $this->transactionManager->transactional(function () use ($record): void {
+                $record->incrementRetryCount();
+
+                if ($record->getRetryCount() >= self::MAX_RETRY_COUNT) {
+                    $record->markFailed(
+                        $this->clock->now(),
+                    );
+
+                    return;
+                }
+
+                $record->releaseProcessing();
+            });
+        } catch (Throwable $releaseException) {
+            $this->logger->error('Failed to update failed outbox message state.', [
+                'outboxMessageId' => $record->getId(),
+                'eventName' => $record->getEventName(),
+                'exception' => $releaseException,
+            ]);
+        }
     }
 
     private function fromRecord(OutboxMessageRecord $record): DomainEvent

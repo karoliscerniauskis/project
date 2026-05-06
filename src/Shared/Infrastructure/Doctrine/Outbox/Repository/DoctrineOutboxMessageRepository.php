@@ -23,6 +23,7 @@ final readonly class DoctrineOutboxMessageRepository
             [
                 'processedAt' => null,
                 'processingAt' => null,
+                'failedAt' => null,
             ],
             ['occurredAt' => 'ASC'],
             $limit,

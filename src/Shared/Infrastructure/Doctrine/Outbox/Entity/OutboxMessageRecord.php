@@ -33,6 +33,12 @@ class OutboxMessageRecord
     #[ORM\Column(name: 'processed_at', type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $processedAt = null;
 
+    #[ORM\Column(name: 'failed_at', type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $failedAt = null;
+
+    #[ORM\Column(name: 'retry_count', type: 'integer')]
+    private int $retryCount = 0;
+
     /**
      * @param array<string, mixed> $payload
      */
@@ -81,6 +87,16 @@ class OutboxMessageRecord
         return $this->processingAt;
     }
 
+    public function getFailedAt(): ?DateTimeImmutable
+    {
+        return $this->failedAt;
+    }
+
+    public function getRetryCount(): int
+    {
+        return $this->retryCount;
+    }
+
     public function markProcessing(DateTimeImmutable $processingAt): void
     {
         $this->processingAt = $processingAt;
@@ -92,8 +108,19 @@ class OutboxMessageRecord
         $this->processingAt = null;
     }
 
+    public function markFailed(DateTimeImmutable $failedAt): void
+    {
+        $this->failedAt = $failedAt;
+        $this->processingAt = null;
+    }
+
     public function releaseProcessing(): void
     {
         $this->processingAt = null;
+    }
+
+    public function incrementRetryCount(): void
+    {
+        ++$this->retryCount;
     }
 }
