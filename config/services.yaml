@@ -70,6 +70,11 @@ services:
         arguments:
             $emailFrom: '%app.email_from%'
 
+    App\Voucher\Application\Handler\SendVoucherCanceledEmailHandler:
+        tags: [ 'messenger.message_handler' ]
+        arguments:
+            $emailFrom: '%app.email_from%'
+
     App\Auth\Infrastructure\Doctrine\Outbox\AuthOutboxDomainEventFactory:
         tags: ['app.outbox_domain_event_factory']
 

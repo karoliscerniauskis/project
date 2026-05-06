@@ -157,6 +157,11 @@ deptrac:
             collectors:
                 -   type: classLike
                     value: ^OpenApi\\
+        -
+            name: Psr
+            collectors:
+                -   type: classLike
+                    value: ^Psr\\
     ruleset:
         # Shared
         SharedDomain:
@@ -175,6 +180,7 @@ deptrac:
             - SharedDomain
             - OpenApi
             - Nelmio
+            - Psr
         # Auth
         AuthDomain:
             - SharedDomain

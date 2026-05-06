@@ -8,6 +8,7 @@ use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Infrastructure\Doctrine\Outbox\AbstractOutboxDomainEventFactory;
 use App\Shared\Infrastructure\Doctrine\Outbox\Entity\OutboxMessageRecord;
 use App\Shared\Infrastructure\Doctrine\Outbox\OutboxDomainEventFactory;
+use App\Voucher\Domain\Event\VoucherCanceled;
 use App\Voucher\Domain\Event\VoucherClaimed;
 use App\Voucher\Domain\Event\VoucherCreated;
 use App\Voucher\Domain\Event\VoucherDeactivated;
@@ -25,6 +26,7 @@ final readonly class VoucherOutboxDomainEventFactory extends AbstractOutboxDomai
             VoucherDeactivated::class,
             VoucherExpired::class,
             VoucherTransferred::class,
+            VoucherCanceled::class,
         ], true);
     }
 
@@ -51,6 +53,11 @@ final readonly class VoucherOutboxDomainEventFactory extends AbstractOutboxDomai
             VoucherTransferred::class => new VoucherTransferred(
                 $this->stringPayloadValue($record->getPayload(), 'transferredFromEmail'),
                 $this->stringPayloadValue($record->getPayload(), 'transferredToEmail'),
+                $record->getOccurredAt(),
+            ),
+            VoucherCanceled::class => new VoucherCanceled(
+                $this->stringPayloadValue($record->getPayload(), 'voucherCode'),
+                $this->stringPayloadValue($record->getPayload(), 'issuedToEmail'),
                 $record->getOccurredAt(),
             ),
             default => throw new RuntimeException('Unsupported voucher outbox event: '.$record->getEventName()),
