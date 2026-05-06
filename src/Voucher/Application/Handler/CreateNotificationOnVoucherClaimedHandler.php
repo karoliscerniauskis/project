@@ -37,7 +37,7 @@ final readonly class CreateNotificationOnVoucherClaimedHandler
                 ),
                 [
                     'providerId' => $event->getProviderId(),
-                    'voucherCode' => $event->getVoucherCode(),
+                    'voucherCode' => sprintf('***%s', substr($event->getVoucherCode(), -3)),
                     'issuedToEmail' => $event->getIssuedToEmail(),
                     'url' => $this->frontendUrlCreator->providerVouchers($event->getProviderId()),
                 ],

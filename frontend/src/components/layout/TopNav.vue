@@ -23,10 +23,16 @@
                     </RouterLink>
                     <RouterLink
                         to="/me/notifications"
-                        class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+                        class="relative text-sm font-medium text-slate-600 transition hover:text-slate-950"
                         active-class="!text-slate-950"
                     >
                         Notifications
+                        <span
+                            v-if="unreadNotificationsCount > 0"
+                            class="absolute -right-5 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold !text-white"
+                        >
+                            {{ unreadNotificationsCount }}
+                        </span>
                     </RouterLink>
                     <RouterLink
                         v-if="isAdminUser"
@@ -74,9 +80,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { getUnreadNotificationsCount } from '@/api/notification.api'
 import { getUsername, isAdmin } from '@/utils/auth'
+
+const unreadNotificationsCount = ref(0)
+let unreadNotificationsInterval: number | null = null
 
 const isAuthenticated = computed(() => {
     return localStorage.getItem('token') !== null
@@ -88,5 +98,34 @@ const isAdminUser = computed(() => {
 
 const username = computed(() => {
     return getUsername()
+})
+
+async function refreshUnreadNotificationsCount(): Promise<void> {
+    if (!isAuthenticated.value) {
+        unreadNotificationsCount.value = 0
+
+        return
+    }
+
+    try {
+        const response = await getUnreadNotificationsCount()
+        unreadNotificationsCount.value = response.data.count
+    } catch {
+        unreadNotificationsCount.value = 0
+    }
+}
+
+onMounted(() => {
+    void refreshUnreadNotificationsCount()
+
+    unreadNotificationsInterval = window.setInterval(() => {
+        void refreshUnreadNotificationsCount()
+    }, 3000)
+})
+
+onUnmounted(() => {
+    if (unreadNotificationsInterval !== null) {
+        window.clearInterval(unreadNotificationsInterval)
+    }
 })
 </script>
