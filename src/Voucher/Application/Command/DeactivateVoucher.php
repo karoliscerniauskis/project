@@ -8,7 +8,7 @@ final readonly class DeactivateVoucher
 {
     public function __construct(
         private string $providerId,
-        private string $code,
+        private string $voucherId,
         private string $userId,
     ) {
     }
@@ -18,9 +18,9 @@ final readonly class DeactivateVoucher
         return $this->providerId;
     }
 
-    public function getCode(): string
+    public function getVoucherId(): string
     {
-        return $this->code;
+        return $this->voucherId;
     }
 
     public function getUserId(): string

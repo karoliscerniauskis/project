@@ -21,16 +21,19 @@
                     <span v-if="value" class="font-mono text-sm text-slate-900">
                         {{ value }}
                     </span>
-                    <span v-else class="text-sm text-slate-500 italic">Claim to reveal</span>
                 </template>
 
                 <template #cell-providerName="{ value }">
                     <span class="text-sm text-slate-900">{{ value }}</span>
                 </template>
 
+                <template #cell-status="{ value }">
+                    <StatusBadge :status="value" />
+                </template>
+
                 <template #cell-actions="{ row }">
                     <div class="flex items-center gap-2">
-                        <template v-if="row.code === null">
+                        <template v-if="row.canBeClaimedOrTransferred">
                             <BaseButton
                                 variant="success"
                                 size="sm"
@@ -46,7 +49,7 @@
                                 Transfer
                             </BaseButton>
                         </template>
-                        <StatusBadge v-else status="claimed" />
+                        <span v-else class="text-slate-400">-</span>
                     </div>
                 </template>
             </DataTable>
@@ -68,6 +71,7 @@ import StatusBadge from '@/components/common/StatusBadge.vue'
 const tableColumns = [
     { key: 'code', label: 'Code' },
     { key: 'providerName', label: 'Provider' },
+    { key: 'status', label: 'Status' },
     { key: 'actions', label: 'Actions' },
 ]
 

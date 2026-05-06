@@ -22,10 +22,10 @@ final class DeactivateVoucherController extends AbstractController
     ) {
     }
 
-    #[Route('/api/providers/{providerId}/vouchers/{code}/deactivate', name: 'api_provider_vouchers_deactivate', methods: ['POST'])]
+    #[Route('/api/providers/{providerId}/vouchers/{voucherId}/deactivate', name: 'api_provider_vouchers_deactivate', methods: ['POST'])]
     #[OA\Post(
-        path: '/api/providers/{providerId}/vouchers/{code}/deactivate',
-        description: 'Deactivates a voucher by its code. The authenticated user must be a provider member.',
+        path: '/api/providers/{providerId}/vouchers/{voucherId}/deactivate',
+        description: 'Deactivates a voucher by its identifier. The authenticated user must be a provider member.',
         summary: 'Deactivate voucher',
         security: [['Bearer' => []]],
         tags: ['Voucher'],
@@ -42,13 +42,14 @@ final class DeactivateVoucherController extends AbstractController
         ),
     )]
     #[OA\Parameter(
-        name: 'code',
-        description: 'Voucher code.',
+        name: 'voucherId',
+        description: 'Voucher identifier.',
         in: 'path',
         required: true,
         schema: new OA\Schema(
             type: 'string',
-            example: 'ABC123XYZ',
+            format: 'uuid',
+            example: '019d882d-1d68-7e2f-94ce-0cd2f4d0c369',
         ),
     )]
     #[OA\Response(
@@ -64,7 +65,7 @@ final class DeactivateVoucherController extends AbstractController
         description: 'Provider access is required.',
         content: new OA\JsonContent(ref: new Model(type: VoucherAccessDeniedResponse::class)),
     )]
-    public function __invoke(string $providerId, string $code): JsonResponse
+    public function __invoke(string $providerId, string $voucherId): JsonResponse
     {
         $user = $this->getUser();
 
@@ -75,7 +76,7 @@ final class DeactivateVoucherController extends AbstractController
         $this->commandBus->dispatch(
             new DeactivateVoucher(
                 $providerId,
-                $code,
+                $voucherId,
                 $user->getId(),
             ),
         );

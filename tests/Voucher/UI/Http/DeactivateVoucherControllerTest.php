@@ -17,9 +17,10 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
     {
         $client = self::createClient();
         $providerId = self::getUuidCreator()->create();
+        $voucherId = self::getUuidCreator()->create();
         $client->request(
             'POST',
-            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, 'DEACTIVATE-UNAUTHORIZED-001'),
+            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, $voucherId),
         );
 
         self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
@@ -46,7 +47,7 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
             status: ProviderUserStatus::Active->value,
         );
         $providerUser = self::getExistingProviderUser($providerId, $providerMemberUserId);
-        self::createVoucherRecord(
+        $voucherId = self::createVoucherRecord(
             code: 'DEACTIVATE-SUCCESS-001',
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
@@ -56,7 +57,7 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
 
         $client->request(
             'POST',
-            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, 'DEACTIVATE-SUCCESS-001'),
+            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, $voucherId),
             [],
             [],
             [
@@ -96,7 +97,7 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
             status: ProviderUserStatus::Active->value,
         );
         $providerUser = self::getExistingProviderUser($providerId, $providerMemberUserId);
-        self::createVoucherRecord(
+        $voucherId = self::createVoucherRecord(
             code: 'DEACTIVATE-PROVIDER-MISMATCH-001',
             providerId: $otherProviderId,
             createdByProviderUserId: $providerUser->getId(),
@@ -106,7 +107,7 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
 
         $client->request(
             'POST',
-            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, 'DEACTIVATE-PROVIDER-MISMATCH-001'),
+            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, $voucherId),
             [],
             [],
             [
@@ -142,7 +143,7 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
             status: ProviderUserStatus::Active->value,
         );
         $providerUser = self::getExistingProviderUser($providerId, $providerMemberUserId);
-        self::createVoucherRecord(
+        $voucherId = self::createVoucherRecord(
             code: 'DEACTIVATE-USED-001',
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
@@ -152,7 +153,7 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
 
         $client->request(
             'POST',
-            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, 'DEACTIVATE-USED-001'),
+            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, $voucherId),
             [],
             [],
             [
@@ -187,10 +188,11 @@ final class DeactivateVoucherControllerTest extends ApiWebTestCase
             role: ProviderUserRole::Member->value,
             status: ProviderUserStatus::Active->value,
         );
+        $voucherId = self::getUuidCreator()->create();
 
         $client->request(
             'POST',
-            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, 'DEACTIVATE-NOT-FOUND-001'),
+            sprintf('/api/providers/%s/vouchers/%s/deactivate', $providerId, $voucherId),
             [],
             [],
             [

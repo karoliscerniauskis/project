@@ -7,11 +7,12 @@ namespace App\Voucher\Domain\View;
 use App\Shared\Domain\View\ArrayableView;
 
 /**
- * @implements ArrayableView<array{code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}>
+ * @implements ArrayableView<array{id: string, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}>
  */
 final readonly class ProviderVoucherView implements ArrayableView
 {
     public function __construct(
+        private string $id,
         private string $code,
         private string $issuedToEmail,
         private ?string $claimedByUser,
@@ -21,11 +22,12 @@ final readonly class ProviderVoucherView implements ArrayableView
     }
 
     /**
-     * @return array{code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}
+     * @return array{id: string, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}
      */
     public function toArray(): array
     {
         return [
+            'id' => $this->id,
             'code' => $this->code,
             'issuedToEmail' => $this->issuedToEmail,
             'claimedByUser' => $this->claimedByUser,

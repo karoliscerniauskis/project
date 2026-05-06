@@ -21,7 +21,7 @@ final readonly class ValidateVoucherHandler
     {
         $voucher = $this->voucherRepository->findByCode($query->getCode());
 
-        if ($voucher === null) {
+        if ($voucher === null || $voucher->getProviderId()->toString() !== $query->getProviderId()) {
             return new VoucherValidationView(
                 false,
                 VoucherValidationStatus::NotFound,
@@ -29,18 +29,10 @@ final readonly class ValidateVoucherHandler
             );
         }
 
-        if ($voucher->getProviderId()->toString() !== $query->getProviderId()) {
-            return new VoucherValidationView(
-                false,
-                VoucherValidationStatus::Invalid,
-                VoucherValidationReason::VoucherProviderMismatch,
-            );
-        }
-
         if (!$voucher->isActive()) {
             return new VoucherValidationView(
                 false,
-                VoucherValidationStatus::Invalid,
+                VoucherValidationStatus::Used,
                 VoucherValidationReason::VoucherNotActive,
             );
         }

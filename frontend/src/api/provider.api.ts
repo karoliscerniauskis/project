@@ -21,6 +21,7 @@ export type ProviderInvitationView = {
 }
 
 export type ProviderVoucherView = {
+    id: string
     code: string
     issuedToEmail: string
     claimedByUser: string | null
@@ -96,9 +97,9 @@ export function getProviderVouchers(id: string): Promise<ProviderVouchersRespons
     })
 }
 
-export function deactivateProviderVoucher(providerId: string, code: string): Promise<void> {
+export function deactivateProviderVoucher(providerId: string, voucherId: string): Promise<void> {
     return apiRequest<void>(
-        `/api/providers/${providerId}/vouchers/${encodeURIComponent(code)}/deactivate`,
+        `/api/providers/${providerId}/vouchers/${encodeURIComponent(voucherId)}/deactivate`,
         {
             method: 'POST',
             headers: {

@@ -8,5 +8,5 @@ enum VoucherValidationStatus: string
 {
     case Valid = 'valid';
     case NotFound = 'notFound';
-    case Invalid = 'invalid';
+    case Used = 'used';
 }

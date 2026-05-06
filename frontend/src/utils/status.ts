@@ -1,7 +1,3 @@
-/**
- * Status formatting and styling utilities
- */
-
 export type VoucherStatus =
     | 'notFound'
     | 'active'
@@ -9,6 +5,7 @@ export type VoucherStatus =
     | 'deactivated'
     | 'transferred'
     | 'used'
+    | 'valid'
     | 'canceled'
 
 export type ProviderStatus = 'active' | 'pending' | 'inactive'
@@ -19,10 +16,8 @@ export type VoucherInvalidReason =
     | 'voucherAlreadyUsed'
     | 'voucherAlreadyClaimed'
     | 'voucherTransferred'
+    | 'voucherNotActive'
 
-/**
- * Format voucher status to human-readable text
- */
 export function formatVoucherStatus(status: VoucherStatus): string {
     const statusMap: Record<VoucherStatus, string> = {
         notFound: 'Not Found',
@@ -32,13 +27,11 @@ export function formatVoucherStatus(status: VoucherStatus): string {
         transferred: 'Transferred',
         used: 'Used',
         canceled: 'Canceled',
+        valid: 'Valid',
     }
     return statusMap[status] || status
 }
 
-/**
- * Format voucher invalid reason to human-readable text
- */
 export function formatVoucherReason(reason: VoucherInvalidReason): string {
     const reasonMap: Record<VoucherInvalidReason, string> = {
         voucherNotFound: 'Voucher not found',
@@ -46,17 +39,16 @@ export function formatVoucherReason(reason: VoucherInvalidReason): string {
         voucherAlreadyUsed: 'Voucher has already been used',
         voucherAlreadyClaimed: 'Voucher has already been claimed',
         voucherTransferred: 'Voucher has been transferred',
+        voucherNotActive: 'This voucher is no longer active.'
     }
     return reasonMap[reason] || reason
 }
 
-/**
- * Get Tailwind CSS classes for voucher status badge
- */
 export function getVoucherStatusClasses(status: VoucherStatus): string {
     const classMap: Record<VoucherStatus, string> = {
         notFound: 'bg-gray-100 text-gray-800',
         active: 'bg-green-100 text-green-800',
+        valid: 'bg-green-100 text-green-800',
         claimed: 'bg-yellow-100 text-yellow-800',
         deactivated: 'bg-red-100 text-red-800',
         transferred: 'bg-blue-100 text-blue-800',
@@ -66,9 +58,6 @@ export function getVoucherStatusClasses(status: VoucherStatus): string {
     return classMap[status] || 'bg-gray-100 text-gray-800'
 }
 
-/**
- * Get Tailwind CSS classes for provider status indicator (dot)
- */
 export function getProviderStatusClasses(status: ProviderStatus): string {
     const classMap: Record<ProviderStatus, string> = {
         active: 'bg-green-500',

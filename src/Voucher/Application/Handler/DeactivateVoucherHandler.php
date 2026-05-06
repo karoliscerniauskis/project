@@ -9,6 +9,7 @@ use App\Shared\Application\Security\ProviderAccessChecker;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
+use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Command\DeactivateVoucher;
 use App\Voucher\Application\Exception\VoucherAccessDenied;
 use App\Voucher\Application\Exception\VoucherNotActive;
@@ -38,18 +39,19 @@ final readonly class DeactivateVoucherHandler
             throw VoucherAccessDenied::create();
         }
 
-        $voucher = $this->voucherRepository->findByCode($command->getCode());
+        $voucherId = VoucherId::fromString($command->getVoucherId());
+        $voucher = $this->voucherRepository->findById($voucherId);
 
         if (!$voucher instanceof Voucher) {
-            throw VoucherNotFound::forCode($command->getCode());
+            throw VoucherNotFound::forId($voucherId);
         }
 
         if ($voucher->getProviderId()->toString() !== $command->getProviderId()) {
-            throw VoucherProviderMismatch::forCode($command->getCode());
+            throw VoucherProviderMismatch::forId($voucherId);
         }
 
         if (!$voucher->isActive()) {
-            throw VoucherNotActive::forCode($command->getCode());
+            throw VoucherNotActive::forId($voucherId);
         }
 
         $this->voucherTransactionManager->transactional(function () use ($voucher): void {

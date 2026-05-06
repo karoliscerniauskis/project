@@ -105,7 +105,7 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
 
         self::assertSame(
             [
-                null,
+                '***001',
                 'MY-VOUCHER-CLAIMED-001',
             ],
             $codes,

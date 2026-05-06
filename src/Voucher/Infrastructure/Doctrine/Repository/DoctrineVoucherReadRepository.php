@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Voucher\Infrastructure\Doctrine\Repository;
 
 use App\Shared\Domain\Id\ProviderId;
+use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Domain\Repository\VoucherReadRepository;
 use App\Voucher\Domain\View\MyVouchersView;
 use App\Voucher\Domain\View\MyVoucherView;
@@ -23,9 +24,10 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
     public function findByProviderId(ProviderId $providerId): ProviderVouchersView
     {
-        /** @var array<int, array{code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}> $rows */
+        /** @var array<int, array{id: UuidV7, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
+                'v.id AS id',
                 'v.code AS code',
                 'v.issuedToEmail AS issuedToEmail',
                 'claimedUser.email AS claimedByUser',
@@ -60,7 +62,8 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
         foreach ($rows as $row) {
             $vouchers[] = new ProviderVoucherView(
-                $row['code'],
+                $row['id']->toRfc4122(),
+                $row['status'] !== VoucherStatus::Active->value ? $row['code'] : sprintf('***%s', substr($row['code'], -3)),
                 $row['issuedToEmail'],
                 $row['claimedByUser'],
                 $row['createdByUser'],
@@ -73,13 +76,14 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
     public function findByUserEmailAndUserId(string $email, string $userId): MyVouchersView
     {
-        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string}> $rows */
+        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string, status: string}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.id AS id',
                 'v.code AS code',
                 'v.claimedByUserId AS claimedByUserId',
                 'p.name AS providerName',
+                'v.status as status',
             )
             ->from(VoucherRecord::class, 'v')
             ->innerJoin(
@@ -96,10 +100,14 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
         $vouchers = [];
 
         foreach ($rows as $row) {
+            $claimedByCurrentUser = $row['claimedByUserId']?->toRfc4122() === $userId;
+            $canBeClaimedOrTransferred = $row['status'] === VoucherStatus::Active->value && !$claimedByCurrentUser;
             $vouchers[] = new MyVoucherView(
                 $row['id']->toRfc4122(),
-                $row['claimedByUserId']?->toRfc4122() === $userId ? $row['code'] : null,
+                $canBeClaimedOrTransferred ? sprintf('***%s', substr($row['code'], -3)) : $row['code'],
                 $row['providerName'],
+                $row['status'],
+                $canBeClaimedOrTransferred,
             );
         }
 

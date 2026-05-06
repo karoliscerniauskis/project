@@ -4,6 +4,8 @@ export type MyVoucherView = {
     id: string
     code: string | null
     providerName: string
+    status: string
+    canBeClaimedOrTransferred: boolean
 }
 
 export type VoucherValidationView = {

@@ -28,7 +28,7 @@
                 description="This provider hasn't created any vouchers yet."
             />
 
-            <DataTable v-else :columns="columns" :data="vouchers" row-key="code">
+            <DataTable v-else :columns="columns" :data="vouchers" row-key="id">
                 <template #cell-code="{ value }">
                     <span class="font-mono text-sm text-slate-900">
                         {{ value }}
@@ -50,9 +50,9 @@
                         v-if="row.status === 'active'"
                         variant="danger"
                         size="sm"
-                        :disabled="deactivatingCode === row.code"
-                        :loading="deactivatingCode === row.code"
-                        @click="deactivateVoucher(row.code)"
+                        :disabled="deactivatingVoucherId === row.id"
+                        :loading="deactivatingVoucherId === row.id"
+                        @click="deactivateVoucher(row.id)"
                     >
                         Deactivate
                     </BaseButton>
@@ -78,9 +78,8 @@ import type { VoucherStatus } from '@/utils/status'
 
 const route = useRoute()
 const providerId = ref('')
-const deactivatingCode = ref('')
+const deactivatingVoucherId = ref('')
 
-// Validate provider ID on mount
 onMounted(() => {
     const id = route.params.id
     if (typeof id !== 'string' || id.length === 0) {
@@ -90,7 +89,6 @@ onMounted(() => {
     }
 })
 
-// Fetch vouchers with automatic loading/error handling
 const {
     loading,
     error,
@@ -106,17 +104,14 @@ const {
     { immediate: false }
 )
 
-// Trigger initial load after providerId is set
 onMounted(() => {
     if (providerId.value) {
         refresh()
     }
 })
 
-// Extract vouchers array from response
 const vouchers = computed(() => vouchersResponse.value?.data ?? [])
 
-// Define table columns
 const columns = [
     { key: 'code', label: 'Code' },
     { key: 'issuedToEmail', label: 'Issued To' },
@@ -126,20 +121,20 @@ const columns = [
     { key: 'actions', label: 'Actions' },
 ]
 
-async function deactivateVoucher(code: string): Promise<void> {
+async function deactivateVoucher(voucherId: string): Promise<void> {
     if (!providerId.value) {
         return
     }
 
-    deactivatingCode.value = code
+    deactivatingVoucherId.value = voucherId
 
     try {
-        await deactivateProviderVoucher(providerId.value, code)
+        await deactivateProviderVoucher(providerId.value, voucherId)
         await refresh()
     } catch (e) {
         error.value = e instanceof Error ? e.message : 'Failed to deactivate voucher.'
     } finally {
-        deactivatingCode.value = ''
+        deactivatingVoucherId.value = ''
     }
 }
 </script>
