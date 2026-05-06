@@ -182,7 +182,6 @@ const providerId = ref('')
 const cancellingEmail = ref('')
 const removingUserId = ref('')
 
-// Validate provider ID on mount
 onMounted(() => {
     const id = route.params.id
     if (typeof id !== 'string' || id.length === 0) {
@@ -192,7 +191,6 @@ onMounted(() => {
     }
 })
 
-// Fetch provider data with automatic loading/error handling
 const {
     loading,
     error,
@@ -209,7 +207,6 @@ const {
 
 const provider = computed(() => providerResponse.value?.data ?? null)
 
-// Fetch provider users
 const {
     loading: usersLoading,
     error: usersError,
@@ -226,7 +223,6 @@ const {
 
 const users = computed(() => usersResponse.value?.data ?? [])
 
-// Fetch provider invitations
 const {
     loading: invitationsLoading,
     error: invitationsError,
@@ -243,7 +239,6 @@ const {
 
 const invitations = computed(() => invitationsResponse.value?.data ?? [])
 
-// Trigger all data loads after providerId is set
 onMounted(() => {
     if (providerId.value) {
         providerResponse.value = null
