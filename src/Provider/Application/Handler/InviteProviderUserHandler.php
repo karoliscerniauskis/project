@@ -8,6 +8,7 @@ use App\Provider\Application\Command\InviteProviderUser;
 use App\Provider\Application\Exception\ProviderAccessDenied;
 use App\Provider\Domain\Entity\ProviderInvitation;
 use App\Provider\Domain\Repository\ProviderInvitationRepository;
+use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Slug\ProviderInvitationSlugGenerator;
@@ -33,6 +34,7 @@ final readonly class InviteProviderUserHandler
         private OutboxWriter $outboxWriter,
         private UserEmailFinder $userEmailFinder,
         private UserIdFinder $userIdFinder,
+        private ProviderRepository $providerRepository,
     ) {
     }
 
@@ -43,6 +45,12 @@ final readonly class InviteProviderUserHandler
             $invitedByUserId = UserId::fromString($command->getInvitedByUserId());
 
             if (!$this->providerUserRepository->isAdmin($providerId, $invitedByUserId)) {
+                throw ProviderAccessDenied::create();
+            }
+
+            $provider = $this->providerRepository->findById($providerId);
+
+            if ($provider === null || !$provider->isActive()) {
                 throw ProviderAccessDenied::create();
             }
 

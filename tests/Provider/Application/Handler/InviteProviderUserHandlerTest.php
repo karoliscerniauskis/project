@@ -6,12 +6,15 @@ namespace App\Tests\Provider\Application\Handler;
 
 use App\Provider\Application\Command\InviteProviderUser;
 use App\Provider\Application\Handler\InviteProviderUserHandler;
+use App\Provider\Domain\Entity\Provider;
 use App\Provider\Domain\Entity\ProviderInvitation;
 use App\Provider\Domain\Event\ProviderInvitationCreated;
 use App\Provider\Domain\Repository\ProviderInvitationRepository;
+use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Domain\Repository\ProviderUserRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Slug\ProviderInvitationSlugGenerator;
+use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
 use App\Shared\Application\User\UserEmailFinder;
@@ -46,6 +49,7 @@ final class InviteProviderUserHandlerTest extends TestCase
         $outboxWriter = $this->createMock(OutboxWriter::class);
         $userEmailFinder = $this->createMock(UserEmailFinder::class);
         $userIdFinder = $this->createMock(UserIdFinder::class);
+        $providerRepository = $this->createMock(ProviderRepository::class);
         $providerUserRepository
             ->expects(self::once())
             ->method('isAdmin')
@@ -54,6 +58,15 @@ final class InviteProviderUserHandlerTest extends TestCase
                 UserId::fromString($invitedByUserId),
             )
             ->willReturn(true);
+        $providerRepository
+            ->expects(self::once())
+            ->method('findById')
+            ->with(ProviderId::fromString($providerId))
+            ->willReturn(Provider::reconstitute(
+                ProviderId::fromString($providerId),
+                'Provider name',
+                ProviderStatus::Active,
+            ));
         $userEmailFinder
             ->expects(self::once())
             ->method('findByUserId')
@@ -137,6 +150,7 @@ final class InviteProviderUserHandlerTest extends TestCase
             $outboxWriter,
             $userEmailFinder,
             $userIdFinder,
+            $providerRepository,
         );
         $handler($command);
     }

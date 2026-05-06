@@ -77,12 +77,20 @@
                         </RouterLink>
                     </div>
 
-                    <p
-                        v-if="inviteError && fieldErrors.length === 0"
+                    <div
+                        v-if="inviteError || fieldErrors.some(e => e.field !== 'email')"
                         class="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
                     >
-                        {{ inviteError }}
-                    </p>
+                        <p v-if="inviteError">
+                            {{ inviteError }}
+                        </p>
+                        <p
+                            v-for="item in fieldErrors.filter(e => e.field !== 'email')"
+                            :key="`${item.field}-${item.message}`"
+                        >
+                            {{ item.message }}
+                        </p>
+                    </div>
 
                     <p
                         v-if="inviteSuccess"
@@ -152,12 +160,15 @@ async function onSubmit() {
         return
     }
 
-    await handleSubmit(
-        () => inviteProviderUser(provider.value!.id, { email: email.value }),
-        () => {
-            inviteSuccess.value = 'Invitation sent.'
-            email.value = ''
-        }
-    )
+    try {
+        await handleSubmit(
+            () => inviteProviderUser(provider.value!.id, { email: email.value }),
+            () => {
+                inviteSuccess.value = 'Invitation sent.'
+                email.value = ''
+            }
+        )
+    } catch {
+    }
 }
 </script>

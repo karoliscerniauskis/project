@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Voucher\Application\Handler;
 
 use App\Shared\Application\Outbox\OutboxWriter;
+use App\Shared\Application\Provider\ProviderStatusChecker;
 use App\Shared\Application\ProviderUser\ProviderUserFinder;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
@@ -12,6 +13,7 @@ use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\UuidCreator;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Command\CreateVoucher;
+use App\Voucher\Application\Exception\ProviderInactive;
 use App\Voucher\Application\Exception\ProviderUserNotFound;
 use App\Voucher\Application\Exception\UnableToGenerateUniqueVoucherCode;
 use App\Voucher\Application\Exception\VoucherCodeAlreadyExists;
@@ -32,6 +34,7 @@ final readonly class CreateVoucherHandler
         private VoucherTransactionManager $voucherTransactionManager,
         private OutboxWriter $outboxWriter,
         private ProviderUserFinder $providerUserFinder,
+        private ProviderStatusChecker $providerStatusChecker,
     ) {
     }
 
@@ -39,6 +42,11 @@ final readonly class CreateVoucherHandler
     {
         $providerId = ProviderId::fromString($command->getProviderId());
         $createdByUserId = UserId::fromString($command->getCreatedByUserId());
+
+        if (!$this->providerStatusChecker->isActive($providerId)) {
+            throw ProviderInactive::create();
+        }
+
         $providerUserId = $this->providerUserFinder->findIdByProviderIdAndUserId($providerId, $createdByUserId);
 
         if ($providerUserId === null) {

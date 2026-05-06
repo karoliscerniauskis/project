@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Voucher\UI\Http;
 
+use App\Voucher\Application\Exception\ProviderInactive;
 use App\Voucher\Application\Exception\ProviderUserNotFound;
 use App\Voucher\Application\Exception\VoucherAccessDenied;
 use App\Voucher\Application\Exception\VoucherAlreadyClaimed;
@@ -83,6 +84,15 @@ final readonly class VoucherApiExceptionSubscriber implements EventSubscriberInt
         }
 
         if ($event->getThrowable()->getPrevious() instanceof VoucherAccessDenied) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_FORBIDDEN));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof ProviderInactive) {
             $event->setResponse(new JsonResponse([
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),

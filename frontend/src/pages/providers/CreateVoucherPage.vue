@@ -80,12 +80,21 @@
                         </RouterLink>
                     </div>
 
-                    <p
-                        v-if="formError && fieldErrors.length === 0"
+                    <div
+                        v-if="formError || fieldErrors.some(e => e.field !== 'issuedToEmail')"
                         class="mt-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700"
                     >
-                        {{ formError }}
-                    </p>
+                        <p v-if="formError">
+                            {{ formError }}
+                        </p>
+                        <p
+                            v-for="item in fieldErrors.filter(e => e.field !== 'issuedToEmail')"
+                            :key="`${item.field}-${item.message}`"
+                        >
+                            {{ item.message }}
+                        </p>
+                    </div>
+
 
                     <p
                         v-if="successMessage"
@@ -134,13 +143,16 @@ async function onSubmit(): Promise<void> {
         return
     }
 
-    await handleSubmit(
-        () => createVoucher(providerId, { issuedToEmail: issuedToEmail.value }),
-        async () => {
-            successMessage.value = 'Voucher created successfully.'
-            issuedToEmail.value = ''
-            await router.push(`/providers/${providerId}`)
-        }
-    )
+    try {
+        await handleSubmit(
+            () => createVoucher(providerId, { issuedToEmail: issuedToEmail.value }),
+            async () => {
+                successMessage.value = 'Voucher created successfully.'
+                issuedToEmail.value = ''
+                await router.push(`/providers/${providerId}`)
+            }
+        )
+    } catch {
+    }
 }
 </script>
