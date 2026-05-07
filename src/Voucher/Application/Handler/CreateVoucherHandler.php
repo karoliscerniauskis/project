@@ -10,7 +10,6 @@ use App\Shared\Application\ProviderUser\ProviderUserFinder;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\UserId;
-use App\Shared\Domain\Id\UuidCreator;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Command\CreateVoucher;
 use App\Voucher\Application\Exception\ProviderInactive;
@@ -29,7 +28,6 @@ final readonly class CreateVoucherHandler
 
     public function __construct(
         private VoucherRepository $voucherRepository,
-        private UuidCreator $uuidCreator,
         private Clock $clock,
         private VoucherCodeGenerator $voucherCodeGenerator,
         private VoucherTransactionManager $voucherTransactionManager,
@@ -60,7 +58,7 @@ final readonly class CreateVoucherHandler
             try {
                 $this->voucherTransactionManager->transactional(function () use ($command, $providerId, $providerUserId, $type): void {
                     $voucher = Voucher::create(
-                        VoucherId::fromString($this->uuidCreator->create()),
+                        VoucherId::fromString($command->getVoucherId()),
                         $this->voucherCodeGenerator->generate(),
                         $providerId,
                         $providerUserId,

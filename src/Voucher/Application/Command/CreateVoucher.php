@@ -7,6 +7,7 @@ namespace App\Voucher\Application\Command;
 final readonly class CreateVoucher
 {
     public function __construct(
+        private string $voucherId,
         private string $providerId,
         private string $createdByUserId,
         private string $issuedToEmail,
@@ -14,6 +15,11 @@ final readonly class CreateVoucher
         private ?int $amount,
         private ?int $usages,
     ) {
+    }
+
+    public function getVoucherId(): string
+    {
+        return $this->voucherId;
     }
 
     public function getProviderId(): string

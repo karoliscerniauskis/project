@@ -74,6 +74,10 @@ export type UseVoucherPayload = {
     amount: number | null
 }
 
+export type CreateVoucherResponse = {
+    id: string
+}
+
 export function getProviders(): Promise<ProvidersResponse> {
     return apiRequest<ProvidersResponse>('/api/providers', {
         method: 'GET',
@@ -178,8 +182,11 @@ export function removeProviderUser(providerId: string, providerUserId: string): 
     )
 }
 
-export function createVoucher(providerId: string, payload: CreateVoucherPayload): Promise<void> {
-    return apiRequest<void>(`/api/providers/${providerId}/vouchers`, {
+export function createVoucher(
+    providerId: string,
+    payload: CreateVoucherPayload
+): Promise<CreateVoucherResponse> {
+    return apiRequest<CreateVoucherResponse>(`/api/providers/${providerId}/vouchers`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

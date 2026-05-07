@@ -6,6 +6,7 @@ namespace App\Voucher\UI\Http;
 
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\AuthenticatedUser;
+use App\Shared\Domain\Id\UuidCreator;
 use App\Shared\UI\Http\JsonDtoFactory;
 use App\Shared\UI\Http\OpenApi\ApiValidationFailedResponse;
 use App\Voucher\Application\Command\CreateVoucher;
@@ -24,6 +25,7 @@ final class CreateVoucherController extends AbstractController
     public function __construct(
         private readonly CommandBus $commandBus,
         private readonly JsonDtoFactory $jsonDtoFactory,
+        private readonly UuidCreator $uuidCreator,
     ) {
     }
 
@@ -78,7 +80,9 @@ final class CreateVoucherController extends AbstractController
 
         /** @var CreateVoucherRequest $dto */
         $dto = $this->jsonDtoFactory->create($request, CreateVoucherRequest::class);
+        $voucherId = $this->uuidCreator->create();
         $this->commandBus->dispatch(new CreateVoucher(
+            $voucherId,
             $providerId,
             $user->getId(),
             $dto->issuedToEmail,
@@ -87,6 +91,6 @@ final class CreateVoucherController extends AbstractController
             $dto->usages,
         ));
 
-        return new JsonResponse(status: Response::HTTP_CREATED);
+        return new JsonResponse(['id' => $voucherId], Response::HTTP_CREATED);
     }
 }

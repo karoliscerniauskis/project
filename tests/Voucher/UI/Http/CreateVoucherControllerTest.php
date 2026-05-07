@@ -171,8 +171,14 @@ final class CreateVoucherControllerTest extends ApiWebTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
+        $response = self::getJsonResponse($client->getResponse()->getContent());
+
+        self::assertArrayHasKey('id', $response);
+        self::assertIsString($response['id']);
+
         $voucher = self::getVoucherByIssuedToEmail($issuedToEmail);
 
+        self::assertSame($response['id'], $voucher->getId());
         self::assertSame($providerId, $voucher->getProviderId());
         self::assertSame($providerUser->getId(), $voucher->getCreatedByProviderUserId());
         self::assertSame($issuedToEmail, $voucher->getIssuedToEmail());
