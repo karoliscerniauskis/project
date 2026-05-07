@@ -15,6 +15,10 @@ export type RefreshResponse = {
     refresh_token?: string
 }
 
+export type ChangeEmailPayload = {
+    newEmail: string
+}
+
 export function login(payload: AuthCredentials): Promise<LoginResponse> {
     return apiRequest<LoginResponse>('/api/auth/login', {
         method: 'POST',
@@ -62,4 +66,14 @@ export async function refreshToken(payload: { refresh_token: string }): Promise<
     }
 
     return data as RefreshResponse
+}
+
+export function changeEmail(payload: ChangeEmailPayload): Promise<void> {
+    return apiRequest<void>('/api/auth/change-email', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
 }

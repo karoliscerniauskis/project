@@ -10,6 +10,7 @@ use App\Auth\Domain\Entity\User;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
+use App\Shared\Application\Voucher\VoucherIssuedEmailChanger;
 use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\UserId;
 use DateTimeImmutable;
@@ -26,6 +27,7 @@ final class VerifyUserEmailHandlerTest extends TestCase
         $clock = $this->createMock(Clock::class);
         $transactionManager = $this->createMock(TransactionManager::class);
         $outboxWriter = $this->createMock(OutboxWriter::class);
+        $voucherIssuedEmailChanger = $this->createMock(VoucherIssuedEmailChanger::class);
         $user = User::reconstitute(
             UserId::fromString('550e8400-e29b-41d4-a716-446655440000'),
             'user@example.com',
@@ -42,6 +44,9 @@ final class VerifyUserEmailHandlerTest extends TestCase
         $clock->expects(self::once())
             ->method('now')
             ->willReturn($verifiedAt);
+        $voucherIssuedEmailChanger->expects(self::once())
+            ->method('changeIssuedToEmail')
+            ->with('user@example.com', $pendingEmail);
         $userRepository->expects(self::once())
             ->method('save')
             ->with(self::callback(static function (User $user) use ($verifiedAt, $pendingEmail): bool {
@@ -65,6 +70,7 @@ final class VerifyUserEmailHandlerTest extends TestCase
             $clock,
             $transactionManager,
             $outboxWriter,
+            $voucherIssuedEmailChanger,
         );
         $handler(new VerifyUserEmail($emailVerificationSlug));
 

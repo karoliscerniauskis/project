@@ -10,6 +10,7 @@ use App\Auth\Application\Exception\UserEmailVerificationLinkInvalid;
 use App\Auth\Domain\Repository\UserRepository;
 use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
+use App\Shared\Application\Voucher\VoucherIssuedEmailChanger;
 use App\Shared\Domain\Clock\Clock;
 
 final readonly class VerifyUserEmailHandler
@@ -19,6 +20,7 @@ final readonly class VerifyUserEmailHandler
         private Clock $clock,
         private TransactionManager $transactionManager,
         private OutboxWriter $outboxWriter,
+        private VoucherIssuedEmailChanger $voucherIssuedEmailChanger,
     ) {
     }
 
@@ -31,8 +33,15 @@ final readonly class VerifyUserEmailHandler
                 throw UserEmailVerificationLinkInvalid::forSlug($command->getEmailVerificationSlug());
             }
 
-            if ($user->isEmailVerified()) {
+            if ($user->isEmailVerified() && $user->getPendingEmail() === null) {
                 throw UserEmailAlreadyVerified::forEmail($user->getEmail());
+            }
+
+            $previousEmail = $user->getEmail();
+            $pendingEmail = $user->getPendingEmail();
+
+            if ($pendingEmail !== null) {
+                $this->voucherIssuedEmailChanger->changeIssuedToEmail($previousEmail, $pendingEmail);
             }
 
             $user->verifyEmail($this->clock->now());

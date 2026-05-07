@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Voucher\Infrastructure\Doctrine\Repository;
 
+use App\Shared\Application\Voucher\VoucherIssuedEmailChanger;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Entity\Voucher;
 use App\Voucher\Domain\Repository\VoucherRepository;
@@ -11,7 +12,7 @@ use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use App\Voucher\Infrastructure\Doctrine\Mapper\VoucherRecordMapper;
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class DoctrineVoucherRepository implements VoucherRepository
+final readonly class DoctrineVoucherRepository implements VoucherRepository, VoucherIssuedEmailChanger
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -52,5 +53,17 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository
         }
 
         return $this->voucherRecordMapper->toDomain($voucherRecord);
+    }
+
+    public function changeIssuedToEmail(string $currentEmail, string $newEmail): void
+    {
+        $this->entityManager->createQueryBuilder()
+            ->update(VoucherRecord::class, 'voucher')
+            ->set('voucher.issuedToEmail', ':newEmail')
+            ->andWhere('voucher.issuedToEmail = :currentEmail')
+            ->setParameter('currentEmail', $currentEmail)
+            ->setParameter('newEmail', $newEmail)
+            ->getQuery()
+            ->execute();
     }
 }

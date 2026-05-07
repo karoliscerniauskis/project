@@ -54,6 +54,14 @@
                     {{ username }}
                 </span>
                 <RouterLink
+                    v-if="isAuthenticated"
+                    to="/me/change-email"
+                    class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+                    active-class="!text-slate-950"
+                >
+                    Change email
+                </RouterLink>
+                <RouterLink
                     v-if="!isAuthenticated"
                     to="/login"
                     class="text-sm font-medium text-slate-600 transition hover:text-slate-950"

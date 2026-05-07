@@ -16,6 +16,7 @@ import TransferVoucherPage from '@/pages/vouchers/TransferVoucherPage.vue'
 import NotificationsPage from '@/pages/notifications/NotificationsPage.vue'
 import AcceptProviderInvitationPage from '@/pages/providers/AcceptProviderInvitationPage.vue'
 import AdminProvidersPage from '@/pages/admin/AdminProvidersPage.vue'
+import ChangeEmailPage from '@/pages/auth/ChangeEmailPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -113,6 +114,11 @@ export const router = createRouter({
             path: '/admin/providers',
             name: 'admin-providers',
             component: AdminProvidersPage,
+        },
+        {
+            path: '/me/change-email',
+            name: 'change-email',
+            component: ChangeEmailPage,
         },
     ],
 })
