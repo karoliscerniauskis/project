@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Provider\Domain\Entity;
 
+use App\Provider\Domain\Event\ProviderUserRemoved;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
+use DateTimeImmutable;
 
 final class ProviderUser extends AbstractAggregateRoot
 {
@@ -103,13 +105,18 @@ final class ProviderUser extends AbstractAggregateRoot
         return $this->role === ProviderUserRole::Admin;
     }
 
-    public function remove(): void
+    public function remove(DateTimeImmutable $occurredOn): void
     {
         if ($this->status !== ProviderUserStatus::Active) {
             return;
         }
 
         $this->status = ProviderUserStatus::Removed;
+        $this->record(new ProviderUserRemoved(
+            $this->providerId->toString(),
+            $this->userId->toString(),
+            $occurredOn,
+        ));
     }
 
     public function isActive(): bool

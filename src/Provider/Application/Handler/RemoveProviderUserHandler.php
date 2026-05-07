@@ -7,13 +7,17 @@ namespace App\Provider\Application\Handler;
 use App\Provider\Application\Command\RemoveProviderUser;
 use App\Provider\Application\Exception\ProviderAccessDenied;
 use App\Provider\Domain\Repository\ProviderUserRepository;
+use App\Shared\Application\Outbox\OutboxWriter;
 use App\Shared\Application\Transaction\TransactionManager;
+use App\Shared\Domain\Clock\Clock;
 
 final readonly class RemoveProviderUserHandler
 {
     public function __construct(
         private ProviderUserRepository $providerUserRepository,
         private TransactionManager $transactionManager,
+        private Clock $clock,
+        private OutboxWriter $outboxWriter,
     ) {
     }
 
@@ -34,8 +38,9 @@ final readonly class RemoveProviderUserHandler
                 return;
             }
 
-            $providerUser->remove();
+            $providerUser->remove($this->clock->now());
             $this->providerUserRepository->save($providerUser);
+            $this->outboxWriter->storeAll($providerUser->pullDomainEvents());
         });
     }
 }

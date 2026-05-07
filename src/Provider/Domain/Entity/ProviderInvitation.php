@@ -54,6 +54,7 @@ final class ProviderInvitation extends AbstractAggregateRoot
         $self->expiresAt = $expiresAt;
         $self->record(new ProviderInvitationCreated(
             $id->toString(),
+            $providerId->toString(),
             $email,
             $slug,
             $createdAt,

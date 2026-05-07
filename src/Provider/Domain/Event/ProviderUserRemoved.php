@@ -8,21 +8,14 @@ use App\Shared\Domain\Event\AbstractDomainEvent;
 use DateTimeImmutable;
 use DateTimeInterface;
 
-final readonly class ProviderInvitationCreated extends AbstractDomainEvent
+final readonly class ProviderUserRemoved extends AbstractDomainEvent
 {
     public function __construct(
-        private string $providerInvitationId,
         private string $providerId,
-        private string $email,
-        private string $slug,
+        private string $userId,
         DateTimeImmutable $occurredOn,
     ) {
         parent::__construct($occurredOn);
-    }
-
-    public function getProviderInvitationId(): string
-    {
-        return $this->providerInvitationId;
     }
 
     public function getProviderId(): string
@@ -30,23 +23,16 @@ final readonly class ProviderInvitationCreated extends AbstractDomainEvent
         return $this->providerId;
     }
 
-    public function getEmail(): string
+    public function getUserId(): string
     {
-        return $this->email;
-    }
-
-    public function getSlug(): string
-    {
-        return $this->slug;
+        return $this->userId;
     }
 
     public function toArray(): array
     {
         return [
-            'providerInvitationId' => $this->providerInvitationId,
             'providerId' => $this->providerId,
-            'email' => $this->email,
-            'slug' => $this->slug,
+            'userId' => $this->userId,
             'occurredOn' => $this->occurredOn->format(DateTimeInterface::ATOM),
         ];
     }

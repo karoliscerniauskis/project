@@ -6,8 +6,10 @@ namespace App\Provider\Application\Handler;
 
 use App\Provider\Application\Url\FrontendUrlCreator;
 use App\Provider\Domain\Event\ProviderInvitationCreated;
+use App\Provider\Domain\Repository\ProviderRepository;
 use App\Shared\Application\Notification\NotificationSender;
 use App\Shared\Application\User\UserIdFinder;
+use App\Shared\Domain\Id\ProviderId;
 
 final readonly class CreateNotificationOnProviderInvitationCreatedHandler
 {
@@ -15,6 +17,7 @@ final readonly class CreateNotificationOnProviderInvitationCreatedHandler
         private UserIdFinder $userIdFinder,
         private NotificationSender $notificationSender,
         private FrontendUrlCreator $frontendUrlCreator,
+        private ProviderRepository $providerRepository,
     ) {
     }
 
@@ -26,13 +29,20 @@ final readonly class CreateNotificationOnProviderInvitationCreatedHandler
             return;
         }
 
+        $provider = $this->providerRepository->findById(
+            ProviderId::fromString($event->getProviderId()),
+        );
+        $providerName = $provider?->getName() ?? 'Unknown provider';
+
         $this->notificationSender->send(
             $userId,
             'provider_invitation_created',
             'You are invited to join a provider',
-            'You have received an invitation to join a provider.',
+            sprintf('You have received an invitation to join provider "%s".', $providerName),
             [
                 'providerInvitationId' => $event->getProviderInvitationId(),
+                'providerId' => $event->getProviderId(),
+                'providerName' => $providerName,
                 'url' => $this->frontendUrlCreator->acceptProviderInvitation($event->getSlug()),
             ],
         );
