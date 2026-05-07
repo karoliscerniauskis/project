@@ -40,10 +40,10 @@
                         <RouterLink
                             v-for="provider in providers"
                             :key="provider.id"
-                            :to="provider.status === 'active' ? `/providers/${provider.id}` : '#'"
+                            :to="`/providers/${provider.id}`"
                             class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-slate-300 hover:shadow-md"
                             :class="{
-                                'pointer-events-none opacity-60': provider.status !== 'active',
+                                'opacity-60': provider.status !== 'active',
                             }"
                         >
                             <h3
