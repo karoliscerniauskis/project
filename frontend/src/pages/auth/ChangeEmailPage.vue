@@ -5,9 +5,7 @@
                 <div class="flex items-center justify-between gap-4">
                     <div>
                         <h1 class="text-3xl font-bold text-slate-900">Change Email</h1>
-                        <p class="text-slate-600 mt-1">
-                            Update your account email address
-                        </p>
+                        <p class="text-slate-600 mt-1">Update your account email address</p>
                     </div>
 
                     <RouterLink
@@ -24,9 +22,7 @@
                 class="bg-green-50 border border-green-200 rounded-xl p-8 text-center"
             >
                 <div class="mx-auto flex h-12 w-12 items-center justify-center text-4xl">📬</div>
-                <h3 class="mt-4 text-lg font-semibold text-green-900">
-                    Verification email sent
-                </h3>
+                <h3 class="mt-4 text-lg font-semibold text-green-900">Verification email sent</h3>
                 <p class="mt-2 text-green-700">
                     Please confirm the new email address. After confirmation, vouchers issued to
                     your previous email will be moved to the new one.

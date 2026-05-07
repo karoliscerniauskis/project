@@ -24,9 +24,7 @@
                 class="mb-6 rounded-xl border border-green-200 bg-green-50 p-6 text-center"
             >
                 <div class="mx-auto flex h-12 w-12 items-center justify-center text-4xl">✅</div>
-                <h3 class="mt-4 text-lg font-semibold text-green-900">
-                    Voucher used successfully
-                </h3>
+                <h3 class="mt-4 text-lg font-semibold text-green-900">Voucher used successfully</h3>
                 <p class="mt-2 text-green-700">
                     {{ successMessage }}
                 </p>
@@ -43,10 +41,7 @@
                     </p>
                 </div>
 
-                <div
-                    v-if="formError"
-                    class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4"
-                >
+                <div v-if="formError" class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
                     <p class="text-sm text-red-800">
                         {{ formError }}
                     </p>
@@ -88,7 +83,9 @@
                             :class="hasFieldError('amount') ? 'text-red-700' : 'text-slate-700'"
                         >
                             Used Amount
-                            <span class="font-normal text-slate-400">(only for amount vouchers)</span>
+                            <span class="font-normal text-slate-400">
+                                (only for amount vouchers)
+                            </span>
                         </label>
 
                         <input

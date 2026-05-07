@@ -168,7 +168,6 @@ async function onSubmit() {
                 email.value = ''
             }
         )
-    } catch {
-    }
+    } catch {}
 }
 </script>

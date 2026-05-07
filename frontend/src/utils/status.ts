@@ -39,7 +39,7 @@ export function formatVoucherReason(reason: VoucherInvalidReason): string {
         voucherAlreadyUsed: 'Voucher has already been used',
         voucherAlreadyClaimed: 'Voucher has already been claimed',
         voucherTransferred: 'Voucher has been transferred',
-        voucherNotActive: 'This voucher is no longer active.'
+        voucherNotActive: 'This voucher is no longer active.',
     }
     return reasonMap[reason] || reason
 }

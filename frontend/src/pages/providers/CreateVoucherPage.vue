@@ -212,10 +212,7 @@
                             {{ formError }}
                         </p>
 
-                        <p
-                            v-for="item in fieldErrors"
-                            :key="`${item.field}-${item.message}`"
-                        >
+                        <p v-for="item in fieldErrors" :key="`${item.field}-${item.message}`">
                             {{ item.message }}
                         </p>
                     </div>
