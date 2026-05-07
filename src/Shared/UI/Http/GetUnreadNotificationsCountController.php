@@ -7,6 +7,9 @@ namespace App\Shared\UI\Http;
 use App\Shared\Application\Notification\NotificationReader;
 use App\Shared\Application\Security\AuthenticatedUser;
 use App\Shared\Domain\Id\UserId;
+use App\Shared\UI\Http\OpenApi\UnreadNotificationsCountResponse;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +23,22 @@ final class GetUnreadNotificationsCountController extends AbstractController
     }
 
     #[Route('/api/me/notifications/unread-count', name: 'api_me_notifications_unread_count', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/me/notifications/unread-count',
+        description: 'Returns the number of unread notifications for the authenticated user.',
+        summary: 'Get unread notifications count',
+        security: [['Bearer' => []]],
+        tags: ['Shared'],
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Unread notifications count returned successfully.',
+        content: new OA\JsonContent(ref: new Model(type: UnreadNotificationsCountResponse::class)),
+    )]
+    #[OA\Response(
+        response: Response::HTTP_UNAUTHORIZED,
+        description: 'Authentication is required.',
+    )]
     public function __invoke(): JsonResponse
     {
         $user = $this->getUser();

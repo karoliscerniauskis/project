@@ -62,6 +62,10 @@ final class GetProviderInvitationsController extends AbstractController
         description: 'Provider access is required.',
         content: new OA\JsonContent(ref: new Model(type: ProviderAccessDeniedResponse::class)),
     )]
+    #[OA\Response(
+        response: Response::HTTP_BAD_REQUEST,
+        description: 'Invalid provider identifier.',
+    )]
     public function __invoke(string $providerId): JsonResponse
     {
         $user = $this->getUser();

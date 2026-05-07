@@ -70,6 +70,10 @@ final class CancelProviderInvitationController extends AbstractController
         description: 'Provider administrator permission is required.',
         content: new OA\JsonContent(ref: new Model(type: ProviderAccessDeniedResponse::class)),
     )]
+    #[OA\Response(
+        response: Response::HTTP_BAD_REQUEST,
+        description: 'Invalid provider identifier.',
+    )]
     public function __invoke(string $providerId, string $email): JsonResponse
     {
         $user = $this->getUser();

@@ -54,6 +54,10 @@ final class ApproveProviderController extends AbstractController
         response: Response::HTTP_FORBIDDEN,
         description: 'Administrator role is required.',
     )]
+    #[OA\Response(
+        response: Response::HTTP_BAD_REQUEST,
+        description: 'Invalid provider identifier.',
+    )]
     public function __invoke(string $providerId): JsonResponse
     {
         $user = $this->getUser();

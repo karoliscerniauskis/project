@@ -62,6 +62,10 @@ final class GetProviderController extends AbstractController
         description: 'Provider was not found.',
         content: new OA\JsonContent(ref: new Model(type: ProviderNotFoundResponse::class)),
     )]
+    #[OA\Response(
+        response: Response::HTTP_BAD_REQUEST,
+        description: 'Invalid provider identifier.',
+    )]
     public function __invoke(string $providerId): JsonResponse
     {
         $user = $this->getUser();
