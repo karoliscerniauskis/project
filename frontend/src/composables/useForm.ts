@@ -36,14 +36,20 @@ export function useForm() {
         }
     }
 
-    function validateRequired(field: string, value: string, label?: string): boolean {
-        if (!value.trim()) {
+    function validateRequired(
+        field: string,
+        value: string | number | null | undefined,
+        label?: string
+    ): boolean {
+        if (value === null || value === undefined || String(value).trim() === '') {
             fieldErrors.value.push({
                 field,
                 message: `${label || field} is required.`,
             })
+
             return false
         }
+
         return true
     }
 

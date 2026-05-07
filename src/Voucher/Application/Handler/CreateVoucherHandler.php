@@ -20,6 +20,7 @@ use App\Voucher\Application\Exception\VoucherCodeAlreadyExists;
 use App\Voucher\Application\Transaction\VoucherTransactionManager;
 use App\Voucher\Domain\Code\VoucherCodeGenerator;
 use App\Voucher\Domain\Entity\Voucher;
+use App\Voucher\Domain\Enum\VoucherType;
 use App\Voucher\Domain\Repository\VoucherRepository;
 
 final readonly class CreateVoucherHandler
@@ -53,15 +54,20 @@ final readonly class CreateVoucherHandler
             throw ProviderUserNotFound::forProviderAndUserId($providerId->toString(), $createdByUserId->toString());
         }
 
+        $type = VoucherType::from($command->getType());
+
         for ($i = 0; $i < self::ATTEMPTS_LIMIT; ++$i) {
             try {
-                $this->voucherTransactionManager->transactional(function () use ($command, $providerId, $providerUserId): void {
+                $this->voucherTransactionManager->transactional(function () use ($command, $providerId, $providerUserId, $type): void {
                     $voucher = Voucher::create(
                         VoucherId::fromString($this->uuidCreator->create()),
                         $this->voucherCodeGenerator->generate(),
                         $providerId,
                         $providerUserId,
                         $command->getIssuedToEmail(),
+                        $type,
+                        $command->getAmount(),
+                        $command->getUsages(),
                         $this->clock->now(),
                     );
                     $this->voucherRepository->save($voucher);

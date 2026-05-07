@@ -32,6 +32,21 @@ class VoucherRecord
     #[ORM\Column(type: 'string')]
     private string $status;
 
+    #[ORM\Column(type: 'string', options: ['default' => 'amount'])]
+    private string $type;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $initialAmount;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $remainingAmount;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $initialUsages;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $remainingUsages;
+
     public function __construct(
         string $id,
         string $code,
@@ -39,6 +54,11 @@ class VoucherRecord
         string $createdByProviderUserId,
         string $issuedToEmail,
         string $status,
+        string $type,
+        ?int $initialAmount = null,
+        ?int $remainingAmount = null,
+        ?int $initialUsages = null,
+        ?int $remainingUsages = null,
         ?string $claimedByUserId = null,
     ) {
         $this->id = $id;
@@ -47,6 +67,11 @@ class VoucherRecord
         $this->createdByProviderUserId = $createdByProviderUserId;
         $this->issuedToEmail = $issuedToEmail;
         $this->status = $status;
+        $this->type = $type;
+        $this->initialAmount = $initialAmount;
+        $this->remainingAmount = $remainingAmount;
+        $this->initialUsages = $initialUsages;
+        $this->remainingUsages = $remainingUsages;
         $this->claimedByUserId = $claimedByUserId;
     }
 
@@ -88,6 +113,66 @@ class VoucherRecord
     public function setStatus(string $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getInitialAmount(): ?int
+    {
+        return $this->initialAmount;
+    }
+
+    public function setInitialAmount(?int $initialAmount): self
+    {
+        $this->initialAmount = $initialAmount;
+
+        return $this;
+    }
+
+    public function getRemainingAmount(): ?int
+    {
+        return $this->remainingAmount;
+    }
+
+    public function setRemainingAmount(?int $remainingAmount): self
+    {
+        $this->remainingAmount = $remainingAmount;
+
+        return $this;
+    }
+
+    public function getInitialUsages(): ?int
+    {
+        return $this->initialUsages;
+    }
+
+    public function setInitialUsages(?int $initialUsages): self
+    {
+        $this->initialUsages = $initialUsages;
+
+        return $this;
+    }
+
+    public function getRemainingUsages(): ?int
+    {
+        return $this->remainingUsages;
+    }
+
+    public function setRemainingUsages(?int $remainingUsages): self
+    {
+        $this->remainingUsages = $remainingUsages;
 
         return $this;
     }

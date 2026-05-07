@@ -6,6 +6,11 @@ export type MyVoucherView = {
     providerName: string
     status: string
     canBeClaimedOrTransferred: boolean
+    type: 'amount' | 'usage'
+    initialAmount: number | null
+    remainingAmount: number | null
+    initialUsages: number | null
+    remainingUsages: number | null
 }
 
 export type VoucherValidationView = {

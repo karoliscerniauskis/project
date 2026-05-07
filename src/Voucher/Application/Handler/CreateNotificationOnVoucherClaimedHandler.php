@@ -24,6 +24,7 @@ final readonly class CreateNotificationOnVoucherClaimedHandler
         $adminUserIds = $this->providerAdminFinder->findAdminUserIdsByProviderId(
             ProviderId::fromString($event->getProviderId()),
         );
+        $voucherCode = sprintf('***%s', substr($event->getVoucherCode(), -3));
 
         foreach ($adminUserIds as $adminUserId) {
             $this->notificationSender->send(
@@ -32,12 +33,12 @@ final readonly class CreateNotificationOnVoucherClaimedHandler
                 'Voucher claimed',
                 sprintf(
                     'Voucher "%s" issued to %s has been claimed.',
-                    $event->getVoucherCode(),
+                    $voucherCode,
                     $event->getIssuedToEmail(),
                 ),
                 [
                     'providerId' => $event->getProviderId(),
-                    'voucherCode' => sprintf('***%s', substr($event->getVoucherCode(), -3)),
+                    'voucherCode' => $voucherCode,
                     'issuedToEmail' => $event->getIssuedToEmail(),
                     'url' => $this->frontendUrlCreator->providerVouchers($event->getProviderId()),
                 ],

@@ -9,6 +9,7 @@ final readonly class UseVoucher
     public function __construct(
         private string $providerId,
         private string $code,
+        private ?int $amount,
     ) {
     }
 
@@ -20,5 +21,10 @@ final readonly class UseVoucher
     public function getCode(): string
     {
         return $this->code;
+    }
+
+    public function getAmount(): ?int
+    {
+        return $this->amount;
     }
 }

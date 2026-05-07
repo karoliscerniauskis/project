@@ -10,6 +10,9 @@ final readonly class CreateVoucher
         private string $providerId,
         private string $createdByUserId,
         private string $issuedToEmail,
+        private string $type,
+        private ?int $amount,
+        private ?int $usages,
     ) {
     }
 
@@ -26,5 +29,20 @@ final readonly class CreateVoucher
     public function getIssuedToEmail(): string
     {
         return $this->issuedToEmail;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getAmount(): ?int
+    {
+        return $this->amount;
+    }
+
+    public function getUsages(): ?int
+    {
+        return $this->usages;
     }
 }

@@ -24,7 +24,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
     public function findByProviderId(ProviderId $providerId): ProviderVouchersView
     {
-        /** @var array<int, array{id: UuidV7, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}> $rows */
+        /** @var array<int, array{id: UuidV7, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.id AS id',
@@ -33,6 +33,11 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 'claimedUser.email AS claimedByUser',
                 'createdUser.email AS createdByUser',
                 'v.status AS status',
+                'v.type AS type',
+                'v.initialAmount AS initialAmount',
+                'v.remainingAmount AS remainingAmount',
+                'v.initialUsages AS initialUsages',
+                'v.remainingUsages AS remainingUsages',
             )
             ->from(VoucherRecord::class, 'v')
             ->leftJoin(
@@ -68,6 +73,11 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 $row['claimedByUser'],
                 $row['createdByUser'],
                 $row['status'],
+                $row['type'],
+                $row['initialAmount'],
+                $row['remainingAmount'],
+                $row['initialUsages'],
+                $row['remainingUsages'],
             );
         }
 
@@ -76,7 +86,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
     public function findByUserEmailAndUserId(string $email, string $userId): MyVouchersView
     {
-        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string, status: string}> $rows */
+        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.id AS id',
@@ -84,6 +94,11 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 'v.claimedByUserId AS claimedByUserId',
                 'p.name AS providerName',
                 'v.status as status',
+                'v.type AS type',
+                'v.initialAmount AS initialAmount',
+                'v.remainingAmount AS remainingAmount',
+                'v.initialUsages AS initialUsages',
+                'v.remainingUsages AS remainingUsages',
             )
             ->from(VoucherRecord::class, 'v')
             ->innerJoin(
@@ -108,6 +123,11 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 $row['providerName'],
                 $row['status'],
                 $canBeClaimedOrTransferred,
+                $row['type'],
+                $row['initialAmount'],
+                $row['remainingAmount'],
+                $row['initialUsages'],
+                $row['remainingUsages'],
             );
         }
 

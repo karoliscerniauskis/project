@@ -78,7 +78,14 @@ final class CreateVoucherController extends AbstractController
 
         /** @var CreateVoucherRequest $dto */
         $dto = $this->jsonDtoFactory->create($request, CreateVoucherRequest::class);
-        $this->commandBus->dispatch(new CreateVoucher($providerId, $user->getId(), $dto->issuedToEmail));
+        $this->commandBus->dispatch(new CreateVoucher(
+            $providerId,
+            $user->getId(),
+            $dto->issuedToEmail,
+            $dto->type,
+            $dto->amount,
+            $dto->usages,
+        ));
 
         return new JsonResponse(status: Response::HTTP_CREATED);
     }

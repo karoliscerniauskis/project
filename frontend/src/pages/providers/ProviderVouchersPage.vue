@@ -35,6 +35,18 @@
                     </span>
                 </template>
 
+                <template #cell-type="{ value }">
+                    <span class="capitalize text-sm text-slate-700">
+                        {{ value }}
+                    </span>
+                </template>
+
+                <template #cell-balance="{ row }">
+                    <span class="text-sm text-slate-700">
+                        {{ formatVoucherBalance(row) }}
+                    </span>
+                </template>
+
                 <template #cell-claimedByUser="{ value }">
                     <span class="text-sm text-slate-600">
                         {{ value ?? '-' }}
@@ -75,6 +87,7 @@ import DataTable from '@/components/common/DataTable.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import type { VoucherStatus } from '@/utils/status'
+import type { ProviderVoucherView } from '@/api/provider.api'
 
 const route = useRoute()
 const providerId = ref('')
@@ -115,11 +128,29 @@ const vouchers = computed(() => vouchersResponse.value?.data ?? [])
 const columns = [
     { key: 'code', label: 'Code' },
     { key: 'issuedToEmail', label: 'Issued To' },
+    { key: 'type', label: 'Type' },
+    { key: 'balance', label: 'Balance' },
     { key: 'claimedByUser', label: 'Claimed By' },
     { key: 'createdByUser', label: 'Created By' },
     { key: 'status', label: 'Status' },
     { key: 'actions', label: 'Actions' },
 ]
+
+function formatMoney(amount: number | null): string {
+    if (amount === null) {
+        return '-'
+    }
+
+    return `${(amount / 100).toFixed(2)} €`
+}
+
+function formatVoucherBalance(voucher: ProviderVoucherView): string {
+    if (voucher.type === 'amount') {
+        return `${formatMoney(voucher.remainingAmount)} / ${formatMoney(voucher.initialAmount)}`
+    }
+
+    return `${voucher.remainingUsages ?? '-'} / ${voucher.initialUsages ?? '-'} usages`
+}
 
 async function deactivateVoucher(voucherId: string): Promise<void> {
     if (!providerId.value) {

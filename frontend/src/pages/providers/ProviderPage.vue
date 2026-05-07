@@ -61,6 +61,13 @@
                     >
                         <span class="text-slate-950">Validate voucher</span>
                     </RouterLink>
+
+                    <RouterLink
+                        :to="`/providers/${provider.id}/vouchers/use`"
+                        class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                    >
+                        <span class="text-slate-950">Use voucher</span>
+                    </RouterLink>
                 </div>
 
                 <div class="space-y-8">

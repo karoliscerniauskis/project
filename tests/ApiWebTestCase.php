@@ -13,6 +13,7 @@ use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderInvitationId;
 use App\Shared\Domain\Id\UuidCreator;
+use App\Voucher\Domain\Enum\VoucherType;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -348,6 +349,11 @@ abstract class ApiWebTestCase extends WebTestCase
         string $issuedToEmail,
         string $status,
         ?string $claimedByUserId = null,
+        string $type = VoucherType::Amount->value,
+        ?int $initialAmount = 5000,
+        ?int $remainingAmount = 5000,
+        ?int $initialUsages = null,
+        ?int $remainingUsages = null,
     ): string {
         $voucherId = self::getUuidCreator()->create();
         $voucher = new VoucherRecord(
@@ -357,6 +363,11 @@ abstract class ApiWebTestCase extends WebTestCase
             $createdByProviderUserId,
             $issuedToEmail,
             $status,
+            $type,
+            $initialAmount,
+            $remainingAmount,
+            $initialUsages,
+            $remainingUsages,
             $claimedByUserId,
         );
 

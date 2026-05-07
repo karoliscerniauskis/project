@@ -80,7 +80,7 @@ final class UseVoucherController extends AbstractController
         $dto = $this->jsonDtoFactory->create($request, UseVoucherRequest::class);
 
         $this->commandBus->dispatch(
-            new UseVoucher($providerId, $dto->code),
+            new UseVoucher($providerId, $dto->code, $dto->amount),
         );
 
         return new JsonResponse(status: Response::HTTP_NO_CONTENT);

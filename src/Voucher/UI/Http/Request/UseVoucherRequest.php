@@ -12,6 +12,8 @@ final readonly class UseVoucherRequest implements JsonMappableRequest
     public function __construct(
         #[Assert\NotBlank(message: 'Code is required.')]
         public string $code,
+        #[Assert\Positive(message: 'Amount must be positive.')]
+        public ?int $amount,
     ) {
     }
 
@@ -22,6 +24,7 @@ final readonly class UseVoucherRequest implements JsonMappableRequest
     {
         return new self(
             isset($payload['code']) && is_string($payload['code']) ? $payload['code'] : '',
+            isset($payload['amount']) && is_int($payload['amount']) ? $payload['amount'] : null,
         );
     }
 }

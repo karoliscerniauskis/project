@@ -23,6 +23,18 @@
                     </span>
                 </template>
 
+                <template #cell-type="{ value }">
+                    <span class="capitalize text-sm text-slate-700">
+                        {{ value }}
+                    </span>
+                </template>
+
+                <template #cell-balance="{ row }">
+                    <span class="text-sm text-slate-700">
+                        {{ formatVoucherBalance(row) }}
+                    </span>
+                </template>
+
                 <template #cell-providerName="{ value }">
                     <span class="text-sm text-slate-900">{{ value }}</span>
                 </template>
@@ -67,13 +79,32 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import DataTable from '@/components/common/DataTable.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import StatusBadge from '@/components/common/StatusBadge.vue'
+import type { MyVoucherView } from '@/api/voucher.api'
 
 const tableColumns = [
     { key: 'code', label: 'Code' },
     { key: 'providerName', label: 'Provider' },
+    { key: 'type', label: 'Type' },
+    { key: 'balance', label: 'Balance' },
     { key: 'status', label: 'Status' },
     { key: 'actions', label: 'Actions' },
 ]
+
+function formatMoney(amount: number | null): string {
+    if (amount === null) {
+        return '-'
+    }
+
+    return `${(amount / 100).toFixed(2)} €`
+}
+
+function formatVoucherBalance(voucher: MyVoucherView): string {
+    if (voucher.type === 'amount') {
+        return `${formatMoney(voucher.remainingAmount)} / ${formatMoney(voucher.initialAmount)}`
+    }
+
+    return `${voucher.remainingUsages ?? '-'} / ${voucher.initialUsages ?? '-'} usages`
+}
 
 const { loading, error, data: vouchersResponse } = useAsyncData(() => getMyVouchers())
 

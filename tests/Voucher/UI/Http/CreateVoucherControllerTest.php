@@ -8,6 +8,7 @@ use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Status\ProviderStatus;
 use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Tests\ApiWebTestCase;
+use App\Voucher\Domain\Enum\VoucherType;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CreateVoucherControllerTest extends ApiWebTestCase
@@ -61,6 +62,8 @@ final class CreateVoucherControllerTest extends ApiWebTestCase
             ],
             self::json([
                 'issuedToEmail' => 'invalid-email',
+                'type' => VoucherType::Amount->value,
+                'amount' => 1000,
             ]),
         );
 
@@ -104,6 +107,8 @@ final class CreateVoucherControllerTest extends ApiWebTestCase
             ],
             self::json([
                 'issuedToEmail' => 'voucher-recipient-non-member@example.com',
+                'type' => VoucherType::Amount->value,
+                'amount' => 1000,
             ]),
         );
 
@@ -159,6 +164,8 @@ final class CreateVoucherControllerTest extends ApiWebTestCase
             ],
             self::json([
                 'issuedToEmail' => $issuedToEmail,
+                'type' => VoucherType::Amount->value,
+                'amount' => 1000,
             ]),
         );
 

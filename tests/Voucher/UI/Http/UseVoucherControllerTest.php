@@ -101,6 +101,8 @@ final class UseVoucherControllerTest extends ApiWebTestCase
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: 'use-voucher-recipient@example.com',
             status: VoucherStatus::Active->value,
+            initialAmount: 1000,
+            remainingAmount: 1000,
         );
         $client->request(
             'POST',
@@ -113,6 +115,7 @@ final class UseVoucherControllerTest extends ApiWebTestCase
             ],
             self::json([
                 'code' => 'USE-SUCCESS-001',
+                'amount' => 1000,
             ]),
         );
 

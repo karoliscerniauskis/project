@@ -17,6 +17,7 @@ import NotificationsPage from '@/pages/notifications/NotificationsPage.vue'
 import AcceptProviderInvitationPage from '@/pages/providers/AcceptProviderInvitationPage.vue'
 import AdminProvidersPage from '@/pages/admin/AdminProvidersPage.vue'
 import ChangeEmailPage from '@/pages/auth/ChangeEmailPage.vue'
+import UseVoucherPage from '@/pages/providers/UseVoucherPage.vue'
 
 export const router = createRouter({
     history: createWebHistory(),
@@ -119,6 +120,12 @@ export const router = createRouter({
             path: '/me/change-email',
             name: 'change-email',
             component: ChangeEmailPage,
+        },
+        {
+            path: '/providers/:id/vouchers/use',
+            name: 'provider-voucher-use',
+            component: UseVoucherPage,
+            props: true,
         },
     ],
 })

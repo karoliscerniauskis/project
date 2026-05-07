@@ -12,6 +12,8 @@ use App\Voucher\Application\Exception\VoucherIssuedToEmailMismatch;
 use App\Voucher\Application\Exception\VoucherNotActive;
 use App\Voucher\Application\Exception\VoucherNotFound;
 use App\Voucher\Application\Exception\VoucherProviderMismatch;
+use App\Voucher\Application\Exception\VoucherUsedAmountExceedsRemainingAmount;
+use App\Voucher\Application\Exception\VoucherUsedAmountRequired;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,6 +63,24 @@ final readonly class VoucherApiExceptionSubscriber implements EventSubscriberInt
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),
             ], Response::HTTP_CONFLICT));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof VoucherUsedAmountRequired) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof VoucherUsedAmountExceedsRemainingAmount) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY));
 
             return;
         }

@@ -27,6 +27,11 @@ export type ProviderVoucherView = {
     claimedByUser: string | null
     createdByUser: string
     status: string
+    type: 'amount' | 'usage'
+    initialAmount: number | null
+    remainingAmount: number | null
+    initialUsages: number | null
+    remainingUsages: number | null
 }
 
 export type ProvidersResponse = {
@@ -59,6 +64,14 @@ export type InviteProviderUserPayload = {
 
 export type CreateVoucherPayload = {
     issuedToEmail: string
+    type: 'amount' | 'usage'
+    amount: number | null
+    usages: number | null
+}
+
+export type UseVoucherPayload = {
+    code: string
+    amount: number | null
 }
 
 export function getProviders(): Promise<ProvidersResponse> {
@@ -208,5 +221,15 @@ export function deactivateProvider(providerId: string): Promise<void> {
         headers: {
             'Content-Type': 'application/json',
         },
+    })
+}
+
+export function useVoucher(providerId: string, payload: UseVoucherPayload): Promise<void> {
+    return apiRequest<void>(`/api/providers/${providerId}/vouchers/use`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
     })
 }

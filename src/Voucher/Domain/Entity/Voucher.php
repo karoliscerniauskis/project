@@ -10,6 +10,7 @@ use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Enum\VoucherStatus;
+use App\Voucher\Domain\Enum\VoucherType;
 use App\Voucher\Domain\Event\VoucherCanceled;
 use App\Voucher\Domain\Event\VoucherClaimed;
 use App\Voucher\Domain\Event\VoucherCreated;
@@ -27,6 +28,11 @@ final class Voucher extends AbstractAggregateRoot
     private string $issuedToEmail;
     private ?UserId $claimedByUserId = null;
     private VoucherStatus $status;
+    private VoucherType $type;
+    private ?int $initialAmount;
+    private ?int $remainingAmount;
+    private ?int $initialUsages;
+    private ?int $remainingUsages;
 
     private function __construct()
     {
@@ -39,8 +45,19 @@ final class Voucher extends AbstractAggregateRoot
         ProviderId $providerId,
         ProviderUserId $createdByProviderUserId,
         string $issuedToEmail,
+        VoucherType $type,
+        ?int $initialAmount,
+        ?int $initialUsages,
         DateTimeImmutable $occurredOn,
     ): self {
+        if ($type === VoucherType::Amount && ($initialAmount === null || $initialAmount <= 0)) {
+            throw new LogicException('Amount voucher must have a positive amount.');
+        }
+
+        if ($type === VoucherType::Usage && ($initialUsages === null || $initialUsages <= 0)) {
+            throw new LogicException('Usage voucher must have a positive usage count.');
+        }
+
         $self = new self();
         $self->id = $id;
         $self->code = $code;
@@ -48,6 +65,11 @@ final class Voucher extends AbstractAggregateRoot
         $self->createdByProviderUserId = $createdByProviderUserId;
         $self->issuedToEmail = $issuedToEmail;
         $self->status = VoucherStatus::Active;
+        $self->type = $type;
+        $self->initialAmount = $type === VoucherType::Amount ? $initialAmount : null;
+        $self->remainingAmount = $type === VoucherType::Amount ? $initialAmount : null;
+        $self->initialUsages = $type === VoucherType::Usage ? $initialUsages : null;
+        $self->remainingUsages = $type === VoucherType::Usage ? $initialUsages : null;
         $self->record(new VoucherCreated($providerId->toString(), $issuedToEmail, $occurredOn));
 
         return $self;
@@ -61,6 +83,11 @@ final class Voucher extends AbstractAggregateRoot
         string $issuedToEmail,
         ?UserId $claimedByUserId,
         VoucherStatus $status,
+        VoucherType $type,
+        ?int $initialAmount,
+        ?int $remainingAmount,
+        ?int $initialUsages,
+        ?int $remainingUsages,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -70,6 +97,11 @@ final class Voucher extends AbstractAggregateRoot
         $self->issuedToEmail = $issuedToEmail;
         $self->claimedByUserId = $claimedByUserId;
         $self->status = $status;
+        $self->type = $type;
+        $self->initialAmount = $initialAmount;
+        $self->remainingAmount = $remainingAmount;
+        $self->initialUsages = $initialUsages;
+        $self->remainingUsages = $remainingUsages;
 
         return $self;
     }
@@ -129,6 +161,82 @@ final class Voucher extends AbstractAggregateRoot
         return $this->status === VoucherStatus::Used;
     }
 
+    public function getType(): VoucherType
+    {
+        return $this->type;
+    }
+
+    public function getInitialAmount(): ?int
+    {
+        return $this->initialAmount;
+    }
+
+    public function getRemainingAmount(): ?int
+    {
+        return $this->remainingAmount;
+    }
+
+    public function getInitialUsages(): ?int
+    {
+        return $this->initialUsages;
+    }
+
+    public function getRemainingUsages(): ?int
+    {
+        return $this->remainingUsages;
+    }
+
+    public function use(DateTimeImmutable $occurredOn, ?int $amount = null): void
+    {
+        if (!$this->isActive()) {
+            throw new LogicException('Voucher is not active.');
+        }
+
+        if ($this->type === VoucherType::Usage) {
+            if ($this->remainingUsages === null || $this->remainingUsages <= 0) {
+                throw new LogicException('Voucher has no remaining usages.');
+            }
+
+            --$this->remainingUsages;
+
+            if ($this->remainingUsages === 0) {
+                $this->status = VoucherStatus::Used;
+            }
+
+            $this->record(new VoucherUsed(
+                $this->code,
+                $this->issuedToEmail,
+                $occurredOn,
+            ));
+
+            return;
+        }
+
+        if ($this->remainingAmount === null || $this->remainingAmount <= 0) {
+            throw new LogicException('Voucher has no remaining amount.');
+        }
+
+        if ($amount === null || $amount <= 0) {
+            throw new LogicException('Used amount must be positive.');
+        }
+
+        if ($amount > $this->remainingAmount) {
+            throw new LogicException('Used amount cannot be greater than remaining amount.');
+        }
+
+        $this->remainingAmount -= $amount;
+
+        if ($this->remainingAmount === 0) {
+            $this->status = VoucherStatus::Used;
+        }
+
+        $this->record(new VoucherUsed(
+            $this->code,
+            $this->issuedToEmail,
+            $occurredOn,
+        ));
+    }
+
     public function claim(UserId $claimedByUserId, DateTimeImmutable $occurredOn): void
     {
         if (!$this->isActive()) {
@@ -142,20 +250,6 @@ final class Voucher extends AbstractAggregateRoot
         $this->claimedByUserId = $claimedByUserId;
         $this->record(new VoucherClaimed(
             $this->providerId->toString(),
-            $this->code,
-            $this->issuedToEmail,
-            $occurredOn,
-        ));
-    }
-
-    public function use(DateTimeImmutable $occurredOn): void
-    {
-        if (!$this->isActive()) {
-            throw new LogicException('Voucher is not active.');
-        }
-
-        $this->status = VoucherStatus::Used;
-        $this->record(new VoucherUsed(
             $this->code,
             $this->issuedToEmail,
             $occurredOn,

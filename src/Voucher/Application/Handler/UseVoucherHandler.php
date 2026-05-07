@@ -10,8 +10,11 @@ use App\Voucher\Application\Command\UseVoucher;
 use App\Voucher\Application\Exception\VoucherNotActive;
 use App\Voucher\Application\Exception\VoucherNotFound;
 use App\Voucher\Application\Exception\VoucherProviderMismatch;
+use App\Voucher\Application\Exception\VoucherUsedAmountExceedsRemainingAmount;
+use App\Voucher\Application\Exception\VoucherUsedAmountRequired;
 use App\Voucher\Application\Transaction\VoucherTransactionManager;
 use App\Voucher\Domain\Entity\Voucher;
+use App\Voucher\Domain\Enum\VoucherType;
 use App\Voucher\Domain\Repository\VoucherRepository;
 
 final readonly class UseVoucherHandler
@@ -40,8 +43,21 @@ final readonly class UseVoucherHandler
             throw VoucherNotActive::forCode($command->getCode());
         }
 
-        $this->voucherTransactionManager->transactional(function () use ($voucher): void {
-            $voucher->use($this->clock->now());
+        if ($voucher->getType() === VoucherType::Amount) {
+            $amount = $command->getAmount();
+            $remainingAmount = $voucher->getRemainingAmount();
+
+            if ($amount === null || $amount <= 0) {
+                throw VoucherUsedAmountRequired::create();
+            }
+
+            if ($remainingAmount !== null && $amount > $remainingAmount) {
+                throw VoucherUsedAmountExceedsRemainingAmount::forAmounts($amount, $remainingAmount);
+            }
+        }
+
+        $this->voucherTransactionManager->transactional(function () use ($voucher, $command): void {
+            $voucher->use($this->clock->now(), $command->getAmount());
             $this->voucherRepository->save($voucher);
             $this->outboxWriter->storeAll($voucher->pullDomainEvents());
         });
