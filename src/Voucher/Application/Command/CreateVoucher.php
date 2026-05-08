@@ -17,6 +17,7 @@ final readonly class CreateVoucher
         private ?int $amount,
         private ?int $usages,
         private ?DateTimeImmutable $expiresAt,
+        private ?DateTimeImmutable $scheduledSendAt,
     ) {
     }
 
@@ -58,5 +59,10 @@ final readonly class CreateVoucher
     public function getExpiresAt(): ?DateTimeImmutable
     {
         return $this->expiresAt;
+    }
+
+    public function getScheduledSendAt(): ?DateTimeImmutable
+    {
+        return $this->scheduledSendAt;
     }
 }

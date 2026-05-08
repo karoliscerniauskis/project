@@ -10,9 +10,11 @@ use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderInvitationRecord;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
+use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderInvitationId;
 use App\Shared\Domain\Id\UuidCreator;
+use App\Shared\Infrastructure\Doctrine\Outbox\Entity\OutboxMessageRecord;
 use App\Voucher\Domain\Enum\VoucherType;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use DateTimeImmutable;
@@ -412,6 +414,8 @@ abstract class ApiWebTestCase extends WebTestCase
         ?int $remainingUsages = null,
         ?DateTimeImmutable $createdAt = null,
         ?DateTimeImmutable $expiresAt = null,
+        ?DateTimeImmutable $scheduledSendAt = null,
+        ?DateTimeImmutable $sentAt = null,
     ): string {
         $voucherId = self::getUuidCreator()->create();
         $voucher = new VoucherRecord(
@@ -429,6 +433,8 @@ abstract class ApiWebTestCase extends WebTestCase
             $claimedByUserId,
             $createdAt,
             $expiresAt,
+            $scheduledSendAt,
+            $sentAt,
         );
 
         $entityManager = self::getEntityManager();
@@ -436,6 +442,18 @@ abstract class ApiWebTestCase extends WebTestCase
         $entityManager->flush();
 
         return $voucherId;
+    }
+
+    /**
+     * @param class-string<DomainEvent> $eventClass
+     */
+    protected static function countOutboxMessagesForEventClass(string $eventClass): int
+    {
+        return self::getEntityManager()
+            ->getRepository(OutboxMessageRecord::class)
+            ->count([
+                'eventName' => $eventClass,
+            ]);
     }
 
     protected static function getVoucherByCode(string $code): VoucherRecord

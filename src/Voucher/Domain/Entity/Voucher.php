@@ -35,6 +35,8 @@ final class Voucher extends AbstractAggregateRoot
     private ?int $remainingUsages;
     private DateTimeImmutable $createdAt;
     private ?DateTimeImmutable $expiresAt;
+    private ?DateTimeImmutable $scheduledSendAt;
+    private ?DateTimeImmutable $sentAt;
 
     private function __construct()
     {
@@ -51,6 +53,7 @@ final class Voucher extends AbstractAggregateRoot
         ?int $initialAmount,
         ?int $initialUsages,
         ?DateTimeImmutable $expiresAt,
+        ?DateTimeImmutable $scheduledSendAt,
         DateTimeImmutable $occurredOn,
     ): self {
         if ($type === VoucherType::Amount && ($initialAmount === null || $initialAmount <= 0)) {
@@ -75,7 +78,12 @@ final class Voucher extends AbstractAggregateRoot
         $self->remainingUsages = $type === VoucherType::Usage ? $initialUsages : null;
         $self->createdAt = $occurredOn;
         $self->expiresAt = $expiresAt;
-        $self->record(new VoucherCreated($providerId->toString(), $issuedToEmail, $occurredOn));
+        $self->scheduledSendAt = $scheduledSendAt;
+        $self->sentAt = null;
+
+        if ($scheduledSendAt === null || $scheduledSendAt <= $occurredOn) {
+            $self->markAsSent($occurredOn);
+        }
 
         return $self;
     }
@@ -95,6 +103,8 @@ final class Voucher extends AbstractAggregateRoot
         ?int $remainingUsages,
         DateTimeImmutable $createdAt,
         ?DateTimeImmutable $expiresAt,
+        ?DateTimeImmutable $scheduledSendAt,
+        ?DateTimeImmutable $sentAt,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -111,6 +121,8 @@ final class Voucher extends AbstractAggregateRoot
         $self->remainingUsages = $remainingUsages;
         $self->createdAt = $createdAt;
         $self->expiresAt = $expiresAt;
+        $self->scheduledSendAt = $scheduledSendAt;
+        $self->sentAt = $sentAt;
 
         return $self;
     }
@@ -203,6 +215,37 @@ final class Voucher extends AbstractAggregateRoot
     public function getExpiresAt(): ?DateTimeImmutable
     {
         return $this->expiresAt;
+    }
+
+    public function getScheduledSendAt(): ?DateTimeImmutable
+    {
+        return $this->scheduledSendAt;
+    }
+
+    public function getSentAt(): ?DateTimeImmutable
+    {
+        return $this->sentAt;
+    }
+
+    public function isSent(): bool
+    {
+        return $this->sentAt !== null;
+    }
+
+    public function shouldBeSent(DateTimeImmutable $now): bool
+    {
+        return $this->sentAt === null
+            && ($this->scheduledSendAt === null || $this->scheduledSendAt <= $now);
+    }
+
+    public function markAsSent(DateTimeImmutable $occurredOn): void
+    {
+        if ($this->sentAt !== null) {
+            throw new LogicException('Voucher is already sent.');
+        }
+
+        $this->sentAt = $occurredOn;
+        $this->record(new VoucherCreated($this->providerId->toString(), $this->issuedToEmail, $occurredOn));
     }
 
     public function isExpired(DateTimeImmutable $now): bool

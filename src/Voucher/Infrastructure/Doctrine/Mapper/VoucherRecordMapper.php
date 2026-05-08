@@ -34,6 +34,8 @@ final readonly class VoucherRecordMapper
             $record->getRemainingUsages(),
             $record->getCreatedAt(),
             $record->getExpiresAt(),
+            $record->getScheduledSendAt(),
+            $record->getSentAt(),
         );
     }
 
@@ -54,6 +56,8 @@ final readonly class VoucherRecordMapper
             $voucher->getClaimedByUserId()?->toString(),
             $voucher->getCreatedAt(),
             $voucher->getExpiresAt(),
+            $voucher->getScheduledSendAt(),
+            $voucher->getSentAt(),
         );
     }
 
@@ -69,5 +73,7 @@ final readonly class VoucherRecordMapper
         $record->setRemainingUsages($voucher->getRemainingUsages());
         $record->setCreatedAt($voucher->getCreatedAt());
         $record->setExpiresAt($voucher->getExpiresAt());
+        $record->setScheduledSendAt($voucher->getScheduledSendAt());
+        $record->setSentAt($voucher->getSentAt());
     }
 }

@@ -54,6 +54,12 @@ class VoucherRecord
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $expiresAt;
 
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $scheduledSendAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $sentAt;
+
     public function __construct(
         string $id,
         string $code,
@@ -69,6 +75,8 @@ class VoucherRecord
         ?string $claimedByUserId = null,
         ?DateTimeImmutable $createdAt = null,
         ?DateTimeImmutable $expiresAt = null,
+        ?DateTimeImmutable $scheduledSendAt = null,
+        ?DateTimeImmutable $sentAt = null,
     ) {
         $this->id = $id;
         $this->code = $code;
@@ -84,6 +92,8 @@ class VoucherRecord
         $this->claimedByUserId = $claimedByUserId;
         $this->createdAt = $createdAt ?? new DateTimeImmutable();
         $this->expiresAt = $expiresAt;
+        $this->scheduledSendAt = $scheduledSendAt;
+        $this->sentAt = $sentAt;
     }
 
     public function getId(): string
@@ -229,6 +239,30 @@ class VoucherRecord
     public function setIssuedToEmail(string $issuedToEmail): self
     {
         $this->issuedToEmail = $issuedToEmail;
+
+        return $this;
+    }
+
+    public function getScheduledSendAt(): ?DateTimeImmutable
+    {
+        return $this->scheduledSendAt;
+    }
+
+    public function setScheduledSendAt(?DateTimeImmutable $scheduledSendAt): self
+    {
+        $this->scheduledSendAt = $scheduledSendAt;
+
+        return $this;
+    }
+
+    public function getSentAt(): ?DateTimeImmutable
+    {
+        return $this->sentAt;
+    }
+
+    public function setSentAt(?DateTimeImmutable $sentAt): self
+    {
+        $this->sentAt = $sentAt;
 
         return $this;
     }

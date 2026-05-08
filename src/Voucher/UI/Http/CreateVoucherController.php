@@ -90,6 +90,7 @@ final class CreateVoucherController extends AbstractController
             $dto->amount,
             $dto->usages,
             $dto->expiresAt,
+            $dto->scheduledSendAt,
         ));
 
         return new JsonResponse(['id' => $voucherId], Response::HTTP_CREATED);

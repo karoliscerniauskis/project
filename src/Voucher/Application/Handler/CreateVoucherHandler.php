@@ -67,6 +67,7 @@ final readonly class CreateVoucherHandler
                         $command->getAmount(),
                         $command->getUsages(),
                         $command->getExpiresAt(),
+                        $command->getScheduledSendAt(),
                         $this->clock->now(),
                     );
                     $this->voucherRepository->save($voucher);

@@ -24,6 +24,8 @@ final readonly class CreateVoucherRequest implements JsonMappableRequest
         public ?int $usages,
         #[Assert\GreaterThan('now', message: 'Expiration date must be in the future.')]
         public ?DateTimeImmutable $expiresAt,
+        #[Assert\GreaterThan('now', message: 'Scheduled send date must be in the future.')]
+        public ?DateTimeImmutable $scheduledSendAt,
     ) {
     }
 
@@ -38,6 +40,7 @@ final readonly class CreateVoucherRequest implements JsonMappableRequest
             isset($payload['amount']) && is_int($payload['amount']) ? $payload['amount'] : null,
             isset($payload['usages']) && is_int($payload['usages']) ? $payload['usages'] : null,
             isset($payload['expiresAt']) && is_string($payload['expiresAt']) ? new DateTimeImmutable($payload['expiresAt']) : null,
+            isset($payload['scheduledSendAt']) && is_string($payload['scheduledSendAt']) ? new DateTimeImmutable($payload['scheduledSendAt']) : null,
         );
     }
 }

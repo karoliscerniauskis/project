@@ -11,6 +11,7 @@ use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Domain\Repository\VoucherRepository;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use App\Voucher\Infrastructure\Doctrine\Mapper\VoucherRecordMapper;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class DoctrineVoucherRepository implements VoucherRepository, VoucherIssuedEmailChanger
@@ -77,6 +78,30 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository, Vou
         $records = $this->entityManager->getRepository(VoucherRecord::class)->findBy([
             'status' => VoucherStatus::Active->value,
         ]);
+
+        return array_map(
+            fn (VoucherRecord $record): Voucher => $this->voucherRecordMapper->toDomain($record),
+            $records,
+        );
+    }
+
+    /**
+     * @return Voucher[]
+     */
+    public function findScheduledSendCandidates(DateTimeImmutable $now): array
+    {
+        /** @var VoucherRecord[] $records */
+        $records = $this->entityManager->createQueryBuilder()
+            ->select('voucher')
+            ->from(VoucherRecord::class, 'voucher')
+            ->andWhere('voucher.status = :status')
+            ->andWhere('voucher.sentAt IS NULL')
+            ->andWhere('voucher.scheduledSendAt IS NOT NULL')
+            ->andWhere('voucher.scheduledSendAt <= :now')
+            ->setParameter('status', VoucherStatus::Active->value)
+            ->setParameter('now', $now)
+            ->getQuery()
+            ->getResult();
 
         return array_map(
             fn (VoucherRecord $record): Voucher => $this->voucherRecordMapper->toDomain($record),

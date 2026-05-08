@@ -6,6 +6,7 @@ namespace App\Voucher\Domain\Repository;
 
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Entity\Voucher;
+use DateTimeImmutable;
 
 interface VoucherRepository
 {
@@ -19,4 +20,9 @@ interface VoucherRepository
      * @return Voucher[]
      */
     public function findActiveReminderCandidates(): array;
+
+    /**
+     * @return Voucher[]
+     */
+    public function findScheduledSendCandidates(DateTimeImmutable $now): array;
 }

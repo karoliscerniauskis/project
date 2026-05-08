@@ -9,6 +9,8 @@ use App\Provider\Domain\Status\ProviderStatus;
 use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Tests\ApiWebTestCase;
 use App\Voucher\Domain\Enum\VoucherType;
+use App\Voucher\Domain\Event\VoucherCreated;
+use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CreateVoucherControllerTest extends ApiWebTestCase
@@ -185,5 +187,103 @@ final class CreateVoucherControllerTest extends ApiWebTestCase
         self::assertSame('active', $voucher->getStatus());
         self::assertNull($voucher->getClaimedByUserId());
         self::assertNotSame('', $voucher->getCode());
+    }
+
+    public function testCreateVoucherWithoutScheduledSendAtSendsVoucherImmediately(): void
+    {
+        $client = self::createClient();
+        $email = 'create-voucher-immediate-member@example.com';
+        $userId = self::registerVerifyAndGetUserId(
+            $client,
+            $email,
+            'securePassword123',
+        );
+        $token = self::login($client, $email, 'securePassword123');
+        $providerId = self::createProviderRecord(
+            'Create Voucher Immediate Send Provider',
+            ProviderStatus::Active->value,
+        );
+        self::createProviderUserRecord(
+            providerId: $providerId,
+            userId: $userId,
+            role: ProviderUserRole::Member->value,
+            status: ProviderUserStatus::Active->value,
+        );
+
+        $issuedToEmail = 'created-voucher-immediate-recipient@example.com';
+
+        $client->request(
+            'POST',
+            sprintf('/api/providers/%s/vouchers', $providerId),
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+            ],
+            self::json([
+                'issuedToEmail' => $issuedToEmail,
+                'type' => VoucherType::Amount->value,
+                'amount' => 1000,
+            ]),
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
+
+        $voucher = self::getVoucherByIssuedToEmail($issuedToEmail);
+
+        self::assertNull($voucher->getScheduledSendAt());
+        self::assertInstanceOf(DateTimeImmutable::class, $voucher->getSentAt());
+        self::assertSame(1, self::countOutboxMessagesForEventClass(VoucherCreated::class));
+    }
+
+    public function testCreateVoucherWithFutureScheduledSendAtDoesNotSendVoucherImmediately(): void
+    {
+        $client = self::createClient();
+        $email = 'create-voucher-scheduled-member@example.com';
+        $userId = self::registerVerifyAndGetUserId(
+            $client,
+            $email,
+            'securePassword123',
+        );
+        $token = self::login($client, $email, 'securePassword123');
+        $providerId = self::createProviderRecord(
+            'Create Voucher Scheduled Send Provider',
+            ProviderStatus::Active->value,
+        );
+        self::createProviderUserRecord(
+            providerId: $providerId,
+            userId: $userId,
+            role: ProviderUserRole::Member->value,
+            status: ProviderUserStatus::Active->value,
+        );
+
+        $issuedToEmail = 'created-voucher-scheduled-recipient@example.com';
+        $scheduledSendAt = new DateTimeImmutable('+7 days');
+
+        $client->request(
+            'POST',
+            sprintf('/api/providers/%s/vouchers', $providerId),
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+            ],
+            self::json([
+                'issuedToEmail' => $issuedToEmail,
+                'type' => VoucherType::Amount->value,
+                'amount' => 1000,
+                'scheduledSendAt' => $scheduledSendAt->format(DATE_ATOM),
+            ]),
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
+
+        $voucher = self::getVoucherByIssuedToEmail($issuedToEmail);
+
+        self::assertInstanceOf(DateTimeImmutable::class, $voucher->getScheduledSendAt());
+        self::assertNull($voucher->getSentAt());
+        self::assertSame(0, self::countOutboxMessagesForEventClass(VoucherCreated::class));
     }
 }
