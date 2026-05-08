@@ -68,7 +68,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
         foreach ($rows as $row) {
             $vouchers[] = new ProviderVoucherView(
                 $row['id']->toRfc4122(),
-                $row['status'] !== VoucherStatus::Active->value ? $row['code'] : sprintf('***%s', substr($row['code'], -3)),
+                $row['code'],
                 $row['issuedToEmail'],
                 $row['claimedByUser'],
                 $row['createdByUser'],
@@ -119,7 +119,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
             $canBeClaimedOrTransferred = $row['status'] === VoucherStatus::Active->value && !$claimedByCurrentUser;
             $vouchers[] = new MyVoucherView(
                 $row['id']->toRfc4122(),
-                $canBeClaimedOrTransferred ? sprintf('***%s', substr($row['code'], -3)) : $row['code'],
+                $row['code'],
                 $row['providerName'],
                 $row['status'],
                 $canBeClaimedOrTransferred,

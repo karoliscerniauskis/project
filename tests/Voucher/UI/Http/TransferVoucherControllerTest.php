@@ -137,7 +137,7 @@ final class TransferVoucherControllerTest extends ApiWebTestCase
 
         self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
-        $voucher = self::getVoucherByCode('TRANSFER-SUCCESS-001');
+        $voucher = self::getVoucherByIssuedToEmail($recipientEmail);
 
         self::assertSame($recipientEmail, $voucher->getIssuedToEmail());
         self::assertSame('active', $voucher->getStatus());

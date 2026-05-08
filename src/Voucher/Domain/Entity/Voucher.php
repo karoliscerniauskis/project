@@ -302,8 +302,12 @@ final class Voucher extends AbstractAggregateRoot
         ));
     }
 
-    public function transfer(string $issuedToEmail, string $transferredFromEmail, DateTimeImmutable $occurredOn): void
-    {
+    public function transfer(
+        string $issuedToEmail,
+        string $transferredFromEmail,
+        string $newCode,
+        DateTimeImmutable $occurredOn,
+    ): void {
         if (!$this->isActive()) {
             throw new LogicException('Voucher is not active.');
         }
@@ -317,6 +321,8 @@ final class Voucher extends AbstractAggregateRoot
         }
 
         $this->issuedToEmail = $issuedToEmail;
+        $this->code = $newCode;
+
         $this->record(new VoucherTransferred(
             $transferredFromEmail,
             $issuedToEmail,

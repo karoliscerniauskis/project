@@ -139,7 +139,7 @@ final class GetProviderVouchersControllerTest extends ApiWebTestCase
 
         self::assertSame(
             [
-                '***001',
+                'PROVIDER-VOUCHER-ACTIVE-001',
                 'PROVIDER-VOUCHER-USED-001',
             ],
             $codes,

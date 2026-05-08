@@ -13,6 +13,7 @@ use App\Voucher\Application\Exception\VoucherAlreadyClaimed;
 use App\Voucher\Application\Exception\VoucherNotActive;
 use App\Voucher\Application\Exception\VoucherNotFound;
 use App\Voucher\Application\Transaction\VoucherTransactionManager;
+use App\Voucher\Domain\Code\VoucherCodeGenerator;
 use App\Voucher\Domain\Entity\Voucher;
 use App\Voucher\Domain\Repository\VoucherRepository;
 
@@ -23,6 +24,7 @@ final readonly class TransferVoucherHandler
         private VoucherTransactionManager $voucherTransactionManager,
         private OutboxWriter $outboxWriter,
         private Clock $clock,
+        private VoucherCodeGenerator $voucherCodeGenerator,
     ) {
     }
 
@@ -48,8 +50,9 @@ final readonly class TransferVoucherHandler
             throw VoucherAccessDenied::create();
         }
 
-        $this->voucherTransactionManager->transactional(function () use ($voucher, $command, $currentUserEmail): void {
-            $voucher->transfer($command->getRecipientEmail(), $currentUserEmail, $this->clock->now());
+        $newCode = $this->voucherCodeGenerator->generate();
+        $this->voucherTransactionManager->transactional(function () use ($voucher, $command, $currentUserEmail, $newCode): void {
+            $voucher->transfer($command->getRecipientEmail(), $currentUserEmail, $newCode, $this->clock->now());
             $this->voucherRepository->save($voucher);
             $this->outboxWriter->storeAll($voucher->pullDomainEvents());
         });
