@@ -7,6 +7,7 @@ namespace App\Voucher\Infrastructure\Doctrine\Repository;
 use App\Shared\Application\Voucher\VoucherIssuedEmailChanger;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Domain\Entity\Voucher;
+use App\Voucher\Domain\Enum\VoucherStatus;
 use App\Voucher\Domain\Repository\VoucherRepository;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use App\Voucher\Infrastructure\Doctrine\Mapper\VoucherRecordMapper;
@@ -65,5 +66,21 @@ final readonly class DoctrineVoucherRepository implements VoucherRepository, Vou
             ->setParameter('newEmail', $newEmail)
             ->getQuery()
             ->execute();
+    }
+
+    /**
+     * @return Voucher[]
+     */
+    public function findActiveReminderCandidates(): array
+    {
+        /** @var VoucherRecord[] $records */
+        $records = $this->entityManager->getRepository(VoucherRecord::class)->findBy([
+            'status' => VoucherStatus::Active->value,
+        ]);
+
+        return array_map(
+            fn (VoucherRecord $record): Voucher => $this->voucherRecordMapper->toDomain($record),
+            $records,
+        );
     }
 }

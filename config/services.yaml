@@ -75,6 +75,10 @@ services:
         arguments:
             $emailFrom: '%app.email_from%'
 
+    App\Voucher\Application\Reminder\VoucherReminderProcessor:
+        arguments:
+            $emailFrom: '%app.email_from%'
+
     App\Auth\Infrastructure\Doctrine\Outbox\AuthOutboxDomainEventFactory:
         tags: ['app.outbox_domain_event_factory']
 

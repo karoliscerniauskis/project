@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Voucher\Application\Command;
 
+use DateTimeImmutable;
+
 final readonly class CreateVoucher
 {
     public function __construct(
@@ -14,6 +16,7 @@ final readonly class CreateVoucher
         private string $type,
         private ?int $amount,
         private ?int $usages,
+        private ?DateTimeImmutable $expiresAt,
     ) {
     }
 
@@ -50,5 +53,10 @@ final readonly class CreateVoucher
     public function getUsages(): ?int
     {
         return $this->usages;
+    }
+
+    public function getExpiresAt(): ?DateTimeImmutable
+    {
+        return $this->expiresAt;
     }
 }

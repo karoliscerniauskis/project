@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Voucher\Infrastructure\Doctrine\Entity;
 
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -47,6 +48,12 @@ class VoucherRecord
     #[ORM\Column(type: 'integer', nullable: true)]
     private ?int $remainingUsages;
 
+    #[ORM\Column(type: 'datetime_immutable')]
+    private DateTimeImmutable $createdAt;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $expiresAt;
+
     public function __construct(
         string $id,
         string $code,
@@ -60,6 +67,8 @@ class VoucherRecord
         ?int $initialUsages = null,
         ?int $remainingUsages = null,
         ?string $claimedByUserId = null,
+        ?DateTimeImmutable $createdAt = null,
+        ?DateTimeImmutable $expiresAt = null,
     ) {
         $this->id = $id;
         $this->code = $code;
@@ -73,6 +82,8 @@ class VoucherRecord
         $this->initialUsages = $initialUsages;
         $this->remainingUsages = $remainingUsages;
         $this->claimedByUserId = $claimedByUserId;
+        $this->createdAt = $createdAt ?? new DateTimeImmutable();
+        $this->expiresAt = $expiresAt;
     }
 
     public function getId(): string
@@ -173,6 +184,30 @@ class VoucherRecord
     public function setRemainingUsages(?int $remainingUsages): self
     {
         $this->remainingUsages = $remainingUsages;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(DateTimeImmutable $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getExpiresAt(): ?DateTimeImmutable
+    {
+        return $this->expiresAt;
+    }
+
+    public function setExpiresAt(?DateTimeImmutable $expiresAt): self
+    {
+        $this->expiresAt = $expiresAt;
 
         return $this;
     }

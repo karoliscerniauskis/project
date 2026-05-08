@@ -16,6 +16,7 @@ use App\Shared\Domain\Id\UuidCreator;
 use App\Voucher\Domain\Enum\VoucherType;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
 use DateTimeImmutable;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -23,6 +24,40 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class ApiWebTestCase extends WebTestCase
 {
+    protected function tearDown(): void
+    {
+        if (self::$kernel !== null) {
+            $entityManager = self::getEntityManager();
+            $connection = $entityManager->getConnection();
+
+            self::truncateDatabase($connection);
+
+            $entityManager->clear();
+        }
+
+        parent::tearDown();
+    }
+
+    private static function truncateDatabase(Connection $connection): void
+    {
+        $schemaManager = $connection->createSchemaManager();
+        $tableNames = $schemaManager->listTableNames();
+
+        if ($tableNames === []) {
+            return;
+        }
+
+        $quotedTableNames = array_map(
+            static fn (string $tableName): string => $connection->quoteIdentifier($tableName),
+            $tableNames,
+        );
+
+        $connection->executeStatement(sprintf(
+            'TRUNCATE TABLE %s RESTART IDENTITY CASCADE',
+            implode(', ', $quotedTableNames),
+        ));
+    }
+
     /**
      * @param array<string, mixed> $payload
      */
@@ -200,6 +235,27 @@ abstract class ApiWebTestCase extends WebTestCase
         return $providerId;
     }
 
+    protected static function createProviderRecordWithReminderSettings(
+        string $name,
+        string $status,
+        ?int $claimReminderAfterDays,
+        ?int $expiryReminderBeforeDays,
+    ): string {
+        $providerId = ProviderId::fromString(self::getUuidCreator()->create())->toString();
+        $provider = new ProviderRecord(
+            $providerId,
+            $name,
+            $status,
+            $claimReminderAfterDays,
+            $expiryReminderBeforeDays,
+        );
+        $entityManager = self::getEntityManager();
+        $entityManager->persist($provider);
+        $entityManager->flush();
+
+        return $providerId;
+    }
+
     protected static function createProviderInvitationRecord(
         string $providerId,
         string $email,
@@ -354,6 +410,8 @@ abstract class ApiWebTestCase extends WebTestCase
         ?int $remainingAmount = 5000,
         ?int $initialUsages = null,
         ?int $remainingUsages = null,
+        ?DateTimeImmutable $createdAt = null,
+        ?DateTimeImmutable $expiresAt = null,
     ): string {
         $voucherId = self::getUuidCreator()->create();
         $voucher = new VoucherRecord(
@@ -369,6 +427,8 @@ abstract class ApiWebTestCase extends WebTestCase
             $initialUsages,
             $remainingUsages,
             $claimedByUserId,
+            $createdAt,
+            $expiresAt,
         );
 
         $entityManager = self::getEntityManager();

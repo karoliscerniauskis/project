@@ -11,12 +11,15 @@ use App\Provider\Domain\Status\ProviderStatus;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
 use App\Shared\Domain\Id\ProviderId;
 use DateTimeImmutable;
+use LogicException;
 
 final class Provider extends AbstractAggregateRoot
 {
     private ProviderId $id;
     private string $name;
     private ProviderStatus $status;
+    private ?int $claimReminderAfterDays = null;
+    private ?int $expiryReminderBeforeDays = null;
 
     private function __construct()
     {
@@ -33,6 +36,8 @@ final class Provider extends AbstractAggregateRoot
         $self->id = $id;
         $self->name = $name;
         $self->status = $status;
+        $self->claimReminderAfterDays = null;
+        $self->expiryReminderBeforeDays = null;
         $self->record(new ProviderCreated(
             $id->toString(),
             $name,
@@ -46,11 +51,15 @@ final class Provider extends AbstractAggregateRoot
         ProviderId $id,
         string $name,
         ProviderStatus $status,
+        ?int $claimReminderAfterDays = null,
+        ?int $expiryReminderBeforeDays = null,
     ): self {
         $self = new self();
         $self->id = $id;
         $self->name = $name;
         $self->status = $status;
+        $self->claimReminderAfterDays = $claimReminderAfterDays;
+        $self->expiryReminderBeforeDays = $expiryReminderBeforeDays;
 
         return $self;
     }
@@ -68,6 +77,32 @@ final class Provider extends AbstractAggregateRoot
     public function getStatus(): ProviderStatus
     {
         return $this->status;
+    }
+
+    public function getClaimReminderAfterDays(): ?int
+    {
+        return $this->claimReminderAfterDays;
+    }
+
+    public function getExpiryReminderBeforeDays(): ?int
+    {
+        return $this->expiryReminderBeforeDays;
+    }
+
+    public function configureReminderSettings(
+        ?int $claimReminderAfterDays,
+        ?int $expiryReminderBeforeDays,
+    ): void {
+        if ($claimReminderAfterDays !== null && $claimReminderAfterDays <= 0) {
+            throw new LogicException('Claim reminder days must be positive.');
+        }
+
+        if ($expiryReminderBeforeDays !== null && $expiryReminderBeforeDays <= 0) {
+            throw new LogicException('Expiry reminder days must be positive.');
+        }
+
+        $this->claimReminderAfterDays = $claimReminderAfterDays;
+        $this->expiryReminderBeforeDays = $expiryReminderBeforeDays;
     }
 
     public function approve(DateTimeImmutable $occurredOn): void

@@ -14,4 +14,9 @@ interface VoucherRepository
     public function findByCode(string $code): ?Voucher;
 
     public function findById(VoucherId $id): ?Voucher;
+
+    /**
+     * @return Voucher[]
+     */
+    public function findActiveReminderCandidates(): array;
 }

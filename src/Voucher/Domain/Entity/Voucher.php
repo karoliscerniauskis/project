@@ -33,6 +33,8 @@ final class Voucher extends AbstractAggregateRoot
     private ?int $remainingAmount;
     private ?int $initialUsages;
     private ?int $remainingUsages;
+    private DateTimeImmutable $createdAt;
+    private ?DateTimeImmutable $expiresAt;
 
     private function __construct()
     {
@@ -48,6 +50,7 @@ final class Voucher extends AbstractAggregateRoot
         VoucherType $type,
         ?int $initialAmount,
         ?int $initialUsages,
+        ?DateTimeImmutable $expiresAt,
         DateTimeImmutable $occurredOn,
     ): self {
         if ($type === VoucherType::Amount && ($initialAmount === null || $initialAmount <= 0)) {
@@ -70,6 +73,8 @@ final class Voucher extends AbstractAggregateRoot
         $self->remainingAmount = $type === VoucherType::Amount ? $initialAmount : null;
         $self->initialUsages = $type === VoucherType::Usage ? $initialUsages : null;
         $self->remainingUsages = $type === VoucherType::Usage ? $initialUsages : null;
+        $self->createdAt = $occurredOn;
+        $self->expiresAt = $expiresAt;
         $self->record(new VoucherCreated($providerId->toString(), $issuedToEmail, $occurredOn));
 
         return $self;
@@ -88,6 +93,8 @@ final class Voucher extends AbstractAggregateRoot
         ?int $remainingAmount,
         ?int $initialUsages,
         ?int $remainingUsages,
+        DateTimeImmutable $createdAt,
+        ?DateTimeImmutable $expiresAt,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -102,6 +109,8 @@ final class Voucher extends AbstractAggregateRoot
         $self->remainingAmount = $remainingAmount;
         $self->initialUsages = $initialUsages;
         $self->remainingUsages = $remainingUsages;
+        $self->createdAt = $createdAt;
+        $self->expiresAt = $expiresAt;
 
         return $self;
     }
@@ -186,10 +195,29 @@ final class Voucher extends AbstractAggregateRoot
         return $this->remainingUsages;
     }
 
+    public function getCreatedAt(): DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getExpiresAt(): ?DateTimeImmutable
+    {
+        return $this->expiresAt;
+    }
+
+    public function isExpired(DateTimeImmutable $now): bool
+    {
+        return $this->expiresAt !== null && $this->expiresAt <= $now;
+    }
+
     public function use(DateTimeImmutable $occurredOn, ?int $amount = null): void
     {
         if (!$this->isActive()) {
             throw new LogicException('Voucher is not active.');
+        }
+
+        if ($this->isExpired($occurredOn)) {
+            throw new LogicException('Voucher is expired.');
         }
 
         if ($this->type === VoucherType::Usage) {
@@ -241,6 +269,10 @@ final class Voucher extends AbstractAggregateRoot
     {
         if (!$this->isActive()) {
             throw new LogicException('Voucher is not active.');
+        }
+
+        if ($this->isExpired($occurredOn)) {
+            throw new LogicException('Voucher is expired.');
         }
 
         if ($this->claimedByUserId !== null) {

@@ -17,6 +17,8 @@ final readonly class ProviderRecordMapper
             ProviderId::fromString($record->getId()),
             $record->getName(),
             ProviderStatus::from($record->getStatus()),
+            $record->getClaimReminderAfterDays(),
+            $record->getExpiryReminderBeforeDays(),
         );
     }
 
@@ -26,11 +28,15 @@ final readonly class ProviderRecordMapper
             $provider->getId()->toString(),
             $provider->getName(),
             $provider->getStatus()->value,
+            $provider->getClaimReminderAfterDays(),
+            $provider->getExpiryReminderBeforeDays(),
         );
     }
 
     public function syncRecord(Provider $provider, ProviderRecord $record): void
     {
         $record->setStatus($provider->getStatus()->value);
+        $record->setClaimReminderAfterDays($provider->getClaimReminderAfterDays());
+        $record->setExpiryReminderBeforeDays($provider->getExpiryReminderBeforeDays());
     }
 }
