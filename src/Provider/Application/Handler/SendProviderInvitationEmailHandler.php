@@ -24,7 +24,9 @@ final readonly class SendProviderInvitationEmailHandler
             $this->emailFrom,
             $event->getEmail(),
             'You are invited to join a provider',
-            'Click to accept invitation: '.$inviteUrl,
+            'You have been invited to join a provider. Click the button below to accept the invitation.',
+            $inviteUrl,
+            'Accept invitation',
         );
     }
 }

@@ -32,7 +32,9 @@ final class SendVerifyEmailOnUserRegisteredHandlerTest extends TestCase
                 $emailFrom,
                 $email,
                 'Verify your email',
-                'Click to verify your email: '.$verifyUrl,
+                'Click the button below to verify your email address.',
+                $verifyUrl,
+                'Verify email',
             );
         $handler = new SendVerifyEmailOnUserRegisteredHandler(
             $emailSender,

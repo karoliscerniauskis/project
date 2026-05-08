@@ -53,10 +53,11 @@ final readonly class SendProviderApprovedEmailHandler
                 $email,
                 'Your provider has been approved',
                 sprintf(
-                    'Your provider "%s" has been approved and is now active. View it here: %s',
+                    'Your provider "%s" has been approved and is now active. Click the button below to view it.',
                     $providerName,
-                    $providerUrl,
                 ),
+                $providerUrl,
+                'View provider',
             );
         }
     }

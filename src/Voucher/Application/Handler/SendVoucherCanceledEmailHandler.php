@@ -19,15 +19,17 @@ final readonly class SendVoucherCanceledEmailHandler
 
     public function __invoke(VoucherCanceled $event): void
     {
+        $myVouchersUrl = $this->frontendUrlCreator->myVouchers();
         $this->emailSender->send(
             $this->emailFrom,
             $event->getIssuedToEmail(),
             'Your voucher has been canceled',
             sprintf(
-                'Your voucher "%s" has been canceled. View your vouchers here: %s',
+                'Your voucher "%s" has been canceled. Click the button below to view your vouchers.',
                 $event->getVoucherCode(),
-                $this->frontendUrlCreator->myVouchers(),
             ),
+            $myVouchersUrl,
+            'View vouchers',
         );
     }
 }

@@ -24,7 +24,9 @@ final readonly class SendVoucherCreatedEmailHandler
             $this->emailFrom,
             $event->getIssuedToEmail(),
             'You have received a voucher',
-            'You have received a voucher. View it here: '.$myVouchersUrl,
+            'You have received a new voucher. Click the button below to view your vouchers.',
+            $myVouchersUrl,
+            'View vouchers',
         );
     }
 }

@@ -19,7 +19,7 @@ docker compose exec app bash
 php bin/console lexik:jwt:generate-keypair --skip-if-exists
 
 # Commands
-php bin/console app:outbox:process
+php bin/console app:outbox:process --watch --interval=3
 
 # Tests
 docker exec app composer test

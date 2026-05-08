@@ -82,22 +82,27 @@ final class SendProviderApprovedEmailHandlerTest extends TestCase
                 string $to,
                 string $subject,
                 string $text,
+                ?string $actionUrl,
+                ?string $actionLabel,
             ) use ($emailFrom, $adminEmail1, $adminEmail2, &$call, $providerUrl): void {
                 ++$call;
 
                 self::assertSame($emailFrom, $from);
+                self::assertSame('Your provider has been approved', $subject);
+                self::assertSame(
+                    'Your provider "Provider" has been approved and is now active. Click the button below to view it.',
+                    $text,
+                );
+                self::assertSame($providerUrl, $actionUrl);
+                self::assertSame('View provider', $actionLabel);
 
                 if ($call === 1) {
                     self::assertSame($adminEmail1, $to);
-                    self::assertSame('Your provider has been approved', $subject);
-                    self::assertSame('Your provider "Provider" has been approved and is now active. View it here: '.$providerUrl, $text);
 
                     return;
                 }
 
                 self::assertSame($adminEmail2, $to);
-                self::assertSame('Your provider has been approved', $subject);
-                self::assertSame('Your provider "Provider" has been approved and is now active. View it here: '.$providerUrl, $text);
             });
         $handler = new SendProviderApprovedEmailHandler(
             $providerRepository,

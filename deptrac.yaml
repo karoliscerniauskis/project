@@ -162,6 +162,11 @@ deptrac:
             collectors:
                 -   type: classLike
                     value: ^Psr\\
+        -
+            name: Twig
+            collectors:
+                -   type: classLike
+                    value: ^Twig\\
     ruleset:
         # Shared
         SharedDomain:
@@ -175,6 +180,7 @@ deptrac:
             - PhpParser
             - Doctrine
             - Psr
+            - Twig
         SharedUI:
             - Symfony
             - SharedApplication

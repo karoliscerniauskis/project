@@ -6,5 +6,12 @@ namespace App\Shared\Application\Email;
 
 interface EmailSender
 {
-    public function send(string $from, string $to, string $subject, string $text): void;
+    public function send(
+        string $from,
+        string $to,
+        string $subject,
+        string $text,
+        ?string $actionUrl = null,
+        ?string $actionLabel = null,
+    ): void;
 }

@@ -40,7 +40,9 @@ final class SendProviderInvitationEmailHandlerTest extends TestCase
                 $emailFrom,
                 $emailTo,
                 'You are invited to join a provider',
-                'Click to accept invitation: '.$inviteUrl,
+                'You have been invited to join a provider. Click the button below to accept the invitation.',
+                $inviteUrl,
+                'Accept invitation',
             );
         $handler = new SendProviderInvitationEmailHandler(
             $emailSender,

@@ -37,7 +37,9 @@ final class SendVerifyEmailOnUserEmailChangeRequestedHandlerTest extends TestCas
                 $emailFrom,
                 $email,
                 'Verify your new email',
-                'Click to verify your email: '.$verifyUrl,
+                'Click the button below to verify your email address.',
+                $verifyUrl,
+                'Verify email',
             );
         $handler(new UserEmailChangeRequested($email, $slug, $occurredOn));
     }

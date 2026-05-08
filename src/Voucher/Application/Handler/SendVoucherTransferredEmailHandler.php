@@ -25,10 +25,11 @@ final readonly class SendVoucherTransferredEmailHandler
             $event->getTransferredToEmail(),
             'You have received a voucher',
             sprintf(
-                'You have received a voucher from %s. View it here: %s',
+                'You have received a voucher from %s. Click the button below to view your vouchers.',
                 $event->getTransferredFromEmail(),
-                $myVouchersUrl,
             ),
+            $myVouchersUrl,
+            'View vouchers',
         );
     }
 }
