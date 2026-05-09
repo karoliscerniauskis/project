@@ -14,6 +14,7 @@ use App\Shared\Domain\Event\DomainEvent;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderInvitationId;
 use App\Shared\Domain\Id\UuidCreator;
+use App\Shared\Infrastructure\Doctrine\Notification\Entity\NotificationRecord;
 use App\Shared\Infrastructure\Doctrine\Outbox\Entity\OutboxMessageRecord;
 use App\Voucher\Domain\Enum\VoucherType;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
@@ -476,5 +477,15 @@ abstract class ApiWebTestCase extends WebTestCase
         self::assertInstanceOf(VoucherRecord::class, $voucher);
 
         return $voucher;
+    }
+
+    protected static function countNotificationsByUserIdAndType(string $userId, string $type): int
+    {
+        return self::getEntityManager()
+            ->getRepository(NotificationRecord::class)
+            ->count([
+                'userId' => $userId,
+                'type' => $type,
+            ]);
     }
 }

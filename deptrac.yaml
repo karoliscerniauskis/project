@@ -205,6 +205,8 @@ deptrac:
             - Doctrine
             - Gesdinet
         AuthUI:
+            - AuthDomain
+            - SharedDomain
             - Symfony
             - AuthInfrastructure
             - AuthApplication

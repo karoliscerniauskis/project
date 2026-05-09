@@ -20,6 +20,10 @@ final readonly class UserRecordMapper
             $record->getRoles(),
             $record->getEmailVerificationSlug(),
             $record->getEmailVerifiedAt(),
+            $record->isEmailBreachCheckEnabled(),
+            $record->getEmailBreachCheckedAt(),
+            $record->getEmailBreachedAt(),
+            $record->getEmailBreachCount(),
         );
     }
 
@@ -33,6 +37,10 @@ final readonly class UserRecordMapper
             $user->getRoles(),
             $user->getEmailVerificationSlug(),
             $user->getEmailVerifiedAt(),
+            $user->isEmailBreachCheckEnabled(),
+            $user->getEmailBreachCheckedAt(),
+            $user->getEmailBreachedAt(),
+            $user->getEmailBreachCount(),
         );
     }
 
@@ -43,6 +51,10 @@ final readonly class UserRecordMapper
             ->setPendingEmail($user->getPendingEmail())
             ->setHashedPassword($user->getHashedPassword())
             ->setEmailVerificationSlug($user->getEmailVerificationSlug())
-            ->setEmailVerifiedAt($user->getEmailVerifiedAt());
+            ->setEmailVerifiedAt($user->getEmailVerifiedAt())
+            ->setEmailBreachCheckEnabled($user->isEmailBreachCheckEnabled())
+            ->setEmailBreachCheckedAt($user->getEmailBreachCheckedAt())
+            ->setEmailBreachedAt($user->getEmailBreachedAt())
+            ->setEmailBreachCount($user->getEmailBreachCount());
     }
 }

@@ -8,7 +8,9 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters: {
     app.email_from: '%env(APP_EMAIL_FROM)%',
-    app.frontend_url: '%env(APP_FRONTEND_URL)%'
+    app.frontend_url: '%env(APP_FRONTEND_URL)%',
+    app.hibp_api_key: '%env(HIBP_API_KEY)%',
+    app.hibp_api_url: '%env(HIBP_API_URL)%',
 }
 
 services:
@@ -94,6 +96,12 @@ services:
 
     App\Shared\Application\Transaction\TransactionManager:
         alias: App\Shared\Infrastructure\Doctrine\Transaction\DoctrineTransactionManager
+
+    App\Auth\Application\EmailBreach\EmailBreachChecker:
+        class: App\Auth\Infrastructure\HaveIBeenPwned\HaveIBeenPwnedEmailBreachChecker
+        arguments:
+            $apiKey: '%app.hibp_api_key%'
+            $apiUrl: '%app.hibp_api_url%'
 
     App\Auth\Infrastructure\Url\FrontendUrlCreator:
         arguments:

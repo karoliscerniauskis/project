@@ -27,6 +27,14 @@ class UserRecord
     private ?string $emailVerificationSlug;
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $emailVerifiedAt;
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $emailBreachCheckEnabled;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $emailBreachCheckedAt;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $emailBreachedAt;
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $emailBreachCount;
 
     /**
      * @param string[] $roles
@@ -39,6 +47,10 @@ class UserRecord
         array $roles,
         ?string $emailVerificationSlug,
         ?DateTimeImmutable $emailVerifiedAt = null,
+        bool $emailBreachCheckEnabled = false,
+        ?DateTimeImmutable $emailBreachCheckedAt = null,
+        ?DateTimeImmutable $emailBreachedAt = null,
+        int $emailBreachCount = 0,
     ) {
         $this->id = $id;
         $this->email = $email;
@@ -47,6 +59,10 @@ class UserRecord
         $this->roles = $roles;
         $this->emailVerificationSlug = $emailVerificationSlug;
         $this->emailVerifiedAt = $emailVerifiedAt;
+        $this->emailBreachCheckEnabled = $emailBreachCheckEnabled;
+        $this->emailBreachCheckedAt = $emailBreachCheckedAt;
+        $this->emailBreachedAt = $emailBreachedAt;
+        $this->emailBreachCount = $emailBreachCount;
     }
 
     public function getId(): string
@@ -118,6 +134,54 @@ class UserRecord
     public function setEmailVerifiedAt(?DateTimeImmutable $emailVerifiedAt): self
     {
         $this->emailVerifiedAt = $emailVerifiedAt;
+
+        return $this;
+    }
+
+    public function isEmailBreachCheckEnabled(): bool
+    {
+        return $this->emailBreachCheckEnabled;
+    }
+
+    public function setEmailBreachCheckEnabled(bool $emailBreachCheckEnabled): self
+    {
+        $this->emailBreachCheckEnabled = $emailBreachCheckEnabled;
+
+        return $this;
+    }
+
+    public function getEmailBreachCheckedAt(): ?DateTimeImmutable
+    {
+        return $this->emailBreachCheckedAt;
+    }
+
+    public function setEmailBreachCheckedAt(?DateTimeImmutable $emailBreachCheckedAt): self
+    {
+        $this->emailBreachCheckedAt = $emailBreachCheckedAt;
+
+        return $this;
+    }
+
+    public function getEmailBreachedAt(): ?DateTimeImmutable
+    {
+        return $this->emailBreachedAt;
+    }
+
+    public function setEmailBreachedAt(?DateTimeImmutable $emailBreachedAt): self
+    {
+        $this->emailBreachedAt = $emailBreachedAt;
+
+        return $this;
+    }
+
+    public function getEmailBreachCount(): int
+    {
+        return $this->emailBreachCount;
+    }
+
+    public function setEmailBreachCount(int $emailBreachCount): self
+    {
+        $this->emailBreachCount = $emailBreachCount;
 
         return $this;
     }

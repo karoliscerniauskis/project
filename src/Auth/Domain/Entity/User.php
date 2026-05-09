@@ -20,6 +20,10 @@ final class User extends AbstractAggregateRoot
     private array $roles;
     private ?string $emailVerificationSlug;
     private ?DateTimeImmutable $emailVerifiedAt = null;
+    private bool $emailBreachCheckEnabled = false;
+    private ?DateTimeImmutable $emailBreachCheckedAt = null;
+    private ?DateTimeImmutable $emailBreachedAt = null;
+    private int $emailBreachCount = 0;
 
     private function __construct()
     {
@@ -45,6 +49,10 @@ final class User extends AbstractAggregateRoot
         $self->roles = $roles;
         $self->emailVerificationSlug = $emailVerificationSlug;
         $self->emailVerifiedAt = null;
+        $self->emailBreachCheckEnabled = false;
+        $self->emailBreachCheckedAt = null;
+        $self->emailBreachedAt = null;
+        $self->emailBreachCount = 0;
         $self->record(new UserRegistered($email, $emailVerificationSlug, $occurredOn));
 
         return $self;
@@ -89,6 +97,10 @@ final class User extends AbstractAggregateRoot
         array $roles,
         ?string $emailVerificationSlug,
         ?DateTimeImmutable $emailVerifiedAt,
+        bool $emailBreachCheckEnabled = false,
+        ?DateTimeImmutable $emailBreachCheckedAt = null,
+        ?DateTimeImmutable $emailBreachedAt = null,
+        int $emailBreachCount = 0,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -98,6 +110,10 @@ final class User extends AbstractAggregateRoot
         $self->roles = $roles;
         $self->emailVerificationSlug = $emailVerificationSlug;
         $self->emailVerifiedAt = $emailVerifiedAt;
+        $self->emailBreachCheckEnabled = $emailBreachCheckEnabled;
+        $self->emailBreachCheckedAt = $emailBreachCheckedAt;
+        $self->emailBreachedAt = $emailBreachedAt;
+        $self->emailBreachCount = $emailBreachCount;
 
         return $self;
     }
@@ -146,5 +162,40 @@ final class User extends AbstractAggregateRoot
     public function isEmailVerified(): bool
     {
         return $this->emailVerifiedAt !== null;
+    }
+
+    public function isEmailBreachCheckEnabled(): bool
+    {
+        return $this->emailBreachCheckEnabled;
+    }
+
+    public function getEmailBreachCheckedAt(): ?DateTimeImmutable
+    {
+        return $this->emailBreachCheckedAt;
+    }
+
+    public function getEmailBreachedAt(): ?DateTimeImmutable
+    {
+        return $this->emailBreachedAt;
+    }
+
+    public function getEmailBreachCount(): int
+    {
+        return $this->emailBreachCount;
+    }
+
+    public function configureEmailBreachCheck(bool $enabled): void
+    {
+        $this->emailBreachCheckEnabled = $enabled;
+    }
+
+    public function markEmailBreachCheckCompleted(
+        DateTimeImmutable $checkedAt,
+        bool $breached,
+        int $breachCount,
+    ): void {
+        $this->emailBreachCheckedAt = $checkedAt;
+        $this->emailBreachCount = $breachCount;
+        $this->emailBreachedAt = $breached ? $checkedAt : null;
     }
 }

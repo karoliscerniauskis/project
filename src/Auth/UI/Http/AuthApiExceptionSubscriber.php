@@ -9,6 +9,7 @@ use App\Auth\Application\Exception\UserEmailAlreadyVerified;
 use App\Auth\Application\Exception\UserEmailMustBeUnique;
 use App\Auth\Application\Exception\UserEmailMustBeVerified;
 use App\Auth\Application\Exception\UserEmailVerificationLinkInvalid;
+use App\Auth\Application\Exception\UserNotFound;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,6 +65,15 @@ final readonly class AuthApiExceptionSubscriber implements EventSubscriberInterf
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),
             ], Response::HTTP_UNAUTHORIZED));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof UserNotFound) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_NOT_FOUND));
 
             return;
         }

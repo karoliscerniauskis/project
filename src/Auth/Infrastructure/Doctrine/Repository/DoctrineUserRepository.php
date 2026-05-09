@@ -10,6 +10,7 @@ use App\Auth\Infrastructure\Doctrine\Entity\UserRecord;
 use App\Auth\Infrastructure\Doctrine\Mapper\UserRecordMapper;
 use App\Shared\Application\User\UserIdFinder;
 use App\Shared\Domain\Id\UserId;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class DoctrineUserRepository implements UserRepository, UserIdFinder
@@ -83,5 +84,28 @@ final readonly class DoctrineUserRepository implements UserRepository, UserIdFin
         }
 
         return $user->getId();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findEmailBreachCheckCandidates(DateTimeImmutable $recheckThreshold, int $limit): array
+    {
+        /** @var UserRecord[] $records */
+        $records = $this->entityManager->createQueryBuilder()
+            ->select('user')
+            ->from(UserRecord::class, 'user')
+            ->andWhere('user.emailBreachCheckEnabled = true')
+            ->andWhere('user.emailBreachCheckedAt IS NULL OR user.emailBreachCheckedAt <= :recheckThreshold')
+            ->setParameter('recheckThreshold', $recheckThreshold)
+            ->orderBy('user.emailBreachCheckedAt', 'ASC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return array_map(
+            fn (UserRecord $record): User => $this->userRecordMapper->toDomain($record),
+            $records,
+        );
     }
 }
