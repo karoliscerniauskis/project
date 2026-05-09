@@ -103,6 +103,10 @@ services:
             $apiKey: '%app.hibp_api_key%'
             $apiUrl: '%app.hibp_api_url%'
 
+    App\Auth\Application\EmailBreach\EmailBreachCheckProcessor:
+        arguments:
+            $emailFrom: '%app.email_from%'
+
     App\Auth\Infrastructure\Url\FrontendUrlCreator:
         arguments:
             $frontendUrl: '%app.frontend_url%'

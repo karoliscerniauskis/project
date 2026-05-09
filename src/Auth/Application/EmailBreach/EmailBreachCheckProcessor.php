@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Auth\Application\EmailBreach;
 
 use App\Auth\Domain\Repository\UserRepository;
+use App\Shared\Application\Email\EmailSender;
 use App\Shared\Application\Notification\NotificationSender;
 use App\Shared\Application\Persistence\Flusher;
 use App\Shared\Domain\Clock\Clock;
@@ -20,6 +21,8 @@ final readonly class EmailBreachCheckProcessor
         private NotificationSender $notificationSender,
         private Clock $clock,
         private Flusher $flusher,
+        private EmailSender $emailSender,
+        private string $emailFrom,
     ) {
     }
 
@@ -44,14 +47,22 @@ final readonly class EmailBreachCheckProcessor
             $this->flusher->flush();
 
             if ($result->isBreached()) {
+                $message = 'Your email address was found in public data breaches. To protect your account and vouchers, please review your security settings and consider changing your password.';
                 $this->notificationSender->send(
                     $user->getId(),
                     self::NOTIFICATION_TYPE,
                     'Your email may be at risk',
-                    'Your email address was found in public data breaches. To protect your account and vouchers, please review your security settings and consider changing your password.',
+                    $message,
                     [
                         'breachCount' => $result->getBreachCount(),
                     ],
+                );
+
+                $this->emailSender->send(
+                    $this->emailFrom,
+                    $user->getEmail(),
+                    'Your email may be at risk',
+                    $message,
                 );
             }
 

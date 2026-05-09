@@ -12,6 +12,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -51,6 +52,11 @@ final class CreateAdminUserCommand extends Command
 
         if (!is_string($password)) {
             $helper = $this->getHelper('question');
+
+            if (!$helper instanceof QuestionHelper) {
+                throw new InvalidArgumentException('Question helper is not available.');
+            }
+
             $question = new Question('Admin password: ');
             $question->setHidden(true);
             $question->setHiddenFallback(false);
