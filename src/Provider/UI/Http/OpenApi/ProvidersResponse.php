@@ -8,7 +8,7 @@ use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     schema: 'ProvidersResponse',
-    required: ['data'],
+    required: ['data', 'pagination'],
     properties: [
         new OA\Property(
             property: 'data',
@@ -39,6 +39,33 @@ use OpenApi\Attributes as OA;
                 ],
                 type: 'object',
             ),
+        ),
+        new OA\Property(
+            property: 'pagination',
+            required: ['page', 'limit', 'total', 'totalPages'],
+            properties: [
+                new OA\Property(
+                    property: 'page',
+                    type: 'integer',
+                    example: 1,
+                ),
+                new OA\Property(
+                    property: 'limit',
+                    type: 'integer',
+                    example: 10,
+                ),
+                new OA\Property(
+                    property: 'total',
+                    type: 'integer',
+                    example: 42,
+                ),
+                new OA\Property(
+                    property: 'totalPages',
+                    type: 'integer',
+                    example: 5,
+                ),
+            ],
+            type: 'object',
         ),
     ],
     type: 'object',

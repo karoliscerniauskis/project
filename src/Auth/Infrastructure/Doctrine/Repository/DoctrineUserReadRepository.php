@@ -21,9 +21,9 @@ final readonly class DoctrineUserReadRepository implements UserReadRepository
     {
         $qb = $this->entityManager->createQueryBuilder();
 
-        /** @var array{email: string, emailBreachCheckEnabled: bool}|null $result */
+        /** @var array{email: string, emailBreachCheckEnabled: bool, roles: array<string>}|null $result */
         $result = $qb
-            ->select('u.email', 'u.emailBreachCheckEnabled')
+            ->select('u.email', 'u.emailBreachCheckEnabled', 'u.roles')
             ->from(UserRecord::class, 'u')
             ->where('u.id = :userId')
             ->setParameter('userId', $userId->toString())
@@ -37,6 +37,7 @@ final readonly class DoctrineUserReadRepository implements UserReadRepository
         return new UserProfileView(
             email: $result['email'],
             emailBreachCheckEnabled: $result['emailBreachCheckEnabled'],
+            roles: $result['roles'],
         );
     }
 }

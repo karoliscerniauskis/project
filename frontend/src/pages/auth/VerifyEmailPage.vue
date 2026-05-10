@@ -1,69 +1,82 @@
 <template>
-    <main class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
-        <div class="max-w-2xl mx-auto">
-            <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-slate-900">Verify Email</h1>
-                    <p class="text-slate-600 mt-1">Confirm your email address</p>
+    <AuthLayout title="Email Verification" subtitle="Verifying your email address">
+        <div class="text-center py-8">
+            <div v-if="loading" class="space-y-4">
+                <el-icon class="is-loading text-accent-600" :size="48">
+                    <Loading />
+                </el-icon>
+                <p class="text-primary-600">Verifying your email...</p>
+            </div>
+
+            <div v-else-if="success" class="space-y-4">
+                <div class="flex justify-center">
+                    <el-icon :size="48" style="color: #16a34a;">
+                        <CircleCheck />
+                    </el-icon>
                 </div>
-            </div>
-
-            <LoadingSpinner v-if="loading" />
-
-            <div
-                v-else-if="success"
-                class="bg-green-50 border border-green-200 rounded-xl p-8 text-center"
-            >
-                <div class="mx-auto flex h-12 w-12 items-center justify-center text-4xl">✅</div>
-
-                <h3 class="mt-4 text-lg font-semibold text-green-900">
-                    Email verified successfully!
-                </h3>
-
-                <p class="mt-2 text-green-700">You can now log in to your account.</p>
-
-                <RouterLink
-                    to="/login"
-                    class="mt-6 inline-block px-6 py-3 bg-green-600 !text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                >
+                <div class="space-y-2">
+                    <p class="text-lg font-semibold text-primary-900">Email Verified Successfully!</p>
+                    <p class="text-primary-600">You can now log in to your account.</p>
+                </div>
+                <el-button type="primary" size="large" @click="navigateToLogin">
                     Go to Login
-                </RouterLink>
+                </el-button>
             </div>
 
-            <ErrorMessage v-else-if="error" :message="error" />
+            <div v-else-if="error" class="space-y-4">
+                <div class="flex justify-center">
+                    <el-icon :size="48" style="color: #dc2626;">
+                        <CircleClose />
+                    </el-icon>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-lg font-semibold text-primary-900">Verification Failed</p>
+                    <p class="text-primary-600">{{ error }}</p>
+                </div>
+                <el-button type="primary" size="large" @click="navigateToLogin">
+                    Back to Login
+                </el-button>
+            </div>
         </div>
-    </main>
+    </AuthLayout>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { verifyEmail } from '@/api/auth.api'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import ErrorMessage from '@/components/common/ErrorMessage.vue'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { Loading, CircleCheck, CircleClose } from '@element-plus/icons-vue'
+import AuthLayout from '@/components/layout/AuthLayout.vue'
+import { http } from '@/utils/http'
+import { useAsyncAction } from '@/composables/useAsyncState'
 
+const router = useRouter()
 const route = useRoute()
 
-const loading = ref(true)
-const success = ref('')
-const error = ref('')
+const { loading, error, execute } = useAsyncAction()
+const success = ref(false)
 
-onMounted(async () => {
-    const slug = route.params.slug
+async function verifyEmail(token: string) {
+    await execute(
+        async () => {
+            await http.get(`/api/auth/verify-email/${token}`, { skipAuth: true })
+            success.value = true
+        },
+        {
+            errorMessage: 'Verification failed. The link may be invalid or expired.',
+        }
+    )
+}
 
-    if (typeof slug !== 'string' || slug.length === 0) {
-        loading.value = false
-        error.value = 'Invalid verification link.'
-        return
-    }
+function navigateToLogin() {
+    router.push('/login')
+}
 
-    try {
-        await verifyEmail(slug)
-        success.value = 'Email verified successfully. You can now log in.'
-    } catch (e) {
-        error.value = e instanceof Error ? e.message : 'Verification failed.'
-    } finally {
-        loading.value = false
+onMounted(() => {
+    const token = route.params.token as string
+    if (token) {
+        verifyEmail(token)
+    } else {
+        error.value = 'Invalid verification link'
     }
 })
 </script>

@@ -1,131 +1,125 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginPage from '@/pages/auth/LoginPage.vue'
-import RegisterPage from '@/pages/auth/RegisterPage.vue'
-import VerifyEmailPage from '@/pages/auth/VerifyEmailPage.vue'
-import LogoutPage from '@/pages/auth/LogoutPage.vue'
-import ProvidersPage from '@/pages/providers/ProvidersPage.vue'
-import CreateProviderPage from '@/pages/providers/CreateProviderPage.vue'
-import ProviderPage from '@/pages/providers/ProviderPage.vue'
-import InviteProviderUserPage from '@/pages/providers/InviteProviderUserPage.vue'
-import CreateVoucherPage from '@/pages/providers/CreateVoucherPage.vue'
-import ProviderVouchersPage from '@/pages/providers/ProviderVouchersPage.vue'
-import MyVouchersPage from '@/pages/vouchers/MyVouchersPage.vue'
-import ValidateVoucherPage from '@/pages/providers/ValidateVoucherPage.vue'
-import ClaimVoucherPage from '@/pages/vouchers/ClaimVoucherPage.vue'
-import TransferVoucherPage from '@/pages/vouchers/TransferVoucherPage.vue'
-import NotificationsPage from '@/pages/notifications/NotificationsPage.vue'
-import AcceptProviderInvitationPage from '@/pages/providers/AcceptProviderInvitationPage.vue'
-import AdminProvidersPage from '@/pages/admin/AdminProvidersPage.vue'
-import ChangeEmailPage from '@/pages/auth/ChangeEmailPage.vue'
-import UseVoucherPage from '@/pages/providers/UseVoucherPage.vue'
+import type { RouteRecordRaw } from 'vue-router'
+import { storage } from '@/utils/storage'
+import { userApi } from '@/api/user.api'
 
-export const router = createRouter({
+const routes: RouteRecordRaw[] = [
+    {
+        path: '/login',
+        name: 'login',
+        component: () => import('@/pages/auth/LoginPage.vue'),
+        meta: { requiresGuest: true },
+    },
+    {
+        path: '/register',
+        name: 'register',
+        component: () => import('@/pages/auth/RegisterPage.vue'),
+        meta: { requiresGuest: true },
+    },
+    {
+        path: '/forgot-password',
+        name: 'forgot-password',
+        component: () => import('@/pages/auth/ForgotPasswordPage.vue'),
+        meta: { requiresGuest: true },
+    },
+    {
+        path: '/reset-password/:token',
+        name: 'reset-password',
+        component: () => import('@/pages/auth/ResetPasswordPage.vue'),
+        meta: { requiresGuest: true },
+    },
+    {
+        path: '/verify-email/:token',
+        name: 'verify-email',
+        component: () => import('@/pages/auth/VerifyEmailPage.vue'),
+        meta: { requiresGuest: true },
+    },
+    {
+        path: '/providers',
+        name: 'providers',
+        component: () => import('@/pages/ProvidersPage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/providers/create',
+        name: 'create-provider',
+        component: () => import('@/pages/provider/CreateProviderPage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/providers/:id',
+        name: 'provider-details',
+        component: () => import('@/pages/provider/ProviderDetailsPage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/provider-invitations/:slug/accept',
+        name: 'accept-provider-invitation',
+        component: () => import('@/pages/provider/AcceptProviderInvitationPage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/profile',
+        name: 'profile',
+        component: () => import('@/pages/profile/ProfilePage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/admin/providers',
+        name: 'admin-providers',
+        component: () => import('@/pages/admin/AdminProvidersPage.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true },
+    },
+    {
+        path: '/vouchers',
+        name: 'vouchers',
+        component: () => import('@/pages/voucher/VouchersPage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/notifications',
+        name: 'notifications',
+        component: () => import('@/pages/notification/NotificationsPage.vue'),
+        meta: { requiresAuth: true },
+    },
+    {
+        path: '/',
+        redirect: '/login',
+    },
+]
+
+const router = createRouter({
     history: createWebHistory(),
-    routes: [
-        {
-            path: '/login',
-            name: 'login',
-            component: LoginPage,
-        },
-        {
-            path: '/register',
-            name: 'register',
-            component: RegisterPage,
-        },
-        {
-            path: '/verify-email/:slug',
-            name: 'verify-email',
-            component: VerifyEmailPage,
-            props: true,
-        },
-        {
-            path: '/providers',
-            name: 'providers',
-            component: ProvidersPage,
-        },
-        {
-            path: '/logout',
-            name: 'logout',
-            component: LogoutPage,
-        },
-        {
-            path: '/provider/create',
-            name: 'provider-create',
-            component: CreateProviderPage,
-        },
-        {
-            path: '/providers/:id',
-            name: 'provider',
-            component: ProviderPage,
-            props: true,
-        },
-        {
-            path: '/providers/:id/invite',
-            name: 'provider-invite-user',
-            component: InviteProviderUserPage,
-            props: true,
-        },
-        {
-            path: '/providers/:id/vouchers/create',
-            name: 'provider-voucher-create',
-            component: CreateVoucherPage,
-            props: true,
-        },
-        {
-            path: '/providers/:id/vouchers',
-            name: 'provider-vouchers',
-            component: ProviderVouchersPage,
-            props: true,
-        },
-        {
-            path: '/me/vouchers',
-            name: 'my-vouchers',
-            component: MyVouchersPage,
-        },
-        {
-            path: '/providers/:id/vouchers/validate',
-            name: 'provider-voucher-validate',
-            component: ValidateVoucherPage,
-            props: true,
-        },
-        {
-            path: '/vouchers/:voucherId/claim',
-            name: 'voucher-claim',
-            component: ClaimVoucherPage,
-            props: true,
-        },
-        {
-            path: '/vouchers/:voucherId/transfer',
-            name: 'voucher-transfer',
-            component: TransferVoucherPage,
-            props: true,
-        },
-        {
-            path: '/me/notifications',
-            name: 'my-notifications',
-            component: NotificationsPage,
-        },
-        {
-            path: '/provider-invitations/:slug/accept',
-            name: 'provider-invitation-accept',
-            component: AcceptProviderInvitationPage,
-            props: true,
-        },
-        {
-            path: '/admin/providers',
-            name: 'admin-providers',
-            component: AdminProvidersPage,
-        },
-        {
-            path: '/me/change-email',
-            name: 'change-email',
-            component: ChangeEmailPage,
-        },
-        {
-            path: '/providers/:id/vouchers/use',
-            name: 'provider-voucher-use',
-            component: UseVoucherPage,
-            props: true,
-        },
-    ],
+    routes,
 })
+
+router.beforeEach(async (to, _from, next) => {
+    const isAuthenticated = storage.hasTokens()
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        next('/login')
+        return
+    }
+
+    if (to.meta.requiresGuest && isAuthenticated) {
+        next('/providers')
+        return
+    }
+
+    if (to.meta.requiresAdmin) {
+        try {
+            const user = await userApi.getCurrentUser()
+            if (!user.roles.includes('ROLE_ADMIN')) {
+                next('/providers')
+                return
+            }
+        } catch {
+            next('/login')
+            return
+        }
+    }
+
+    next()
+})
+
+export default router

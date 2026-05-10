@@ -6,7 +6,7 @@ namespace App\Provider\Application\Handler;
 
 use App\Provider\Application\Query\GetProviders;
 use App\Provider\Domain\Repository\ProviderReadRepository;
-use App\Provider\Domain\View\ProvidersView;
+use App\Provider\Domain\View\PaginatedProvidersView;
 
 final readonly class GetProvidersHandler
 {
@@ -15,8 +15,13 @@ final readonly class GetProvidersHandler
     ) {
     }
 
-    public function __invoke(GetProviders $query): ProvidersView
+    public function __invoke(GetProviders $query): PaginatedProvidersView
     {
-        return $this->providerReadRepository->findByUserId($query->getUserId());
+        return $this->providerReadRepository->findByUserIdPaginated(
+            $query->getUserId(),
+            $query->getLimit(),
+            $query->getOffset(),
+            $query->getNameFilter(),
+        );
     }
 }

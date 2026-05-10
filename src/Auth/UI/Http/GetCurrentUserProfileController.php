@@ -36,6 +36,7 @@ class GetCurrentUserProfileController extends AbstractController
             properties: [
                 new OA\Property(property: 'email', type: 'string', example: 'user@example.com'),
                 new OA\Property(property: 'emailBreachCheckEnabled', type: 'boolean', example: false),
+                new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string'), example: ['ROLE_USER']),
             ],
             type: 'object'
         ),
@@ -55,9 +56,6 @@ class GetCurrentUserProfileController extends AbstractController
         /** @var UserProfileView $profile */
         $profile = $this->queryBus->ask(new GetUserProfile($user->getId()));
 
-        return new JsonResponse([
-            'email' => $profile->email,
-            'emailBreachCheckEnabled' => $profile->emailBreachCheckEnabled,
-        ]);
+        return new JsonResponse($profile->toArray());
     }
 }

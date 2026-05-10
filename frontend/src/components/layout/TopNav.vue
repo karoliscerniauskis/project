@@ -1,139 +1,149 @@
 <template>
-    <header class="border-b border-white/40 bg-white/60 backdrop-blur-xl">
-        <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 sm:px-8 lg:px-12">
-            <div class="flex items-center gap-8">
-                <RouterLink to="/providers" class="text-lg font-semibold text-slate-950">
-                    Voucher Platform
-                </RouterLink>
+    <nav class="bg-white border-b border-primary-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-4 sm:gap-8">
+                    <router-link to="/providers" class="text-lg sm:text-xl font-semibold text-primary-900">
+                        VoucherApp
+                    </router-link>
 
-                <div class="hidden gap-6 md:flex">
-                    <RouterLink
-                        to="/providers"
-                        class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-                        active-class="!text-slate-950"
-                    >
-                        Providers
-                    </RouterLink>
-                    <RouterLink
-                        to="/me/vouchers"
-                        class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-                        active-class="!text-slate-950"
-                    >
-                        My vouchers
-                    </RouterLink>
-                    <RouterLink
-                        to="/me/notifications"
-                        class="relative text-sm font-medium text-slate-600 transition hover:text-slate-950"
-                        active-class="!text-slate-950"
-                    >
-                        Notifications
-                        <span
-                            v-if="unreadNotificationsCount > 0"
-                            class="absolute -right-5 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1.5 text-xs font-semibold !text-white"
+                    <div v-if="!isMobile" class="flex items-center gap-1">
+                        <router-link
+                            to="/vouchers"
+                            class="px-4 py-2 rounded-lg text-sm font-medium text-primary-700 hover:bg-primary-50 hover:text-accent-600 transition-colors"
+                            active-class="bg-accent-50 text-accent-700"
                         >
-                            {{ unreadNotificationsCount }}
-                        </span>
-                    </RouterLink>
-                    <RouterLink
-                        v-if="isAdminUser"
-                        to="/admin/providers"
-                        class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-                        active-class="!text-slate-950"
-                    >
-                        Admin
-                    </RouterLink>
+                            My Vouchers
+                        </router-link>
+                        <router-link
+                            to="/providers"
+                            class="px-4 py-2 rounded-lg text-sm font-medium text-primary-700 hover:bg-primary-50 hover:text-accent-600 transition-colors"
+                            active-class="bg-accent-50 text-accent-700"
+                        >
+                            My Providers
+                        </router-link>
+                        <router-link
+                            v-if="isAdmin"
+                            to="/admin/providers"
+                            class="px-4 py-2 rounded-lg text-sm font-medium text-primary-700 hover:bg-primary-50 hover:text-accent-600 transition-colors"
+                            active-class="bg-accent-50 text-accent-700"
+                        >
+                            Admin
+                        </router-link>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <el-badge :value="notificationCount" :hidden="notificationCount === 0">
+                        <el-button circle @click="navigateToNotifications">
+                            <el-icon :size="20"><Bell /></el-icon>
+                        </el-button>
+                    </el-badge>
+
+                    <el-dropdown @command="handleCommand">
+                        <div class="flex items-center gap-2 px-2 sm:px-3 py-2 rounded-lg hover:bg-primary-50 cursor-pointer transition-colors">
+                            <el-avatar :size="32" class="bg-accent-600">
+                                <el-icon><User /></el-icon>
+                            </el-avatar>
+                            <span class="hidden sm:block text-sm font-medium text-primary-900">{{ userEmail }}</span>
+                            <el-icon class="hidden sm:block text-primary-400"><ArrowDown /></el-icon>
+                        </div>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item command="profile">
+                                    <el-icon><User /></el-icon>
+                                    Edit Profile
+                                </el-dropdown-item>
+                                <el-dropdown-item command="logout" divided>
+                                    <el-icon><SwitchButton /></el-icon>
+                                    Logout
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+
+                    <el-button v-if="isMobile" text @click="mobileMenuOpen = !mobileMenuOpen">
+                        <el-icon :size="24"><Menu /></el-icon>
+                    </el-button>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <span
-                    v-if="isAuthenticated && username !== null"
-                    class="hidden max-w-56 truncate rounded-xl bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 sm:inline"
-                    :title="username"
+            <div v-if="mobileMenuOpen && isMobile" class="border-t border-primary-100 py-3">
+                <router-link
+                    to="/vouchers"
+                    class="block px-4 py-2 rounded-lg text-sm font-medium text-primary-700 hover:bg-primary-50 hover:text-accent-600 transition-colors"
+                    active-class="bg-accent-50 text-accent-700"
+                    @click="mobileMenuOpen = false"
                 >
-                    {{ username }}
-                </span>
-                <RouterLink
-                    v-if="isAuthenticated"
-                    to="/me/change-email"
-                    class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-                    active-class="!text-slate-950"
+                    My Vouchers
+                </router-link>
+                <router-link
+                    to="/providers"
+                    class="block px-4 py-2 rounded-lg text-sm font-medium text-primary-700 hover:bg-primary-50 hover:text-accent-600 transition-colors"
+                    active-class="bg-accent-50 text-accent-700"
+                    @click="mobileMenuOpen = false"
                 >
-                    Change email
-                </RouterLink>
-                <RouterLink
-                    v-if="!isAuthenticated"
-                    to="/login"
-                    class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
+                    My Providers
+                </router-link>
+                <router-link
+                    v-if="isAdmin"
+                    to="/admin/providers"
+                    class="block px-4 py-2 rounded-lg text-sm font-medium text-primary-700 hover:bg-primary-50 hover:text-accent-600 transition-colors"
+                    active-class="bg-accent-50 text-accent-700"
+                    @click="mobileMenuOpen = false"
                 >
-                    Login
-                </RouterLink>
-                <RouterLink
-                    v-if="!isAuthenticated"
-                    to="/register"
-                    class="inline-flex h-9 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium !text-white transition hover:bg-slate-800"
-                >
-                    Register
-                </RouterLink>
-                <RouterLink
-                    v-if="isAuthenticated"
-                    to="/logout"
-                    class="text-sm font-medium text-slate-600 transition hover:text-slate-950"
-                >
-                    Logout
-                </RouterLink>
+                    Admin
+                </router-link>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import { getUnreadNotificationsCount } from '@/api/notification.api'
-import { getUsername, isAdmin } from '@/utils/auth'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { Bell, User, ArrowDown, SwitchButton, Menu } from '@element-plus/icons-vue'
+import { useAuth } from '@/composables/useAuth'
+import { useUser } from '@/composables/useUser'
+import { useWindowSize } from '@vueuse/core'
+import { notificationApi } from '@/api/notification.api'
 
-const unreadNotificationsCount = ref(0)
-let unreadNotificationsInterval: number | null = null
+const router = useRouter()
+const { logout } = useAuth()
+const { currentUser, fetchCurrentUser } = useUser()
+const { width } = useWindowSize()
 
-const isAuthenticated = computed(() => {
-    return localStorage.getItem('token') !== null
-})
+const notificationCount = ref(0)
+const mobileMenuOpen = ref(false)
 
-const isAdminUser = computed(() => {
-    return isAdmin()
-})
+const userEmail = computed(() => currentUser.value?.email || 'Loading...')
+const isMobile = computed(() => width.value < 768)
+const isAdmin = computed(() => currentUser.value?.roles?.includes('ROLE_ADMIN') ?? false)
 
-const username = computed(() => {
-    return getUsername()
-})
-
-async function refreshUnreadNotificationsCount(): Promise<void> {
-    if (!isAuthenticated.value) {
-        unreadNotificationsCount.value = 0
-
-        return
-    }
-
+async function fetchNotificationCount() {
     try {
-        const response = await getUnreadNotificationsCount()
-        unreadNotificationsCount.value = response.data.count
-    } catch {
-        unreadNotificationsCount.value = 0
+        notificationCount.value = await notificationApi.getUnreadCount()
+    } catch (err) {
+        console.error('Failed to fetch notification count', err)
     }
 }
 
 onMounted(() => {
-    void refreshUnreadNotificationsCount()
-
-    unreadNotificationsInterval = window.setInterval(() => {
-        void refreshUnreadNotificationsCount()
-    }, 3000)
+    fetchCurrentUser()
+    fetchNotificationCount()
+    // Poll for new notifications every 30 seconds
+    setInterval(fetchNotificationCount, 30000)
 })
 
-onUnmounted(() => {
-    if (unreadNotificationsInterval !== null) {
-        window.clearInterval(unreadNotificationsInterval)
+function handleCommand(command: string) {
+    if (command === 'profile') {
+        router.push('/profile')
+    } else if (command === 'logout') {
+        logout()
     }
-})
+}
+
+function navigateToNotifications() {
+    router.push('/notifications')
+}
 </script>

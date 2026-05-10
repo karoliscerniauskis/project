@@ -12,6 +12,7 @@ use App\Voucher\Domain\View\MyVoucherView;
 use App\Voucher\Domain\View\ProviderVouchersView;
 use App\Voucher\Domain\View\ProviderVoucherView;
 use App\Voucher\Infrastructure\Doctrine\Entity\VoucherRecord;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\UuidV7;
 
@@ -86,7 +87,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
     public function findByUserEmailAndUserId(string $email, string $userId): MyVouchersView
     {
-        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null}> $rows */
+        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: DateTimeImmutable|null}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.id AS id',
@@ -99,6 +100,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 'v.remainingAmount AS remainingAmount',
                 'v.initialUsages AS initialUsages',
                 'v.remainingUsages AS remainingUsages',
+                'v.expiresAt AS expiresAt',
             )
             ->from(VoucherRecord::class, 'v')
             ->innerJoin(
@@ -128,6 +130,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 $row['remainingAmount'],
                 $row['initialUsages'],
                 $row['remainingUsages'],
+                $row['expiresAt']?->format('Y-m-d\TH:i:s\Z'),
             );
         }
 

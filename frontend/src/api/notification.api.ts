@@ -1,48 +1,27 @@
-import { apiRequest } from './http'
+import { http } from '@/utils/http'
 
-export type NotificationView = {
+export interface Notification {
     id: string
     type: string
     title: string
     message: string
-    payload: Record<string, unknown>
+    payload: Record<string, any>
     readAt: string | null
     createdAt: string
 }
 
-export type NotificationsResponse = {
-    data: NotificationView[]
-}
+export const notificationApi = {
+    async getNotifications(): Promise<Notification[]> {
+        const response = await http.get<{ data: Notification[] }>('/api/me/notifications')
+        return response.data
+    },
 
-export type UnreadNotificationsCountResponse = {
-    data: {
-        count: number
-    }
-}
+    async getUnreadCount(): Promise<number> {
+        const response = await http.get<{ data: { count: number } }>('/api/me/notifications/unread-count')
+        return response.data.count
+    },
 
-export function getMyNotifications(): Promise<NotificationsResponse> {
-    return apiRequest<NotificationsResponse>('/api/me/notifications', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-}
-
-export function getUnreadNotificationsCount(): Promise<UnreadNotificationsCountResponse> {
-    return apiRequest<UnreadNotificationsCountResponse>('/api/me/notifications/unread-count', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
-}
-
-export function markNotificationAsRead(notificationId: string): Promise<void> {
-    return apiRequest<void>(`/api/me/notifications/${encodeURIComponent(notificationId)}/read`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    })
+    async markAsRead(notificationId: string): Promise<void> {
+        await http.post(`/api/me/notifications/${notificationId}/read`)
+    },
 }

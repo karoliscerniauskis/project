@@ -7,7 +7,7 @@ namespace App\Voucher\Domain\View;
 use App\Shared\Domain\View\ArrayableView;
 
 /**
- * @implements ArrayableView<array{id: string, code: string, providerName: string, status: string, canBeClaimedOrTransferred: bool, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null}>
+ * @implements ArrayableView<array{id: string, code: string, providerName: string, status: string, canBeClaimedOrTransferred: bool, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: string|null}>
  */
 final readonly class MyVoucherView implements ArrayableView
 {
@@ -22,11 +22,12 @@ final readonly class MyVoucherView implements ArrayableView
         private ?int $remainingAmount,
         private ?int $initialUsages,
         private ?int $remainingUsages,
+        private ?string $expiresAt,
     ) {
     }
 
     /**
-     * @return array{id: string, code: string, providerName: string, status: string, canBeClaimedOrTransferred: bool, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null}
+     * @return array{id: string, code: string, providerName: string, status: string, canBeClaimedOrTransferred: bool, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: string|null}
      */
     public function toArray(): array
     {
@@ -41,6 +42,7 @@ final readonly class MyVoucherView implements ArrayableView
             'remainingAmount' => $this->remainingAmount,
             'initialUsages' => $this->initialUsages,
             'remainingUsages' => $this->remainingUsages,
+            'expiresAt' => $this->expiresAt,
         ];
     }
 }

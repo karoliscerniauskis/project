@@ -1,79 +1,52 @@
-import { apiRequest } from './http'
+import { http } from '@/utils/http'
+import { storage } from '@/utils/storage'
+import type {
+    LoginCredentials,
+    RegisterCredentials,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
+    AuthResponse,
+    User,
+    ApiResponse,
+} from '@/types'
 
-export type AuthCredentials = {
-    email: string
-    password: string
-}
+export const authApi = {
+    async login(credentials: LoginCredentials): Promise<void> {
+        const response = await http.post<AuthResponse>(
+            '/api/auth/login',
+            credentials,
+            { skipAuth: true }
+        )
+        storage.setAccessToken(response.token)
+        storage.setRefreshToken(response.refresh_token)
+    },
 
-export type LoginResponse = {
-    token: string
-    refresh_token: string
-}
+    async register(credentials: RegisterCredentials): Promise<void> {
+        await http.post('/api/auth/register', credentials, { skipAuth: true })
+    },
 
-export type RefreshResponse = {
-    token: string
-    refresh_token?: string
-}
+    async logout(): Promise<void> {
+        try {
+            await http.post('/api/auth/logout')
+        } finally {
+            storage.clearTokens()
+        }
+    },
 
-export type ChangeEmailPayload = {
-    newEmail: string
-}
+    async forgotPassword(request: ForgotPasswordRequest): Promise<void> {
+        await http.post('/api/auth/forgot-password', { email: request.email }, { skipAuth: true })
+    },
 
-export function login(payload: AuthCredentials): Promise<LoginResponse> {
-    return apiRequest<LoginResponse>('/api/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-        skipRefresh: true,
-        skipAuth: true,
-    })
-}
+    async resetPassword(request: ResetPasswordRequest): Promise<void> {
+        await http.post('/api/auth/reset-password', request, { skipAuth: true })
+    },
 
-export function register(payload: AuthCredentials): Promise<void> {
-    return apiRequest<void>('/api/auth/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-        skipRefresh: true,
-        skipAuth: true,
-    })
-}
+    async getCurrentUser(): Promise<User> {
+        const response = await http.get<ApiResponse<User>>('/api/auth/me')
+        return response.data
+    },
 
-export function verifyEmail(slug: string): Promise<void> {
-    return apiRequest<void>(`/api/auth/verify-email/${slug}`, {
-        method: 'GET',
-    })
-}
-
-export async function refreshToken(payload: { refresh_token: string }): Promise<RefreshResponse> {
-    const response = await fetch('/api/auth/token/refresh', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
-
-    const data = await response.json().catch(() => null)
-
-    if (!response.ok) {
-        const message = typeof data === 'string' ? data : (data?.message ?? 'Request failed')
-        throw new Error(message)
-    }
-
-    return data as RefreshResponse
-}
-
-export function changeEmail(payload: ChangeEmailPayload): Promise<void> {
-    return apiRequest<void>('/api/auth/change-email', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-    })
+    async verifyEmail(token: string): Promise<void> {
+        await http.post(`/api/auth/verify-email/${token}`, null, { skipAuth: true })
+    },
 }
