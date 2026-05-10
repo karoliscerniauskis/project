@@ -7,7 +7,7 @@ namespace App\Voucher\Domain\View;
 use App\Shared\Domain\View\ArrayableView;
 
 /**
- * @implements ArrayableView<array<array{id: string, code: string|null, providerName: string, status: string, canBeClaimedOrTransferred: bool}>>
+ * @implements ArrayableView<array<array{id: string, code: string, providerId: string, providerName: string, status: string, canBeClaimedOrTransferred: bool, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: string|null}>>
  */
 final readonly class MyVouchersView implements ArrayableView
 {
@@ -28,7 +28,7 @@ final readonly class MyVouchersView implements ArrayableView
     }
 
     /**
-     * @return array<array{id: string, code: string|null, providerName: string, status: string, canBeClaimedOrTransferred: bool}>
+     * @return array<array{id: string, code: string, providerId: string, providerName: string, status: string, canBeClaimedOrTransferred: bool, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: string|null}>
      */
     public function toArray(): array
     {

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Provider\Domain\Repository;
 
+use App\Provider\Domain\View\AvailableProvidersView;
+use App\Provider\Domain\View\LinkedProvidersView;
 use App\Provider\Domain\View\PaginatedProvidersView;
 use App\Provider\Domain\View\ProvidersView;
 use App\Provider\Domain\View\ProviderView;
@@ -31,4 +33,8 @@ interface ProviderReadRepository
         ?string $nameFilter = null,
         ?string $statusFilter = null,
     ): PaginatedProvidersView;
+
+    public function findLinkedProviders(ProviderId $providerId): LinkedProvidersView;
+
+    public function findAvailableProvidersToLink(ProviderId $providerId, UserId $userId): AvailableProvidersView;
 }

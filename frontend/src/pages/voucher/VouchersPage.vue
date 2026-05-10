@@ -47,7 +47,7 @@
                             {{ row.expiresAt ? formatRelativeDate(row.expiresAt) : 'Never' }}
                         </template>
                     </el-table-column>
-                    <el-table-column label="Actions" width="200" align="right">
+                    <el-table-column label="Actions" width="280" align="right">
                         <template #default="{ row }">
                             <el-button
                                 v-if="row.canBeClaimedOrTransferred"
@@ -65,6 +65,14 @@
                             >
                                 Transfer
                             </el-button>
+                            <el-button
+                                v-if="row.status === 'active'"
+                                type="warning"
+                                size="small"
+                                @click="handleChangeProvider(row)"
+                            >
+                                Change Provider
+                            </el-button>
                         </template>
                     </el-table-column>
                 </el-table>
@@ -72,7 +80,6 @@
         </div>
 
         <el-dialog v-model="claimDialogVisible" title="Claim Voucher" width="500">
-            <p>Are you sure you want to claim this voucher?</p>
             <template #footer>
                 <el-button @click="claimDialogVisible = false">Cancel</el-button>
                 <el-button type="success" :loading="claimLoading" @click="confirmClaim">
@@ -94,6 +101,12 @@
                 </el-button>
             </template>
         </el-dialog>
+        <ChangeVoucherProviderForm
+            v-if="selectedVoucher && changeProviderDialogVisible"
+            v-model:visible="changeProviderDialogVisible"
+            :voucher="selectedVoucher"
+            @changed="handleProviderChanged"
+        />
     </div>
 </template>
 
@@ -103,6 +116,7 @@ import { ElMessage, type FormInstance } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { voucherApi, type Voucher } from '@/api/voucher.api'
 import TopNav from '@/components/layout/TopNav.vue'
+import ChangeVoucherProviderForm from '@/components/voucher/ChangeVoucherProviderForm.vue'
 import { formatRelativeDate } from '@/utils/date'
 import { getVoucherStatusType } from '@/utils/status'
 import { useAsyncState } from '@/composables/useAsyncState'
@@ -117,6 +131,7 @@ const claimLoading = ref(false)
 const transferDialogVisible = ref(false)
 const transferLoading = ref(false)
 const transferFormRef = ref<FormInstance>()
+const changeProviderDialogVisible = ref(false)
 const selectedVoucher = ref<Voucher | null>(null)
 const transferForm = ref({
     toEmail: '',
@@ -181,6 +196,15 @@ async function confirmTransfer() {
             transferLoading.value = false
         }
     })
+}
+
+function handleChangeProvider(voucher: Voucher) {
+    selectedVoucher.value = voucher
+    changeProviderDialogVisible.value = true
+}
+
+async function handleProviderChanged() {
+    await loadVouchers()
 }
 
 onMounted(() => {

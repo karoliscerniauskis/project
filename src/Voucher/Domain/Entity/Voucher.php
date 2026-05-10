@@ -372,4 +372,13 @@ final class Voucher extends AbstractAggregateRoot
             $occurredOn,
         ));
     }
+
+    public function changeProvider(ProviderId $newProviderId): void
+    {
+        if (!$this->isActive()) {
+            throw new LogicException('Voucher is not active.');
+        }
+
+        $this->providerId = $newProviderId;
+    }
 }

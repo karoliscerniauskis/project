@@ -7,9 +7,13 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 use App\Provider\Domain\Repository\ProviderReadRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
 use App\Provider\Domain\Status\ProviderUserStatus;
+use App\Provider\Domain\View\AvailableProvidersView;
+use App\Provider\Domain\View\LinkedProvidersView;
+use App\Provider\Domain\View\LinkedProviderView;
 use App\Provider\Domain\View\PaginatedProvidersView;
 use App\Provider\Domain\View\ProvidersView;
 use App\Provider\Domain\View\ProviderView;
+use App\Provider\Infrastructure\Doctrine\Entity\ProviderLinkRecord;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Shared\Domain\Id\ProviderId;
@@ -222,5 +226,118 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
             $limit,
             $total,
         );
+    }
+
+    public function findLinkedProviders(ProviderId $providerId): LinkedProvidersView
+    {
+        $providerIdString = $providerId->toString();
+
+        /** @var array<int, array{id: Uuid, name: string, status: string}> $forwardRows */
+        $forwardRows = $this->entityManager->createQueryBuilder()
+            ->select('p.id AS id', 'p.name AS name', 'p.status AS status')
+            ->from(ProviderRecord::class, 'p')
+            ->innerJoin(
+                ProviderLinkRecord::class,
+                'pl',
+                'WITH',
+                'pl.linkedProviderId = p.id',
+            )
+            ->where('pl.providerId = :providerId')
+            ->setParameter('providerId', $providerIdString)
+            ->getQuery()
+            ->getArrayResult();
+
+        /** @var array<int, array{id: Uuid, name: string, status: string}> $reverseRows */
+        $reverseRows = $this->entityManager->createQueryBuilder()
+            ->select('p.id AS id', 'p.name AS name', 'p.status AS status')
+            ->from(ProviderRecord::class, 'p')
+            ->innerJoin(
+                ProviderLinkRecord::class,
+                'pl',
+                'WITH',
+                'pl.providerId = p.id',
+            )
+            ->where('pl.linkedProviderId = :providerId')
+            ->setParameter('providerId', $providerIdString)
+            ->getQuery()
+            ->getArrayResult();
+
+        $providers = [];
+        $uniqueIds = [];
+
+        foreach (array_merge($forwardRows, $reverseRows) as $row) {
+            $id = $row['id']->toRfc4122();
+            if (!isset($uniqueIds[$id])) {
+                $uniqueIds[$id] = true;
+                $providers[] = new LinkedProviderView(
+                    $id,
+                    $row['name'],
+                    $row['status'],
+                );
+            }
+        }
+
+        return new LinkedProvidersView($providers);
+    }
+
+    public function findAvailableProvidersToLink(ProviderId $providerId, UserId $userId): AvailableProvidersView
+    {
+        $providerIdString = $providerId->toString();
+        $userIdString = $userId->toString();
+
+        // Get already linked provider IDs
+        /** @var array<int, array{id: Uuid}> $linkedRows */
+        $linkedRows = $this->entityManager->createQueryBuilder()
+            ->select('p.id AS id')
+            ->from(ProviderRecord::class, 'p')
+            ->innerJoin(
+                ProviderLinkRecord::class,
+                'pl',
+                'WITH',
+                'pl.linkedProviderId = p.id OR pl.providerId = p.id',
+            )
+            ->where('pl.providerId = :providerId OR pl.linkedProviderId = :providerId')
+            ->setParameter('providerId', $providerIdString)
+            ->getQuery()
+            ->getArrayResult();
+
+        $linkedIds = array_map(fn ($row) => $row['id']->toRfc4122(), $linkedRows);
+        $linkedIds[] = $providerIdString;
+
+        // Get providers where user is admin, active, and not already linked
+        $qb = $this->entityManager->createQueryBuilder()
+            ->select('p.id AS id', 'p.name AS name', 'p.status AS status')
+            ->from(ProviderRecord::class, 'p')
+            ->innerJoin(
+                ProviderUserRecord::class,
+                'pu',
+                'WITH',
+                'pu.providerId = p.id',
+            )
+            ->where('pu.userId = :userId')
+            ->andWhere('pu.role = :adminRole')
+            ->andWhere('pu.status = :activeStatus')
+            ->andWhere('p.status = :providerActiveStatus')
+            ->setParameter('userId', $userIdString)
+            ->setParameter('adminRole', ProviderUserRole::Admin->value)
+            ->setParameter('activeStatus', ProviderUserStatus::Active->value)
+            ->setParameter('providerActiveStatus', 'active')
+            ->andWhere('p.id NOT IN (:linkedIds)')
+            ->setParameter('linkedIds', $linkedIds)
+            ->orderBy('p.name', 'ASC');
+
+        /** @var array<int, array{id: Uuid, name: string, status: string}> $rows */
+        $rows = $qb->getQuery()->getArrayResult();
+        $providers = [];
+
+        foreach ($rows as $row) {
+            $providers[] = new LinkedProviderView(
+                $row['id']->toRfc4122(),
+                $row['name'],
+                $row['status'],
+            );
+        }
+
+        return new AvailableProvidersView($providers);
     }
 }

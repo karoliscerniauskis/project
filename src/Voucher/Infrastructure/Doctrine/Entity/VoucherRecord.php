@@ -118,6 +118,13 @@ class VoucherRecord
         return $this->providerId;
     }
 
+    public function setProviderId(string $providerId): self
+    {
+        $this->providerId = $providerId;
+
+        return $this;
+    }
+
     public function getCreatedByProviderUserId(): string
     {
         return $this->createdByProviderUserId;

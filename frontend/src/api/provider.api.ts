@@ -23,6 +23,16 @@ export interface ConfigureReminderSettingsRequest {
     expiryReminderBeforeDays: number | null
 }
 
+export interface LinkedProvider {
+    id: string
+    name: string
+    status: string
+}
+
+export interface LinkProviderRequest {
+    linkedProviderId: string
+}
+
 export const providerApi = {
     async createProvider(request: CreateProviderRequest): Promise<void> {
         await http.post('/api/provider', request)
@@ -93,5 +103,23 @@ export const providerApi = {
 
     async configureReminderSettings(providerId: string, data: ConfigureReminderSettingsRequest): Promise<void> {
         await http.patch(`/api/providers/${providerId}/reminder-settings`, data)
+    },
+
+    async getLinkedProviders(providerId: string): Promise<LinkedProvider[]> {
+        const response = await http.get<{ data: LinkedProvider[] }>(`/api/providers/${providerId}/linked`)
+        return response.data
+    },
+
+    async linkProvider(providerId: string, data: LinkProviderRequest): Promise<void> {
+        await http.post(`/api/providers/${providerId}/link`, data)
+    },
+
+    async unlinkProvider(providerId: string, linkedProviderId: string): Promise<void> {
+        await http.delete(`/api/providers/${providerId}/link/${linkedProviderId}`)
+    },
+
+    async getAvailableProvidersToLink(providerId: string): Promise<LinkedProvider[]> {
+        const response = await http.get<{ data: LinkedProvider[] }>(`/api/providers/${providerId}/available-to-link`)
+        return response.data
     },
 }

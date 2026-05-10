@@ -37,6 +37,11 @@
                     @invited="handleInvited"
                 />
                 <ProviderReminderSettings v-if="provider.isAdmin" :provider-id="provider.id" />
+                <LinkedProviders
+                    v-if="provider.isAdmin"
+                    ref="linkedProvidersRef"
+                    :provider-id="provider.id"
+                />
             </div>
 
             <div v-else-if="error" class="text-center py-12">
@@ -64,6 +69,7 @@ import ValidateVoucherForm from '@/components/voucher/ValidateVoucherForm.vue'
 import UseVoucherForm from '@/components/voucher/UseVoucherForm.vue'
 import ProviderVouchersList from '@/components/voucher/ProviderVouchersList.vue'
 import ProviderReminderSettings from '@/components/provider/ProviderReminderSettings.vue'
+import LinkedProviders from '@/components/provider/LinkedProviders.vue'
 import { useAsyncState } from '@/composables/useAsyncState'
 import { MESSAGES } from '@/constants/messages'
 

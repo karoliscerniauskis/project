@@ -27,9 +27,14 @@ export interface TransferVoucherRequest {
     recipientEmail: string
 }
 
+export interface ChangeVoucherProviderRequest {
+    newProviderId: string
+}
+
 export interface Voucher {
     id: string
     code: string
+    providerId: string
     providerName: string
     status: string
     canBeClaimedOrTransferred: boolean
@@ -98,5 +103,9 @@ export const voucherApi = {
 
     async deactivateVoucher(providerId: string, voucherId: string): Promise<void> {
         await http.post(`/api/providers/${providerId}/vouchers/${voucherId}/deactivate`)
+    },
+
+    async changeVoucherProvider(voucherId: string, data: ChangeVoucherProviderRequest): Promise<void> {
+        await http.patch(`/api/vouchers/${voucherId}/change-provider`, data)
     },
 }

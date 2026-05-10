@@ -87,11 +87,12 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
     public function findByUserEmailAndUserId(string $email, string $userId): MyVouchersView
     {
-        /** @var array<int, array{id: UuidV7, code: string, claimedByUserId: UuidV7|null, providerName: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: DateTimeImmutable|null}> $rows */
+        /** @var array<int, array{id: UuidV7, code: string, providerId: UuidV7, claimedByUserId: UuidV7|null, providerName: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: DateTimeImmutable|null}> $rows */
         $rows = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.id AS id',
                 'v.code AS code',
+                'v.providerId AS providerId',
                 'v.claimedByUserId AS claimedByUserId',
                 'p.name AS providerName',
                 'v.status as status',
@@ -122,6 +123,7 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
             $vouchers[] = new MyVoucherView(
                 $row['id']->toRfc4122(),
                 $row['code'],
+                $row['providerId']->toRfc4122(),
                 $row['providerName'],
                 $row['status'],
                 $canBeClaimedOrTransferred,

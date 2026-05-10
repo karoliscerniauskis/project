@@ -64,6 +64,7 @@ final readonly class VoucherRecordMapper
     public function syncRecord(Voucher $voucher, VoucherRecord $record): void
     {
         $record->setCode($voucher->getCode());
+        $record->setProviderId($voucher->getProviderId()->toString());
         $record->setStatus($voucher->getStatus()->value);
         $record->setClaimedByUserId($voucher->getClaimedByUserId()?->toString());
         $record->setIssuedToEmail($voucher->getIssuedToEmail());
