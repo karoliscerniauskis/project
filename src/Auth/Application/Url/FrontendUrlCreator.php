@@ -7,4 +7,6 @@ namespace App\Auth\Application\Url;
 interface FrontendUrlCreator
 {
     public function verifyEmail(string $emailVerificationSlug): string;
+
+    public function resetPassword(string $resetToken): string;
 }

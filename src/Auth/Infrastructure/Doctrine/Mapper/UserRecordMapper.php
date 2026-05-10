@@ -24,6 +24,8 @@ final readonly class UserRecordMapper
             $record->getEmailBreachCheckedAt(),
             $record->getEmailBreachedAt(),
             $record->getEmailBreachCount(),
+            $record->getPasswordResetToken(),
+            $record->getPasswordResetTokenExpiresAt(),
         );
     }
 
@@ -41,6 +43,8 @@ final readonly class UserRecordMapper
             $user->getEmailBreachCheckedAt(),
             $user->getEmailBreachedAt(),
             $user->getEmailBreachCount(),
+            $user->getPasswordResetToken(),
+            $user->getPasswordResetTokenExpiresAt(),
         );
     }
 
@@ -55,6 +59,8 @@ final readonly class UserRecordMapper
             ->setEmailBreachCheckEnabled($user->isEmailBreachCheckEnabled())
             ->setEmailBreachCheckedAt($user->getEmailBreachCheckedAt())
             ->setEmailBreachedAt($user->getEmailBreachedAt())
-            ->setEmailBreachCount($user->getEmailBreachCount());
+            ->setEmailBreachCount($user->getEmailBreachCount())
+            ->setPasswordResetToken($user->getPasswordResetToken())
+            ->setPasswordResetTokenExpiresAt($user->getPasswordResetTokenExpiresAt());
     }
 }

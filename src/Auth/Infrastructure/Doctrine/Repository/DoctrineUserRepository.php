@@ -108,4 +108,11 @@ final readonly class DoctrineUserRepository implements UserRepository, UserIdFin
             $records,
         );
     }
+
+    public function findByResetToken(string $resetToken): ?User
+    {
+        $userRecord = $this->entityManager->getRepository(UserRecord::class)->findOneBy(['passwordResetToken' => $resetToken]);
+
+        return $this->toDomainUserOrNull($userRecord);
+    }
 }

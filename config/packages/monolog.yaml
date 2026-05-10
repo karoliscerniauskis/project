@@ -1,6 +1,7 @@
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+        - outbox # Outbox message processing errors
 
 when@dev:
     monolog:
@@ -9,7 +10,12 @@ when@dev:
                 type: stream
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
-                channels: ["!event"]
+                channels: ["!event", "!outbox"]
+            outbox:
+                type: stream
+                path: "%kernel.logs_dir%/outbox.log"
+                level: error
+                channels: [outbox]
             console:
                 type: console
                 process_psr_3_messages: false
@@ -37,12 +43,18 @@ when@prod:
                 action_level: error
                 handler: nested
                 excluded_http_codes: [404, 405]
-                channels: ["!deprecation"]
+                channels: ["!deprecation", "!outbox"]
                 buffer_size: 50 # How many messages should be saved? Prevent memory leaks
             nested:
                 type: stream
                 path: php://stderr
                 level: debug
+                formatter: monolog.formatter.json
+            outbox:
+                type: stream
+                channels: [outbox]
+                path: "%kernel.logs_dir%/outbox.log"
+                level: error
                 formatter: monolog.formatter.json
             console:
                 type: console

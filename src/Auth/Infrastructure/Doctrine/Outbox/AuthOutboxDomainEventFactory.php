@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Infrastructure\Doctrine\Outbox;
 
+use App\Auth\Domain\Event\PasswordResetRequested;
 use App\Auth\Domain\Event\UserEmailChangeRequested;
 use App\Auth\Domain\Event\UserPasswordChanged;
 use App\Auth\Domain\Event\UserRegistered;
@@ -21,6 +22,7 @@ final readonly class AuthOutboxDomainEventFactory extends AbstractOutboxDomainEv
             UserRegistered::class,
             UserEmailChangeRequested::class,
             UserPasswordChanged::class,
+            PasswordResetRequested::class,
         ], true);
     }
 
@@ -38,6 +40,11 @@ final readonly class AuthOutboxDomainEventFactory extends AbstractOutboxDomainEv
                 $record->getOccurredAt(),
             ),
             UserPasswordChanged::class => new UserPasswordChanged($record->getOccurredAt()),
+            PasswordResetRequested::class => new PasswordResetRequested(
+                $this->stringPayloadValue($record->getPayload(), 'email'),
+                $this->stringPayloadValue($record->getPayload(), 'resetToken'),
+                $record->getOccurredAt(),
+            ),
             default => throw new RuntimeException('Unsupported auth outbox event: '.$record->getEventName()),
         };
     }

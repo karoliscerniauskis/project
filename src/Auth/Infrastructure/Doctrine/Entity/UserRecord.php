@@ -35,6 +35,10 @@ class UserRecord
     private ?DateTimeImmutable $emailBreachedAt;
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $emailBreachCount;
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $passwordResetToken;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?DateTimeImmutable $passwordResetTokenExpiresAt;
 
     /**
      * @param string[] $roles
@@ -51,6 +55,8 @@ class UserRecord
         ?DateTimeImmutable $emailBreachCheckedAt = null,
         ?DateTimeImmutable $emailBreachedAt = null,
         int $emailBreachCount = 0,
+        ?string $passwordResetToken = null,
+        ?DateTimeImmutable $passwordResetTokenExpiresAt = null,
     ) {
         $this->id = $id;
         $this->email = $email;
@@ -63,6 +69,8 @@ class UserRecord
         $this->emailBreachCheckedAt = $emailBreachCheckedAt;
         $this->emailBreachedAt = $emailBreachedAt;
         $this->emailBreachCount = $emailBreachCount;
+        $this->passwordResetToken = $passwordResetToken;
+        $this->passwordResetTokenExpiresAt = $passwordResetTokenExpiresAt;
     }
 
     public function getId(): string
@@ -182,6 +190,30 @@ class UserRecord
     public function setEmailBreachCount(int $emailBreachCount): self
     {
         $this->emailBreachCount = $emailBreachCount;
+
+        return $this;
+    }
+
+    public function getPasswordResetToken(): ?string
+    {
+        return $this->passwordResetToken;
+    }
+
+    public function setPasswordResetToken(?string $passwordResetToken): self
+    {
+        $this->passwordResetToken = $passwordResetToken;
+
+        return $this;
+    }
+
+    public function getPasswordResetTokenExpiresAt(): ?DateTimeImmutable
+    {
+        return $this->passwordResetTokenExpiresAt;
+    }
+
+    public function setPasswordResetTokenExpiresAt(?DateTimeImmutable $passwordResetTokenExpiresAt): self
+    {
+        $this->passwordResetTokenExpiresAt = $passwordResetTokenExpiresAt;
 
         return $this;
     }

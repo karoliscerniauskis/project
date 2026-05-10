@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Auth\Domain\Entity;
 
+use App\Auth\Domain\Event\PasswordResetRequested;
 use App\Auth\Domain\Event\UserEmailChangeRequested;
 use App\Auth\Domain\Event\UserRegistered;
 use App\Shared\Domain\Event\AbstractAggregateRoot;
@@ -24,6 +25,8 @@ final class User extends AbstractAggregateRoot
     private ?DateTimeImmutable $emailBreachCheckedAt = null;
     private ?DateTimeImmutable $emailBreachedAt = null;
     private int $emailBreachCount = 0;
+    private ?string $passwordResetToken = null;
+    private ?DateTimeImmutable $passwordResetTokenExpiresAt = null;
 
     private function __construct()
     {
@@ -101,6 +104,8 @@ final class User extends AbstractAggregateRoot
         ?DateTimeImmutable $emailBreachCheckedAt = null,
         ?DateTimeImmutable $emailBreachedAt = null,
         int $emailBreachCount = 0,
+        ?string $passwordResetToken = null,
+        ?DateTimeImmutable $passwordResetTokenExpiresAt = null,
     ): self {
         $self = new self();
         $self->id = $id;
@@ -114,6 +119,8 @@ final class User extends AbstractAggregateRoot
         $self->emailBreachCheckedAt = $emailBreachCheckedAt;
         $self->emailBreachedAt = $emailBreachedAt;
         $self->emailBreachCount = $emailBreachCount;
+        $self->passwordResetToken = $passwordResetToken;
+        $self->passwordResetTokenExpiresAt = $passwordResetTokenExpiresAt;
 
         return $self;
     }
@@ -197,5 +204,42 @@ final class User extends AbstractAggregateRoot
         $this->emailBreachCheckedAt = $checkedAt;
         $this->emailBreachCount = $breachCount;
         $this->emailBreachedAt = $breached ? $checkedAt : null;
+    }
+
+    public function requestPasswordReset(string $resetToken, DateTimeImmutable $expiresAt, DateTimeImmutable $occurredOn): void
+    {
+        $this->passwordResetToken = $resetToken;
+        $this->passwordResetTokenExpiresAt = $expiresAt;
+        $this->record(new PasswordResetRequested($this->email, $resetToken, $occurredOn));
+    }
+
+    public function getPasswordResetToken(): ?string
+    {
+        return $this->passwordResetToken;
+    }
+
+    public function getPasswordResetTokenExpiresAt(): ?DateTimeImmutable
+    {
+        return $this->passwordResetTokenExpiresAt;
+    }
+
+    public function resetPassword(string $hashedPassword): void
+    {
+        $this->hashedPassword = $hashedPassword;
+        $this->passwordResetToken = null;
+        $this->passwordResetTokenExpiresAt = null;
+    }
+
+    public function isPasswordResetTokenValid(string $token, DateTimeImmutable $now): bool
+    {
+        if ($this->passwordResetToken === null || $this->passwordResetTokenExpiresAt === null) {
+            return false;
+        }
+
+        if ($this->passwordResetToken !== $token) {
+            return false;
+        }
+
+        return $this->passwordResetTokenExpiresAt > $now;
     }
 }
