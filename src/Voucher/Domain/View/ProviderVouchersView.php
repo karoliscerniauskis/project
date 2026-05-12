@@ -7,12 +7,12 @@ namespace App\Voucher\Domain\View;
 use App\Shared\Domain\View\ArrayableView;
 
 /**
- * @implements ArrayableView<array<array{id: string, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}>>
+ * @implements ArrayableView<list<array{id: string, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}>>
  */
 final readonly class ProviderVouchersView implements ArrayableView
 {
     /**
-     * @param ProviderVoucherView[] $vouchers
+     * @param list<ProviderVoucherView> $vouchers
      */
     public function __construct(
         private array $vouchers,
@@ -20,7 +20,7 @@ final readonly class ProviderVouchersView implements ArrayableView
     }
 
     /**
-     * @return ProviderVoucherView[]
+     * @return list<ProviderVoucherView>
      */
     public function getVouchers(): array
     {
@@ -28,7 +28,7 @@ final readonly class ProviderVouchersView implements ArrayableView
     }
 
     /**
-     * @return array<array{id: string, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}>
+     * @return list<array{id: string, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string}>
      */
     public function toArray(): array
     {

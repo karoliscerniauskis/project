@@ -93,33 +93,29 @@ const router = createRouter({
     routes,
 })
 
-router.beforeEach(async (to, _from, next) => {
+router.beforeEach(async (to) => {
     const isAuthenticated = storage.hasTokens()
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        next('/login')
-        return
+        return '/login'
     }
 
     if (to.meta.requiresGuest && isAuthenticated) {
-        next('/providers')
-        return
+        return '/providers'
     }
 
     if (to.meta.requiresAdmin) {
         try {
             const user = await userApi.getCurrentUser()
             if (!user.roles.includes('ROLE_ADMIN')) {
-                next('/providers')
-                return
+                return '/providers'
             }
         } catch {
-            next('/login')
-            return
+            return '/login'
         }
     }
 
-    next()
+    return true
 })
 
 export default router

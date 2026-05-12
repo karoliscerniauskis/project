@@ -5,7 +5,7 @@ export interface Notification {
     type: string
     title: string
     message: string
-    payload: Record<string, any>
+    payload: Record<string, unknown>
     readAt: string | null
     createdAt: string
 }

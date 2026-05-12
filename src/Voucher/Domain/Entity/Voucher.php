@@ -277,6 +277,7 @@ final class Voucher extends AbstractAggregateRoot
             $this->record(new VoucherUsed(
                 $this->code,
                 $this->issuedToEmail,
+                null,
                 $occurredOn,
             ));
 
@@ -304,6 +305,7 @@ final class Voucher extends AbstractAggregateRoot
         $this->record(new VoucherUsed(
             $this->code,
             $this->issuedToEmail,
+            $amount,
             $occurredOn,
         ));
     }
@@ -355,14 +357,11 @@ final class Voucher extends AbstractAggregateRoot
             throw new LogicException('Voucher is not active.');
         }
 
-        if ($this->claimedByUserId !== null) {
-            throw new LogicException('Voucher is already claimed.');
-        }
-
         if ($this->issuedToEmail !== $transferredFromEmail) {
             throw new LogicException('Voucher is not issued to the user.');
         }
 
+        $this->claimedByUserId = null;
         $this->issuedToEmail = $issuedToEmail;
         $this->code = $newCode;
 
@@ -380,5 +379,10 @@ final class Voucher extends AbstractAggregateRoot
         }
 
         $this->providerId = $newProviderId;
+    }
+
+    public function assignTo(string $email): void
+    {
+        $this->issuedToEmail = $email;
     }
 }

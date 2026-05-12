@@ -11,12 +11,13 @@ use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderUserRecord;
 use App\Provider\Infrastructure\Doctrine\Mapper\ProviderUserRecordMapper;
 use App\Shared\Application\ProviderUser\ProviderAdminFinder;
+use App\Shared\Application\ProviderUser\ProviderMembershipChecker;
 use App\Shared\Domain\Id\ProviderId;
 use App\Shared\Domain\Id\ProviderUserId;
 use App\Shared\Domain\Id\UserId;
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class DoctrineProviderUserRepository implements ProviderUserRepository, ProviderAdminFinder
+final readonly class DoctrineProviderUserRepository implements ProviderUserRepository, ProviderAdminFinder, ProviderMembershipChecker
 {
     public function __construct(
         private EntityManagerInterface $entityManager,

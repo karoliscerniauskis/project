@@ -52,9 +52,11 @@ import { notificationApi, type Notification } from '@/api/notification.api'
 import TopNav from '@/components/layout/TopNav.vue'
 import { formatRelativeDate } from '@/utils/date'
 import { useAsyncState } from '@/composables/useAsyncState'
+import { useNotificationCount } from '@/composables/useNotificationCount'
 import { MESSAGES } from '@/constants/messages'
 
 const { data: notifications, loading, error, execute: fetchNotifications } = useAsyncState<Notification[]>()
+const { decrementCount } = useNotificationCount()
 
 async function loadNotifications() {
     await fetchNotifications(() => notificationApi.getNotifications(), {
@@ -67,7 +69,8 @@ async function handleNotificationClick(notification: Notification) {
         try {
             await notificationApi.markAsRead(notification.id)
             notification.readAt = new Date().toISOString()
-        } catch (err: any) {
+            decrementCount()
+        } catch (err: unknown) {
             ElMessage.error(err.response?.data?.message || MESSAGES.ERROR.NOTIFICATION_MARK_READ)
         }
     }

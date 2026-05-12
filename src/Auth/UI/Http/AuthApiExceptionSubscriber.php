@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Auth\UI\Http;
 
 use App\Auth\Application\Exception\InvalidCredentials;
+use App\Auth\Application\Exception\InvalidPasswordResetToken;
 use App\Auth\Application\Exception\UserEmailAlreadyVerified;
 use App\Auth\Application\Exception\UserEmailMustBeUnique;
 use App\Auth\Application\Exception\UserEmailMustBeVerified;
@@ -65,6 +66,15 @@ final readonly class AuthApiExceptionSubscriber implements EventSubscriberInterf
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),
             ], Response::HTTP_UNAUTHORIZED));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof InvalidPasswordResetToken) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_BAD_REQUEST));
 
             return;
         }

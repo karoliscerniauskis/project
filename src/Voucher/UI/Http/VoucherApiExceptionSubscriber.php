@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Voucher\UI\Http;
 
 use App\Voucher\Application\Exception\ProviderInactive;
+use App\Voucher\Application\Exception\ProviderNotLinkedToVoucherProvider;
 use App\Voucher\Application\Exception\ProviderUserNotFound;
 use App\Voucher\Application\Exception\VoucherAccessDenied;
 use App\Voucher\Application\Exception\VoucherAlreadyClaimed;
 use App\Voucher\Application\Exception\VoucherIssuedToEmailMismatch;
 use App\Voucher\Application\Exception\VoucherNotActive;
 use App\Voucher\Application\Exception\VoucherNotFound;
+use App\Voucher\Application\Exception\VoucherNotOwnedByUser;
 use App\Voucher\Application\Exception\VoucherProviderMismatch;
 use App\Voucher\Application\Exception\VoucherUsedAmountExceedsRemainingAmount;
 use App\Voucher\Application\Exception\VoucherUsedAmountRequired;
@@ -113,6 +115,24 @@ final readonly class VoucherApiExceptionSubscriber implements EventSubscriberInt
         }
 
         if ($event->getThrowable()->getPrevious() instanceof ProviderInactive) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_FORBIDDEN));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof VoucherNotOwnedByUser) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_FORBIDDEN));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof ProviderNotLinkedToVoucherProvider) {
             $event->setResponse(new JsonResponse([
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),

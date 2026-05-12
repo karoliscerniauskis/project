@@ -18,7 +18,9 @@ export const authApi = {
             { skipAuth: true }
         )
         storage.setAccessToken(response.token)
-        storage.setRefreshToken(response.refresh_token)
+        if (response.refresh_token) {
+            storage.setRefreshToken(response.refresh_token)
+        }
     },
 
     async register(credentials: RegisterCredentials): Promise<void> {
@@ -26,11 +28,7 @@ export const authApi = {
     },
 
     async logout(): Promise<void> {
-        try {
-            await http.post('/api/auth/logout')
-        } finally {
-            storage.clearTokens()
-        }
+        storage.clearTokens()
     },
 
     async forgotPassword(request: ForgotPasswordRequest): Promise<void> {

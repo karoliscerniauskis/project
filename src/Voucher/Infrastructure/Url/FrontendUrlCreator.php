@@ -8,7 +8,7 @@ use App\Voucher\Application\Url\FrontendUrlCreator as FrontendUrlCreatorInterfac
 
 final readonly class FrontendUrlCreator implements FrontendUrlCreatorInterface
 {
-    private const string MY_VOUCHERS_FORMAT = '%s/me/vouchers';
+    private const string MY_VOUCHERS_FORMAT = '%s/vouchers';
     private const string PROVIDER_VOUCHERS_FORMAT = '%s/providers/%s/vouchers';
 
     public function __construct(

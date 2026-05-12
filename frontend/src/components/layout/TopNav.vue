@@ -4,7 +4,7 @@
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-4 sm:gap-8">
                     <router-link to="/providers" class="text-lg sm:text-xl font-semibold text-primary-900">
-                        VoucherApp
+                        🎁 Vouchera
                     </router-link>
 
                     <div v-if="!isMobile" class="flex items-center gap-1">
@@ -106,14 +106,13 @@ import { Bell, User, ArrowDown, SwitchButton, Menu } from '@element-plus/icons-v
 import { useAuth } from '@/composables/useAuth'
 import { useUser } from '@/composables/useUser'
 import { useWindowSize } from '@vueuse/core'
-import { notificationApi } from '@/api/notification.api'
+import { useNotificationCount } from '@/composables/useNotificationCount'
 
 const router = useRouter()
 const { logout } = useAuth()
 const { currentUser, fetchCurrentUser } = useUser()
 const { width } = useWindowSize()
-
-const notificationCount = ref(0)
+const { notificationCount, fetchCount } = useNotificationCount()
 const mobileMenuOpen = ref(false)
 
 const userEmail = computed(() => currentUser.value?.email || 'Loading...')
@@ -121,16 +120,16 @@ const isMobile = computed(() => width.value < 768)
 const isAdmin = computed(() => currentUser.value?.roles?.includes('ROLE_ADMIN') ?? false)
 
 async function fetchNotificationCount() {
-    try {
-        notificationCount.value = await notificationApi.getUnreadCount()
-    } catch (err) {
-        console.error('Failed to fetch notification count', err)
+    if (!currentUser.value) {
+        return
     }
+
+    await fetchCount()
 }
 
-onMounted(() => {
-    fetchCurrentUser()
-    fetchNotificationCount()
+onMounted(async () => {
+    await fetchCurrentUser()
+    await fetchNotificationCount()
     // Poll for new notifications every 30 seconds
     setInterval(fetchNotificationCount, 30000)
 })

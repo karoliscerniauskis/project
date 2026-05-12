@@ -6,6 +6,8 @@ namespace App\Voucher\UI\Http;
 
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\AuthenticatedUser;
+use App\Shared\Domain\Id\UuidValidator;
+use App\Shared\UI\Http\InvalidRequestParameterException;
 use App\Shared\UI\Http\JsonDtoFactory;
 use App\Shared\UI\Http\OpenApi\ApiValidationFailedResponse;
 use App\Voucher\Application\Command\TransferVoucher;
@@ -24,6 +26,7 @@ final class TransferVoucherController extends AbstractController
     public function __construct(
         private readonly CommandBus $commandBus,
         private readonly JsonDtoFactory $jsonDtoFactory,
+        private readonly UuidValidator $uuidValidator,
     ) {
     }
 
@@ -74,6 +77,10 @@ final class TransferVoucherController extends AbstractController
 
         if (!$user instanceof AuthenticatedUser) {
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
+        }
+
+        if (!$this->uuidValidator->isValid($voucherId)) {
+            throw new InvalidRequestParameterException('voucherId', sprintf('Invalid Voucher "%s".', $voucherId));
         }
 
         /** @var TransferVoucherRequest $dto */

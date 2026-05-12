@@ -2,7 +2,7 @@
     <div class="bg-white rounded-2xl shadow-sm p-6 border border-primary-100">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-primary-900">Users</h2>
-            <el-button @click="loadUsers" :loading="loading" size="small">
+            <el-button :loading="loading" size="small" @click="loadUsers">
                 <el-icon><Refresh /></el-icon>
             </el-button>
         </div>

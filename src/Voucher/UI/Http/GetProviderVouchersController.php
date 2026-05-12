@@ -11,13 +11,14 @@ use App\Shared\Domain\Id\UserId;
 use App\Shared\Domain\Id\UuidValidator;
 use App\Shared\UI\Http\InvalidRequestParameterException;
 use App\Voucher\Application\Query\GetProviderVouchers;
-use App\Voucher\Domain\View\ProviderVouchersView;
+use App\Voucher\Domain\View\PaginatedProviderVouchersView;
 use App\Voucher\UI\Http\OpenApi\ProviderVouchersResponse;
 use App\Voucher\UI\Http\OpenApi\VoucherAccessDeniedResponse;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -48,6 +49,27 @@ final class GetProviderVouchersController extends AbstractController
             example: '019d882d-1d68-7e2f-94ce-0cd2f4d0c369',
         ),
     )]
+    #[OA\Parameter(
+        name: 'code',
+        description: 'Filter vouchers by code (partial match).',
+        in: 'query',
+        required: false,
+        schema: new OA\Schema(type: 'string'),
+    )]
+    #[OA\Parameter(
+        name: 'page',
+        description: 'Page number.',
+        in: 'query',
+        required: false,
+        schema: new OA\Schema(type: 'integer', default: 1),
+    )]
+    #[OA\Parameter(
+        name: 'perPage',
+        description: 'Items per page.',
+        in: 'query',
+        required: false,
+        schema: new OA\Schema(type: 'integer', default: 20),
+    )]
     #[OA\Response(
         response: Response::HTTP_OK,
         description: 'Provider vouchers returned successfully.',
@@ -66,7 +88,7 @@ final class GetProviderVouchersController extends AbstractController
         response: Response::HTTP_BAD_REQUEST,
         description: 'Invalid provider identifier.',
     )]
-    public function __invoke(string $providerId): JsonResponse
+    public function __invoke(string $providerId, Request $request): JsonResponse
     {
         $user = $this->getUser();
 
@@ -78,14 +100,21 @@ final class GetProviderVouchersController extends AbstractController
             throw new InvalidRequestParameterException('providerId', sprintf('Invalid Provider "%s".', $providerId));
         }
 
-        /** @var ProviderVouchersView $providerVouchersView */
-        $providerVouchersView = $this->queryBus->ask(
+        $codeFilter = $request->query->get('code');
+        $page = max(1, (int) $request->query->get('page', 1));
+        $perPage = max(1, min(100, (int) $request->query->get('perPage', 20)));
+
+        /** @var PaginatedProviderVouchersView $paginatedView */
+        $paginatedView = $this->queryBus->ask(
             new GetProviderVouchers(
                 ProviderId::fromString($providerId),
                 UserId::fromString($user->getId()),
+                $codeFilter,
+                $page,
+                $perPage,
             ),
         );
 
-        return new JsonResponse(['data' => $providerVouchersView->toArray()]);
+        return new JsonResponse($paginatedView->toArray());
     }
 }

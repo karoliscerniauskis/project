@@ -22,13 +22,13 @@
             </el-form-item>
 
             <el-form-item v-if="validationResult">
-                <el-alert :type="validationResult.valid ? 'success' : 'warning'" :closable="false" show-icon>
+                <el-alert :type="validationResult.valid ? 'success' : 'error'" :closable="false" show-icon>
                     <template #title>
                         {{ validationResult.valid ? 'Valid Voucher' : 'Invalid Voucher' }}
                     </template>
                     <div>
-                        <p><strong>Status:</strong> <el-tag :type="getStatusType(validationResult.status)" size="small">{{ validationResult.status }}</el-tag></p>
-                        <p v-if="validationResult.reason"><strong>Reason:</strong> {{ validationResult.reason }}</p>
+                        <p><strong>Status:</strong> <el-tag :type="getStatusType(validationResult.status)" size="small">{{ getStatusMessage(validationResult.status) }}</el-tag></p>
+                        <p v-if="validationResult.reason"><strong>Reason:</strong> {{ getReasonMessage(validationResult.reason) }}</p>
                     </div>
                 </el-alert>
             </el-form-item>
@@ -66,16 +66,27 @@ const validationResult = ref<VoucherValidationResponse | null>(null)
 
 const getStatusType = (status: string): 'success' | 'info' | 'warning' | 'danger' => {
     switch (status) {
-        case 'valid':
-            return 'success'
-        case 'expired':
-        case 'exhausted':
-            return 'warning'
-        case 'invalid':
-            return 'danger'
-        default:
-            return 'info'
+    case 'valid':
+        return 'success'
+    case 'notFound':
+    case 'used':
+        return 'danger'
+    default:
+        return 'info'
     }
+}
+
+const getStatusMessage = (status: string): string => {
+    const statusMap: Record<string, string> = {
+        valid: 'Valid',
+        notFound: 'Not Found',
+        used: 'Used',
+    }
+    return statusMap[status] || status
+}
+
+const getReasonMessage = (reason: string): string => {
+    return MESSAGES.VALIDATION_REASON[reason as keyof typeof MESSAGES.VALIDATION_REASON] || reason
 }
 
 async function handleSubmit() {

@@ -29,6 +29,6 @@ final readonly class GetLinkedProvidersHandler
             throw ProviderAdminRoleRequired::create();
         }
 
-        return $this->providerReadRepository->findLinkedProviders($providerId);
+        return $this->providerReadRepository->findLinkedProviders($providerId, true);
     }
 }

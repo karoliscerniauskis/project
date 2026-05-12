@@ -9,7 +9,6 @@ use App\Shared\Domain\Clock\Clock;
 use App\Shared\Domain\Id\VoucherId;
 use App\Voucher\Application\Command\TransferVoucher;
 use App\Voucher\Application\Exception\VoucherAccessDenied;
-use App\Voucher\Application\Exception\VoucherAlreadyClaimed;
 use App\Voucher\Application\Exception\VoucherNotActive;
 use App\Voucher\Application\Exception\VoucherNotFound;
 use App\Voucher\Application\Transaction\VoucherTransactionManager;
@@ -40,10 +39,6 @@ final readonly class TransferVoucherHandler
 
         if (!$voucher->isActive()) {
             throw VoucherNotActive::forId($voucherId);
-        }
-
-        if ($voucher->getClaimedByUserId() !== null) {
-            throw VoucherAlreadyClaimed::forId($voucherId);
         }
 
         if ($voucher->getIssuedToEmail() !== $currentUserEmail) {

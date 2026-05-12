@@ -23,10 +23,13 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
     ) {
     }
 
-    public function findByProviderId(ProviderId $providerId): ProviderVouchersView
-    {
-        /** @var array<int, array{id: UuidV7, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null}> $rows */
-        $rows = $this->entityManager->createQueryBuilder()
+    public function findByProviderId(
+        ProviderId $providerId,
+        ?string $codeFilter = null,
+        int $limit = 20,
+        int $offset = 0,
+    ): ProviderVouchersView {
+        $qb = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.id AS id',
                 'v.code AS code',
@@ -60,7 +63,17 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 'createdUser.id = createdProviderUser.userId',
             )
             ->andWhere('v.providerId = :providerId')
-            ->setParameter('providerId', $providerId->toString())
+            ->setParameter('providerId', $providerId->toString());
+
+        if ($codeFilter !== null) {
+            $qb->andWhere('v.code LIKE :codeFilter')
+                ->setParameter('codeFilter', '%'.$codeFilter.'%');
+        }
+
+        /** @var array<int, array{id: UuidV7, code: string, issuedToEmail: string, claimedByUser: string|null, createdByUser: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null}> $rows */
+        $rows = $qb
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
             ->getArrayResult();
 
@@ -85,10 +98,14 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
         return new ProviderVouchersView($vouchers);
     }
 
-    public function findByUserEmailAndUserId(string $email, string $userId): MyVouchersView
-    {
-        /** @var array<int, array{id: UuidV7, code: string, providerId: UuidV7, claimedByUserId: UuidV7|null, providerName: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: DateTimeImmutable|null}> $rows */
-        $rows = $this->entityManager->createQueryBuilder()
+    public function findByUserEmailAndUserId(
+        string $email,
+        string $userId,
+        ?string $codeFilter = null,
+        int $limit = 20,
+        int $offset = 0,
+    ): MyVouchersView {
+        $qb = $this->entityManager->createQueryBuilder()
             ->select(
                 'v.id AS id',
                 'v.code AS code',
@@ -111,7 +128,18 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
                 'p.id = v.providerId',
             )
             ->andWhere('v.issuedToEmail = :email')
-            ->setParameter('email', $email)
+            ->andWhere('v.sentAt IS NOT NULL')
+            ->setParameter('email', $email);
+
+        if ($codeFilter !== null) {
+            $qb->andWhere('v.code LIKE :codeFilter')
+                ->setParameter('codeFilter', '%'.$codeFilter.'%');
+        }
+
+        /** @var array<int, array{id: UuidV7, code: string, providerId: UuidV7, claimedByUserId: UuidV7|null, providerName: string, status: string, type: string, initialAmount: int|null, remainingAmount: int|null, initialUsages: int|null, remainingUsages: int|null, expiresAt: DateTimeImmutable|null}> $rows */
+        $rows = $qb
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
             ->getQuery()
             ->getArrayResult();
 
@@ -119,14 +147,20 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
 
         foreach ($rows as $row) {
             $claimedByCurrentUser = $row['claimedByUserId']?->toRfc4122() === $userId;
-            $canBeClaimedOrTransferred = $row['status'] === VoucherStatus::Active->value && !$claimedByCurrentUser;
+            $canBeClaimed = $row['status'] === VoucherStatus::Active->value && !$claimedByCurrentUser;
+            $canBeTransferred = $row['status'] === VoucherStatus::Active->value && $claimedByCurrentUser;
+            $canProviderBeChanged = $row['status'] === VoucherStatus::Active->value && $claimedByCurrentUser;
+            $isCodeVisible = $claimedByCurrentUser;
             $vouchers[] = new MyVoucherView(
                 $row['id']->toRfc4122(),
                 $row['code'],
                 $row['providerId']->toRfc4122(),
                 $row['providerName'],
                 $row['status'],
-                $canBeClaimedOrTransferred,
+                $canBeClaimed,
+                $canBeTransferred,
+                $canProviderBeChanged,
+                $isCodeVisible,
                 $row['type'],
                 $row['initialAmount'],
                 $row['remainingAmount'],
@@ -137,5 +171,38 @@ final readonly class DoctrineVoucherReadRepository implements VoucherReadReposit
         }
 
         return new MyVouchersView($vouchers);
+    }
+
+    public function countByProviderId(ProviderId $providerId, ?string $codeFilter = null): int
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->select('COUNT(v.id)')
+            ->from(VoucherRecord::class, 'v')
+            ->andWhere('v.providerId = :providerId')
+            ->setParameter('providerId', $providerId->toString());
+
+        if ($codeFilter !== null) {
+            $qb->andWhere('v.code LIKE :codeFilter')
+                ->setParameter('codeFilter', '%'.$codeFilter.'%');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
+    }
+
+    public function countByUserEmailAndUserId(string $email, string $userId, ?string $codeFilter = null): int
+    {
+        $qb = $this->entityManager->createQueryBuilder()
+            ->select('COUNT(v.id)')
+            ->from(VoucherRecord::class, 'v')
+            ->andWhere('v.issuedToEmail = :email')
+            ->andWhere('v.sentAt IS NOT NULL')
+            ->setParameter('email', $email);
+
+        if ($codeFilter !== null) {
+            $qb->andWhere('v.code LIKE :codeFilter')
+                ->setParameter('codeFilter', '%'.$codeFilter.'%');
+        }
+
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 }

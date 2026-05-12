@@ -87,4 +87,15 @@ export const MESSAGES = {
         NO_NOTIFICATIONS: 'No notifications',
         VOUCHER_INVALID: 'Voucher is invalid',
     },
+
+    // Validation reasons
+    VALIDATION_REASON: {
+        voucherNotActive: 'Voucher is not active',
+        voucherExpired: 'Voucher has expired',
+        voucherExhausted: 'Voucher has been fully used',
+        voucherNotFound: 'Voucher not found',
+        voucherNotClaimedByUser: 'Voucher is not claimed by this user',
+        voucherAlreadyClaimed: 'Voucher has already been claimed',
+        insufficientBalance: 'Insufficient voucher balance',
+    },
 } as const

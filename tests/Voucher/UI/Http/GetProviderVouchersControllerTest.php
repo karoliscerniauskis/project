@@ -193,6 +193,12 @@ final class GetProviderVouchersControllerTest extends ApiWebTestCase
         self::assertSame(
             [
                 'data' => [],
+                'meta' => [
+                    'total' => 0,
+                    'page' => 1,
+                    'perPage' => 20,
+                    'totalPages' => 0,
+                ],
             ],
             self::getJsonResponse($client->getResponse()->getContent()),
         );

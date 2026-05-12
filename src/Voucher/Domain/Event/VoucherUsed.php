@@ -13,6 +13,7 @@ final readonly class VoucherUsed extends AbstractDomainEvent
     public function __construct(
         private string $voucherCode,
         private string $issuedToEmail,
+        private ?int $usedAmount,
         DateTimeImmutable $occurredOn,
     ) {
         parent::__construct($occurredOn);
@@ -28,11 +29,17 @@ final readonly class VoucherUsed extends AbstractDomainEvent
         return $this->issuedToEmail;
     }
 
+    public function getUsedAmount(): ?int
+    {
+        return $this->usedAmount;
+    }
+
     public function toArray(): array
     {
         return [
             'voucherCode' => $this->voucherCode,
             'issuedToEmail' => $this->issuedToEmail,
+            'usedAmount' => $this->usedAmount,
             'occurredOn' => $this->occurredOn->format(DateTimeInterface::ATOM),
         ];
     }

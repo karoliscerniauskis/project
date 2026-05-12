@@ -64,7 +64,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Expires At" prop="expiresAt">
+            <el-form-item label="Expires At" prop="expiresAt" :error="getFieldError('expiresAt')">
                 <el-date-picker
                     v-model="form.expiresAt"
                     type="datetime"
@@ -75,7 +75,7 @@
                 />
             </el-form-item>
 
-            <el-form-item label="Scheduled Send At" prop="scheduledSendAt">
+            <el-form-item label="Scheduled Send At" prop="scheduledSendAt" :error="getFieldError('scheduledSendAt')">
                 <el-date-picker
                     v-model="form.scheduledSendAt"
                     type="datetime"
@@ -137,7 +137,11 @@ const rules = {
     ),
 }
 
-const { loading, error, success, execute } = useAsyncAction()
+const { loading, error, success, fieldErrors, execute } = useAsyncAction()
+
+function getFieldError(field: string): string {
+    return fieldErrors.value.find(e => e.field === field)?.message || ''
+}
 
 watch(() => form.value.type, (newType) => {
     if (newType === 'amount') {

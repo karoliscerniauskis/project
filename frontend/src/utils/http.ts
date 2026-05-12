@@ -55,6 +55,13 @@ class HttpClient {
             try {
                 const error: ApiError = await response.json()
                 errorMessage = error.message || errorMessage
+
+                if (error.errors && error.errors.length > 0) {
+                    const fieldErrors = error.errors
+                        .map(err => `${err.field}: ${err.message}`)
+                        .join(', ')
+                    errorMessage = `${errorMessage} - ${fieldErrors}`
+                }
             } catch {
                 if (response.status === 401) {
                     errorMessage = 'Invalid email or password'
@@ -77,7 +84,7 @@ class HttpClient {
 
     private async refreshToken(): Promise<boolean> {
         const refreshToken = storage.getRefreshToken()
-        if (!refreshToken) return false
+        if (!refreshToken || refreshToken === 'undefined') return false
 
         try {
             const response = await fetch(`${this.baseUrl}/api/auth/token/refresh`, {
@@ -90,7 +97,9 @@ class HttpClient {
 
             const data: AuthResponse = await response.json()
             storage.setAccessToken(data.token)
-            storage.setRefreshToken(data.refresh_token)
+            if (data.refresh_token) {
+                storage.setRefreshToken(data.refresh_token)
+            }
             return true
         } catch {
             return false

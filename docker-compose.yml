@@ -56,6 +56,19 @@ services:
     volumes:
       - pgdata_test:/var/lib/postgresql/data
 
+  cron:
+    build:
+      context: .
+      dockerfile: docker/cron/Dockerfile
+    container_name: cron
+    volumes:
+      - ./:/app:delegated
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: "postgresql://app_user:app_password@db:5432/app_db?serverVersion=17&charset=utf8"
+    depends_on:
+      - db
+
   mailer:
     image: axllent/mailpit
     container_name: mailer
