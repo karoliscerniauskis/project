@@ -1,0 +1,3 @@
+* * * * * cd /app && /usr/local/bin/php bin/console app:email-breach-checks:process > /dev/null 2>&1
+* * * * * cd /app && /usr/local/bin/php bin/console app:voucher-reminders:process > /dev/null 2>&1
+* * * * * cd /app && /usr/local/bin/php bin/console app:vouchers:send-scheduled > /dev/null 2>&1

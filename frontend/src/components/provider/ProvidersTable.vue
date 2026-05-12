@@ -22,8 +22,8 @@
                 :data="providers"
                 stripe
                 style="width: 100%"
-                @row-click="clickable ? handleRowClick : undefined"
                 :class="{ 'cursor-pointer': clickable }"
+                @row-click="clickable ? handleRowClick : undefined"
             >
                 <el-table-column prop="name" label="Name" min-width="200">
                     <template #default="{ row }">

@@ -167,6 +167,12 @@ deptrac:
             collectors:
                 -   type: classLike
                     value: ^Twig\\
+        -
+            name: Knp
+            collectors:
+                -
+                    type: classLike
+                    value: ^Knp\\
     ruleset:
         # Shared
         SharedDomain:
@@ -232,6 +238,8 @@ deptrac:
             - Symfony
             - Doctrine
             - Hidehalo
+            - Twig
+            - Knp
         VoucherUI:
             - VoucherDomain
             - VoucherApplication

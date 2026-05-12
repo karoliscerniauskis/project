@@ -36,7 +36,12 @@
                     :provider-id="provider.id"
                     @invited="handleInvited"
                 />
-                <ProviderReminderSettings v-if="provider.isAdmin" :provider-id="provider.id" />
+                <ProviderReminderSettings
+                    v-if="provider.isAdmin"
+                    :provider-id="provider.id"
+                    :claim-reminder-after-days="provider.claimReminderAfterDays"
+                    :expiry-reminder-before-days="provider.expiryReminderBeforeDays"
+                />
                 <LinkedProviders
                     v-if="provider.isAdmin"
                     ref="linkedProvidersRef"

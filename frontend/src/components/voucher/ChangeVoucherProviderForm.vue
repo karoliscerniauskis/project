@@ -16,7 +16,7 @@
                 </template>
             </el-alert>
         </div>
-        <el-form v-else :model="form" ref="formRef" label-position="top">
+        <el-form v-else ref="formRef" :model="form" label-position="top">
             <el-form-item label="New Provider" prop="newProviderId">
                 <el-select v-model="form.newProviderId" placeholder="Select a provider" class="w-full">
                     <el-option
@@ -32,7 +32,7 @@
         <template #footer>
             <el-button @click="handleClose">Cancel</el-button>
             <el-button
-                type="warning"
+                type="primary"
                 :loading="loading"
                 :disabled="!form.newProviderId"
                 @click="handleSubmit"
@@ -51,7 +51,6 @@ import { voucherApi, type Voucher } from '@/api/voucher.api'
 import { providerApi, type LinkedProvider } from '@/api/provider.api'
 
 const props = defineProps<{
-    visible: boolean
     voucher: Voucher
 }>()
 
@@ -60,7 +59,7 @@ const emit = defineEmits<{
     changed: []
 }>()
 
-const dialogVisible: ModelRef<boolean> = defineModel('visible', { required: true })
+const dialogVisible: ModelRef<boolean> = defineModel<boolean>('visible', { required: true })
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const loadingLinkedProviders = ref(false)
@@ -84,14 +83,9 @@ onMounted(async () => {
 })
 
 async function loadLinkedProviders() {
-    if (!props.voucher.providerId) {
-        ElMessage.error('Provider ID is missing from voucher')
-        return
-    }
-
     loadingLinkedProviders.value = true
     try {
-        linkedProviders.value = await providerApi.getLinkedProviders(props.voucher.providerId)
+        linkedProviders.value = await providerApi.getLinkedProvidersForVoucher(props.voucher.id)
     } catch (err) {
         ElMessage.error(err instanceof Error ? err.message : 'Failed to load linked providers')
     } finally {

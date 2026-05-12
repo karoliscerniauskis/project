@@ -4,5 +4,5 @@ export interface ApiResponse<T> {
 
 export interface ApiError {
     message: string
-    errors?: Record<string, string[]>
+    errors?: Array<{ field: string; message: string }>
 }

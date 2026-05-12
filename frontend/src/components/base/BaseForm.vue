@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form class="space-y-6" @submit.prevent="handleSubmit">
         <el-form
             ref="formRef"
             :model="modelValue"

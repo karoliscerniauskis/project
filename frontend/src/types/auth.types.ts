@@ -19,7 +19,7 @@ export interface ResetPasswordRequest {
 
 export interface AuthResponse {
     token: string
-    refresh_token: string
+    refresh_token?: string
 }
 
 export interface User {

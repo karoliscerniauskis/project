@@ -6,6 +6,8 @@ namespace App\Voucher\UI\Http;
 
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\AuthenticatedUser;
+use App\Shared\Domain\Id\UuidValidator;
+use App\Shared\UI\Http\InvalidRequestParameterException;
 use App\Voucher\Application\Command\ClaimVoucher;
 use App\Voucher\UI\Http\OpenApi\VoucherAccessDeniedResponse;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -19,6 +21,7 @@ final class ClaimVoucherController extends AbstractController
 {
     public function __construct(
         private readonly CommandBus $commandBus,
+        private readonly UuidValidator $uuidValidator,
     ) {
     }
 
@@ -60,6 +63,10 @@ final class ClaimVoucherController extends AbstractController
 
         if (!$user instanceof AuthenticatedUser) {
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
+        }
+
+        if (!$this->uuidValidator->isValid($voucherId)) {
+            throw new InvalidRequestParameterException('voucherId', sprintf('Invalid Voucher "%s".', $voucherId));
         }
 
         $this->commandBus->dispatch(

@@ -7,6 +7,8 @@ namespace App\Voucher\UI\Http;
 use App\Shared\Application\Bus\CommandBus;
 use App\Shared\Application\Security\AuthenticatedUser;
 use App\Shared\Domain\Id\UuidCreator;
+use App\Shared\Domain\Id\UuidValidator;
+use App\Shared\UI\Http\InvalidRequestParameterException;
 use App\Shared\UI\Http\JsonDtoFactory;
 use App\Shared\UI\Http\OpenApi\ApiValidationFailedResponse;
 use App\Voucher\Application\Command\CreateVoucher;
@@ -26,6 +28,7 @@ final class CreateVoucherController extends AbstractController
         private readonly CommandBus $commandBus,
         private readonly JsonDtoFactory $jsonDtoFactory,
         private readonly UuidCreator $uuidCreator,
+        private readonly UuidValidator $uuidValidator,
     ) {
     }
 
@@ -76,6 +79,10 @@ final class CreateVoucherController extends AbstractController
 
         if (!$user instanceof AuthenticatedUser) {
             return new JsonResponse(status: Response::HTTP_UNAUTHORIZED);
+        }
+
+        if (!$this->uuidValidator->isValid($providerId)) {
+            throw new InvalidRequestParameterException('providerId', sprintf('Invalid Provider "%s".', $providerId));
         }
 
         /** @var CreateVoucherRequest $dto */

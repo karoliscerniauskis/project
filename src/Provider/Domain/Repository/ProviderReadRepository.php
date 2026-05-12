@@ -34,7 +34,7 @@ interface ProviderReadRepository
         ?string $statusFilter = null,
     ): PaginatedProvidersView;
 
-    public function findLinkedProviders(ProviderId $providerId): LinkedProvidersView;
+    public function findLinkedProviders(ProviderId $providerId, bool $includeInactive = false): LinkedProvidersView;
 
     public function findAvailableProvidersToLink(ProviderId $providerId, UserId $userId): AvailableProvidersView;
 }

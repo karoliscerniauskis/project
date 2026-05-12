@@ -65,6 +65,7 @@ final readonly class VoucherOutboxDomainEventFactory extends AbstractOutboxDomai
             VoucherUsed::class => new VoucherUsed(
                 $this->stringPayloadValue($record->getPayload(), 'voucherCode'),
                 $this->stringPayloadValue($record->getPayload(), 'issuedToEmail'),
+                $this->nullableIntPayloadValue($record->getPayload(), 'usedAmount'),
                 $record->getOccurredAt(),
             ),
             default => throw new RuntimeException('Unsupported voucher outbox event: '.$record->getEventName()),

@@ -21,8 +21,8 @@
                     placeholder="Filter by status"
                     size="large"
                     clearable
-                    @change="handleStatusChange"
                     class="w-full"
+                    @change="handleStatusChange"
                 >
                     <el-option label="Active" value="active" />
                     <el-option label="Pending" value="pending" />

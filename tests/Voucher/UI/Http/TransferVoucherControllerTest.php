@@ -217,7 +217,7 @@ final class TransferVoucherControllerTest extends ApiWebTestCase
         self::assertSame($ownerEmail, $voucher->getIssuedToEmail());
     }
 
-    public function testTransferAlreadyClaimedVoucherReturnsConflict(): void
+    public function testTransferAlreadyClaimedVoucherSuccessfullyTransfersVoucher(): void
     {
         $client = self::createClient();
         $ownerEmail = 'transfer-voucher-claimed-owner@example.com';
@@ -243,9 +243,11 @@ final class TransferVoucherControllerTest extends ApiWebTestCase
             providerId: $providerId,
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: $ownerEmail,
-            status: 'active',
+            status: VoucherStatus::Active->value,
             claimedByUserId: $ownerUserId,
         );
+        $recipientEmail = 'transfer-voucher-claimed-recipient@example.com';
+
         $client->request(
             'POST',
             sprintf('/api/vouchers/%s/transfer', $voucherId),
@@ -256,15 +258,16 @@ final class TransferVoucherControllerTest extends ApiWebTestCase
                 'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
             ],
             self::json([
-                'recipientEmail' => 'transfer-voucher-claimed-recipient@example.com',
+                'recipientEmail' => $recipientEmail,
             ]),
         );
 
-        self::assertResponseStatusCodeSame(Response::HTTP_CONFLICT);
+        self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
 
-        $voucher = self::getVoucherByCode('TRANSFER-CLAIMED-001');
+        $voucher = self::getVoucherByIssuedToEmail($recipientEmail);
 
-        self::assertSame($ownerEmail, $voucher->getIssuedToEmail());
-        self::assertSame($ownerUserId, $voucher->getClaimedByUserId());
+        self::assertSame($recipientEmail, $voucher->getIssuedToEmail());
+        self::assertNull($voucher->getClaimedByUserId());
+        self::assertNotSame('TRANSFER-CLAIMED-001', $voucher->getCode());
     }
 }

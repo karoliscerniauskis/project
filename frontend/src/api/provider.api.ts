@@ -118,6 +118,11 @@ export const providerApi = {
         await http.delete(`/api/providers/${providerId}/link/${linkedProviderId}`)
     },
 
+    async getLinkedProvidersForVoucher(voucherId: string): Promise<LinkedProvider[]> {
+        const response = await http.get<{ data: LinkedProvider[] }>(`/api/vouchers/${voucherId}/linked-providers`)
+        return response.data
+    },
+
     async getAvailableProvidersToLink(providerId: string): Promise<LinkedProvider[]> {
         const response = await http.get<{ data: LinkedProvider[] }>(`/api/providers/${providerId}/available-to-link`)
         return response.data

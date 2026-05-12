@@ -95,7 +95,7 @@ const rules = {
 }
 
 function handleSubmit(data: FormData) {
-    const { confirmPassword, ...credentials } = data
+    const { confirmPassword: _confirmPassword, ...credentials } = data
     emit('submit', credentials)
 }
 </script>

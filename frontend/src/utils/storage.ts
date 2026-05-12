@@ -13,11 +13,17 @@ export const storage = {
     },
 
     getRefreshToken(): string | null {
-        return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+        const token = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)
+        if (token === 'undefined' || token === 'null') {
+            return null
+        }
+        return token
     },
 
     setRefreshToken(token: string): void {
-        localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token)
+        if (token && token !== 'undefined') {
+            localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token)
+        }
     },
 
     clearTokens(): void {

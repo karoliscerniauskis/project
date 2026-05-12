@@ -7,6 +7,7 @@ namespace App\Provider\UI\Http;
 use App\Provider\Application\Exception\ProviderAccessDenied;
 use App\Provider\Application\Exception\ProviderAdminRoleRequired;
 use App\Provider\Application\Exception\ProviderNameAlreadyExists;
+use App\Provider\Application\Exception\VoucherNotFound;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,6 +48,17 @@ class ProviderApiExceptionSubscriber implements EventSubscriberInterface
                 'message' => $event->getThrowable()->getPrevious()->getMessage(),
                 'errors' => $event->getThrowable()->getPrevious()->getErrors(),
             ], Response::HTTP_FORBIDDEN));
+
+            return;
+        }
+
+        if ($event->getThrowable()->getPrevious() instanceof VoucherNotFound) {
+            $event->setResponse(new JsonResponse([
+                'message' => $event->getThrowable()->getPrevious()->getMessage(),
+                'errors' => $event->getThrowable()->getPrevious()->getErrors(),
+            ], Response::HTTP_NOT_FOUND));
+
+            return;
         }
     }
 }

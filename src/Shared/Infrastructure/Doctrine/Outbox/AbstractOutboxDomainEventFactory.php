@@ -21,4 +21,26 @@ abstract readonly class AbstractOutboxDomainEventFactory
 
         return $value;
     }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    protected function nullableIntPayloadValue(array $payload, string $key): ?int
+    {
+        if (!array_key_exists($key, $payload)) {
+            return null;
+        }
+
+        $value = $payload[$key];
+
+        if ($value === null) {
+            return null;
+        }
+
+        if (!is_int($value)) {
+            throw new RuntimeException(sprintf('Invalid payload key "%s", expected int or null.', $key));
+        }
+
+        return $value;
+    }
 }

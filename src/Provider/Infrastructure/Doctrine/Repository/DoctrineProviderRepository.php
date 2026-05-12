@@ -8,10 +8,11 @@ use App\Provider\Domain\Entity\Provider;
 use App\Provider\Domain\Repository\ProviderRepository;
 use App\Provider\Infrastructure\Doctrine\Entity\ProviderRecord;
 use App\Provider\Infrastructure\Doctrine\Mapper\ProviderRecordMapper;
+use App\Shared\Application\Provider\ProviderNameFinder;
 use App\Shared\Domain\Id\ProviderId;
 use Doctrine\ORM\EntityManagerInterface;
 
-final readonly class DoctrineProviderRepository implements ProviderRepository
+final readonly class DoctrineProviderRepository implements ProviderRepository, ProviderNameFinder
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -48,5 +49,10 @@ final readonly class DoctrineProviderRepository implements ProviderRepository
         $record = $this->entityManager->getRepository(ProviderRecord::class)->findOneBy(['name' => $name]);
 
         return $record instanceof ProviderRecord;
+    }
+
+    public function findNameById(ProviderId $providerId): ?string
+    {
+        return $this->findById($providerId)?->getName();
     }
 }

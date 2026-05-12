@@ -57,6 +57,8 @@ import { MESSAGES } from '@/constants/messages'
 
 const props = defineProps<{
     providerId: string
+    claimReminderAfterDays?: number | null
+    expiryReminderBeforeDays?: number | null
 }>()
 
 interface FormData {
@@ -65,8 +67,8 @@ interface FormData {
 }
 
 const form = ref<FormData>({
-    claimReminderAfterDays: null,
-    expiryReminderBeforeDays: null,
+    claimReminderAfterDays: props.claimReminderAfterDays ?? null,
+    expiryReminderBeforeDays: props.expiryReminderBeforeDays ?? null,
 })
 
 const rules = {

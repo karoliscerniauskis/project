@@ -124,3 +124,7 @@ services:
     App\Voucher\Infrastructure\Url\FrontendUrlCreator:
         arguments:
             $frontendUrl: '%app.frontend_url%'
+
+    Knp\Snappy\Image:
+        arguments:
+            $binary: '/usr/local/bin/wkhtmltoimage'

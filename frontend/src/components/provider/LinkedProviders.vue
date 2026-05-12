@@ -2,7 +2,7 @@
     <div class="bg-white rounded-2xl shadow-sm p-6 border border-primary-100">
         <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-semibold text-primary-900">Linked Providers</h2>
-            <el-button @click="loadLinkedProviders" :loading="loading" size="small">
+            <el-button :loading="loading" size="small" @click="loadLinkedProviders">
                 <el-icon><Refresh /></el-icon>
             </el-button>
         </div>
@@ -66,9 +66,9 @@
                 </el-select>
                 <el-button
                     type="primary"
-                    @click="handleLinkProvider"
                     :disabled="!selectedProviderId"
                     :loading="linking"
+                    @click="handleLinkProvider"
                 >
                     Link Provider
                 </el-button>

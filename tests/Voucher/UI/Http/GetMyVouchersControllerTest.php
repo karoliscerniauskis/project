@@ -9,6 +9,7 @@ use App\Provider\Domain\Status\ProviderStatus;
 use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Tests\ApiWebTestCase;
 use App\Voucher\Domain\Enum\VoucherStatus;
+use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Response;
 
 final class GetMyVouchersControllerTest extends ApiWebTestCase
@@ -59,6 +60,7 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: $userEmail,
             status: VoucherStatus::Active->value,
+            sentAt: new DateTimeImmutable('-1 hour'),
         );
         self::createVoucherRecord(
             code: 'MY-VOUCHER-CLAIMED-001',
@@ -67,6 +69,7 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
             issuedToEmail: $userEmail,
             status: VoucherStatus::Active->value,
             claimedByUserId: $userId,
+            sentAt: new DateTimeImmutable('-1 hour'),
         );
         self::createVoucherRecord(
             code: 'MY-VOUCHER-OTHER-USER-001',
@@ -74,6 +77,7 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: $otherUserEmail,
             status: VoucherStatus::Active->value,
+            sentAt: new DateTimeImmutable('-1 hour'),
         );
         self::createVoucherRecord(
             code: 'MY-VOUCHER-OTHER-PROVIDER-001',
@@ -81,6 +85,7 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
             createdByProviderUserId: $providerUser->getId(),
             issuedToEmail: 'other-provider-recipient@example.com',
             status: VoucherStatus::Active->value,
+            sentAt: new DateTimeImmutable('-1 hour'),
         );
         $client->request(
             'GET',
@@ -105,8 +110,8 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
 
         self::assertSame(
             [
+                null,
                 'MY-VOUCHER-CLAIMED-001',
-                'MY-VOUCHER-ISSUED-001',
             ],
             $codes,
         );
@@ -119,6 +124,79 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
             self::assertIsString($voucher['id']);
             self::assertIsString($voucher['providerName']);
         }
+    }
+
+    public function testGetMyVouchersDoesNotReturnScheduledUnsentVouchers(): void
+    {
+        $client = self::createClient();
+        $providerMemberEmail = 'get-my-vouchers-scheduled-provider-member@example.com';
+        $providerMemberUserId = self::registerVerifyAndGetUserId(
+            $client,
+            $providerMemberEmail,
+            'securePassword123',
+        );
+        $userEmail = 'get-my-vouchers-scheduled-owner@example.com';
+        self::registerVerifyAndGetUserId(
+            $client,
+            $userEmail,
+            'securePassword123',
+        );
+        $token = self::login($client, $userEmail, 'securePassword123');
+        $providerId = self::createProviderRecord(
+            'Get My Vouchers Scheduled Provider',
+            ProviderStatus::Active->value,
+        );
+        self::createProviderUserRecord(
+            providerId: $providerId,
+            userId: $providerMemberUserId,
+            role: ProviderUserRole::Member->value,
+            status: ProviderUserStatus::Active->value,
+        );
+        $providerUser = self::getExistingProviderUser($providerId, $providerMemberUserId);
+        self::createVoucherRecord(
+            code: 'MY-VOUCHER-SENT-001',
+            providerId: $providerId,
+            createdByProviderUserId: $providerUser->getId(),
+            issuedToEmail: $userEmail,
+            status: VoucherStatus::Active->value,
+            sentAt: new DateTimeImmutable('-1 hour'),
+        );
+        self::createVoucherRecord(
+            code: 'MY-VOUCHER-SCHEDULED-UNSENT-001',
+            providerId: $providerId,
+            createdByProviderUserId: $providerUser->getId(),
+            issuedToEmail: $userEmail,
+            status: VoucherStatus::Active->value,
+            scheduledSendAt: new DateTimeImmutable('+1 day'),
+            sentAt: null,
+        );
+
+        $client->request(
+            'GET',
+            '/api/me/vouchers',
+            [],
+            [],
+            [
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+            ],
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $response = self::getJsonResponse($client->getResponse()->getContent());
+
+        self::assertArrayHasKey('data', $response);
+        self::assertIsArray($response['data']);
+        self::assertCount(1, $response['data']);
+        self::assertArrayHasKey('meta', $response);
+        self::assertIsArray($response['meta']);
+        self::assertSame(1, $response['meta']['total']);
+
+        $voucher = $response['data'][0];
+
+        self::assertIsArray($voucher);
+        self::assertArrayHasKey('code', $voucher);
+        self::assertNull($voucher['code']);
     }
 
     public function testGetMyVouchersReturnsEmptyArrayWhenUserHasNoVouchers(): void
@@ -144,6 +222,12 @@ final class GetMyVouchersControllerTest extends ApiWebTestCase
         self::assertSame(
             [
                 'data' => [],
+                'meta' => [
+                    'total' => 0,
+                    'page' => 1,
+                    'perPage' => 20,
+                    'totalPages' => 0,
+                ],
             ],
             self::getJsonResponse($client->getResponse()->getContent()),
         );

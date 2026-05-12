@@ -6,6 +6,7 @@ namespace App\Provider\Infrastructure\Doctrine\Repository;
 
 use App\Provider\Domain\Repository\ProviderReadRepository;
 use App\Provider\Domain\Role\ProviderUserRole;
+use App\Provider\Domain\Status\ProviderStatus;
 use App\Provider\Domain\Status\ProviderUserStatus;
 use App\Provider\Domain\View\AvailableProvidersView;
 use App\Provider\Domain\View\LinkedProvidersView;
@@ -120,9 +121,9 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
 
     public function findActiveByIdAndUserId(ProviderId $providerId, UserId $userId): ?ProviderView
     {
-        /** @var array{id: Uuid, name: string, status: string, role: string}|null $row */
+        /** @var array{id: Uuid, name: string, status: string, role: string, claimReminderAfterDays: ?int, expiryReminderBeforeDays: ?int}|null $row */
         $row = $this->entityManager->createQueryBuilder()
-            ->select('p.id AS id', 'p.name AS name', 'p.status AS status', 'pu.role AS role')
+            ->select('p.id AS id', 'p.name AS name', 'p.status AS status', 'pu.role AS role', 'p.claimReminderAfterDays AS claimReminderAfterDays', 'p.expiryReminderBeforeDays AS expiryReminderBeforeDays')
             ->from(ProviderRecord::class, 'p')
             ->innerJoin(
                 ProviderUserRecord::class,
@@ -148,6 +149,8 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
             $row['name'],
             $row['status'],
             $row['role'] === ProviderUserRole::Admin->value,
+            $row['claimReminderAfterDays'],
+            $row['expiryReminderBeforeDays'],
         );
     }
 
@@ -228,7 +231,7 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
         );
     }
 
-    public function findLinkedProviders(ProviderId $providerId): LinkedProvidersView
+    public function findLinkedProviders(ProviderId $providerId, bool $includeInactive = false): LinkedProvidersView
     {
         $providerIdString = $providerId->toString();
 
@@ -243,7 +246,9 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
                 'pl.linkedProviderId = p.id',
             )
             ->where('pl.providerId = :providerId')
+            ->andWhere('p.status IN (:providerStatus)')
             ->setParameter('providerId', $providerIdString)
+            ->setParameter('providerStatus', $includeInactive ? [ProviderStatus::Active, ProviderStatus::Inactive] : [ProviderStatus::Active])
             ->getQuery()
             ->getArrayResult();
 
@@ -258,7 +263,9 @@ final readonly class DoctrineProviderReadRepository implements ProviderReadRepos
                 'pl.providerId = p.id',
             )
             ->where('pl.linkedProviderId = :providerId')
+            ->andWhere('p.status IN (:providerStatus)')
             ->setParameter('providerId', $providerIdString)
+            ->setParameter('providerStatus', $includeInactive ? [ProviderStatus::Active, ProviderStatus::Inactive] : [ProviderStatus::Active])
             ->getQuery()
             ->getArrayResult();
 

@@ -7,7 +7,7 @@ namespace App\Provider\Domain\View;
 use App\Shared\Domain\View\ArrayableView;
 
 /**
- * @implements ArrayableView<array{id: string, name: string, status: string, isAdmin: bool}>
+ * @implements ArrayableView<array{id: string, name: string, status: string, isAdmin: bool, claimReminderAfterDays: ?int, expiryReminderBeforeDays: ?int}>
  */
 final readonly class ProviderView implements ArrayableView
 {
@@ -16,6 +16,8 @@ final readonly class ProviderView implements ArrayableView
         private string $name,
         private string $status,
         private bool $isAdmin,
+        private ?int $claimReminderAfterDays = null,
+        private ?int $expiryReminderBeforeDays = null,
     ) {
     }
 
@@ -39,8 +41,18 @@ final readonly class ProviderView implements ArrayableView
         return $this->isAdmin;
     }
 
+    public function getClaimReminderAfterDays(): ?int
+    {
+        return $this->claimReminderAfterDays;
+    }
+
+    public function getExpiryReminderBeforeDays(): ?int
+    {
+        return $this->expiryReminderBeforeDays;
+    }
+
     /**
-     * @return array{id: string, name: string, status: string, isAdmin: bool}
+     * @return array{id: string, name: string, status: string, isAdmin: bool, claimReminderAfterDays: ?int, expiryReminderBeforeDays: ?int}
      */
     public function toArray(): array
     {
@@ -49,6 +61,8 @@ final readonly class ProviderView implements ArrayableView
             'name' => $this->getName(),
             'status' => $this->getStatus(),
             'isAdmin' => $this->isAdmin(),
+            'claimReminderAfterDays' => $this->getClaimReminderAfterDays(),
+            'expiryReminderBeforeDays' => $this->getExpiryReminderBeforeDays(),
         ];
     }
 }

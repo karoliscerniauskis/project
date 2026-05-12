@@ -3,6 +3,8 @@ export interface Provider {
     name: string
     status: string
     isAdmin: boolean
+    claimReminderAfterDays?: number | null
+    expiryReminderBeforeDays?: number | null
 }
 
 export interface CreateProviderRequest {

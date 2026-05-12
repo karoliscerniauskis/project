@@ -45,6 +45,12 @@ final class GetProvidersControllerTest extends ApiWebTestCase
         self::assertSame(
             [
                 'data' => [],
+                'pagination' => [
+                    'page' => 1,
+                    'limit' => 10,
+                    'total' => 0,
+                    'totalPages' => 0,
+                ],
             ],
             self::getJsonResponse($client->getResponse()->getContent()),
         );
@@ -100,6 +106,8 @@ final class GetProvidersControllerTest extends ApiWebTestCase
                 'name' => 'Admin Listed Provider',
                 'status' => ProviderStatus::Active->value,
                 'isAdmin' => true,
+                'claimReminderAfterDays' => null,
+                'expiryReminderBeforeDays' => null,
             ],
             $providersByName['Admin Listed Provider'],
         );
@@ -110,6 +118,8 @@ final class GetProvidersControllerTest extends ApiWebTestCase
                 'name' => 'Member Listed Provider',
                 'status' => ProviderStatus::Pending->value,
                 'isAdmin' => false,
+                'claimReminderAfterDays' => null,
+                'expiryReminderBeforeDays' => null,
             ],
             $providersByName['Member Listed Provider'],
         );
@@ -237,12 +247,16 @@ final class GetProvidersControllerTest extends ApiWebTestCase
             self::assertIsString($provider['name']);
             self::assertIsString($provider['status']);
             self::assertIsBool($provider['isAdmin']);
+            self::assertTrue($provider['claimReminderAfterDays'] === null || is_int($provider['claimReminderAfterDays']));
+            self::assertTrue($provider['expiryReminderBeforeDays'] === null || is_int($provider['expiryReminderBeforeDays']));
 
             $indexed[$provider['name']] = [
                 'id' => $provider['id'],
                 'name' => $provider['name'],
                 'status' => $provider['status'],
                 'isAdmin' => $provider['isAdmin'],
+                'claimReminderAfterDays' => $provider['claimReminderAfterDays'],
+                'expiryReminderBeforeDays' => $provider['expiryReminderBeforeDays'],
             ];
         }
 

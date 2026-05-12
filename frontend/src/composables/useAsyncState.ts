@@ -1,7 +1,12 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-export function useAsyncState<T = any>() {
+export interface FieldError {
+    field: string
+    message: string
+}
+
+export function useAsyncState<T = unknown>() {
     const data = ref<T | null>(null)
     const loading = ref(false)
     const error = ref<string | null>(null)
@@ -60,6 +65,7 @@ export function useAsyncAction() {
     const loading = ref(false)
     const error = ref<string | null>(null)
     const success = ref<string | null>(null)
+    const fieldErrors = ref<FieldError[]>([])
 
     async function execute(
         asyncFn: () => Promise<void>,
@@ -71,6 +77,7 @@ export function useAsyncAction() {
         loading.value = true
         error.value = null
         success.value = null
+        fieldErrors.value = []
 
         try {
             await asyncFn()
@@ -82,10 +89,28 @@ export function useAsyncAction() {
 
             return true
         } catch (err) {
-            const errorMessage =
-                (err instanceof Error ? err.message : null) || options?.errorMessage || 'An error occurred'
-            error.value = errorMessage
-            ElMessage.error(errorMessage)
+            if (err instanceof Error) {
+                const match = err.message.match(/^(.+?) - (.+)$/)
+                if (match) {
+                    const [, baseMessage, fieldsStr] = match
+                    error.value = baseMessage
+                    const fieldMatches = fieldsStr.matchAll(/(\w+): ([^,]+)(?:, |$)/g)
+                    fieldErrors.value = Array.from(fieldMatches).map(([, field, message]) => ({
+                        field,
+                        message: message.trim(),
+                    }))
+                } else {
+                    error.value = err.message
+                }
+            } else {
+                error.value = options?.errorMessage || 'An error occurred'
+            }
+
+            if (!error.value) {
+                error.value = options?.errorMessage || 'An error occurred'
+            }
+
+            ElMessage.error(error.value)
 
             return false
         } finally {
@@ -96,6 +121,7 @@ export function useAsyncAction() {
     function reset() {
         error.value = null
         success.value = null
+        fieldErrors.value = []
         loading.value = false
     }
 
@@ -103,6 +129,7 @@ export function useAsyncAction() {
         loading,
         error,
         success,
+        fieldErrors,
         execute,
         reset,
     }
