@@ -161,6 +161,28 @@ import { formatCents } from '@/utils/currency'
 import { formatRelativeDate } from '@/utils/date'
 import { useDebounceFn } from '@vueuse/core'
 
+interface ApiErrorResponse {
+    response?: {
+        data?: {
+            message?: string
+        }
+    }
+}
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    if (err instanceof Error) {
+        return err.message
+    }
+
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+        const apiError = err as ApiErrorResponse
+
+        return apiError.response?.data?.message ?? fallback
+    }
+
+    return fallback
+}
+
 const props = defineProps<{
     providerId: string
 }>()
@@ -240,7 +262,7 @@ async function handleDeactivate(voucher: ProviderVoucher) {
         ElMessage.success(MESSAGES.SUCCESS.VOUCHER_DEACTIVATED)
         await loadVouchers()
     } catch (err: unknown) {
-        ElMessage.error(err.response?.data?.message || MESSAGES.ERROR.VOUCHER_DEACTIVATE)
+        ElMessage.error(getErrorMessage(err, MESSAGES.ERROR.VOUCHER_DEACTIVATE))
     }
 }
 
@@ -259,7 +281,7 @@ async function handleGeneratePhysical(voucher: ProviderVoucher) {
 
         ElMessage.success('Physical voucher downloaded successfully!')
     } catch (err: unknown) {
-        ElMessage.error(err.response?.data?.message || 'Failed to generate physical voucher')
+        ElMessage.error(getErrorMessage(err, 'Failed to generate physical voucher'))
     } finally {
         generatePhysicalLoading.value = false
         selectedVoucher.value = null

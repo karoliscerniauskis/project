@@ -238,6 +238,28 @@ import { MESSAGES } from '@/constants/messages'
 import { formatCents } from '@/utils/currency'
 import { useDebounceFn } from '@vueuse/core'
 
+interface ApiErrorResponse {
+    response?: {
+        data?: {
+            message?: string
+        }
+    }
+}
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    if (err instanceof Error) {
+        return err.message
+    }
+
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+        const apiError = err as ApiErrorResponse
+
+        return apiError.response?.data?.message ?? fallback
+    }
+
+    return fallback
+}
+
 const { data: paginatedData, loading, error, execute: fetchVouchers } = useAsyncState<PaginatedVouchers>()
 
 const claimDialogVisible = ref(false)
@@ -337,8 +359,8 @@ async function confirmClaim() {
         ElMessage.success(MESSAGES.SUCCESS.VOUCHER_CLAIMED)
         claimDialogVisible.value = false
         await loadVouchers()
-    } catch (err: unkown) {
-        ElMessage.error(err.response?.data?.message || MESSAGES.ERROR.VOUCHER_CLAIM)
+    } catch (err: unknown) {
+        ElMessage.error(getErrorMessage(err, MESSAGES.ERROR.VOUCHER_CLAIM))
     } finally {
         claimLoading.value = false
     }
@@ -361,7 +383,7 @@ async function confirmImport() {
             importForm.value.code = ''
             await loadVouchers()
         } catch (err: unknown) {
-            ElMessage.error(err.message || 'Failed to import voucher')
+            ElMessage.error(getErrorMessage(err, 'Failed to import voucher'))
         } finally {
             importLoading.value = false
         }
@@ -390,7 +412,7 @@ async function confirmTransfer() {
             transferDialogVisible.value = false
             await loadVouchers()
         } catch (err: unknown) {
-            ElMessage.error(err.response?.data?.message || MESSAGES.ERROR.VOUCHER_TRANSFER)
+            ElMessage.error(getErrorMessage(err, MESSAGES.ERROR.VOUCHER_TRANSFER))
         } finally {
             transferLoading.value = false
         }
@@ -420,8 +442,8 @@ async function handleGeneratePhysical(voucher: Voucher) {
         document.body.removeChild(link)
 
         ElMessage.success('Physical voucher downloaded successfully!')
-    } catch (err: unkown) {
-        ElMessage.error(err.response?.data?.message || 'Failed to generate physical voucher')
+    } catch (err: unknown) {
+        ElMessage.error(getErrorMessage(err, 'Failed to generate physical voucher'))
     } finally {
         generatePhysicalLoading.value = false
         selectedVoucher.value = null

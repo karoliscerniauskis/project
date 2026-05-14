@@ -1,0 +1,67 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: docker/prod.Dockerfile
+            target: app
+        container_name: app_prod
+        environment:
+            APP_ENV: prod
+            APP_DEBUG: "0"
+            SERVER_NAME: ":80"
+            APP_SECRET: "<APP_SECRET>"
+            APP_FRONTEND_URL: "https://localhost:8443"
+            DEFAULT_URI: "https://localhost:8443"
+            DATABASE_URL: "postgresql://app_user:app_password@db:5432/app_db?serverVersion=17&charset=utf8"
+        depends_on:
+            - db
+            - mailer
+
+    web:
+        build:
+            context: .
+            dockerfile: docker/frontend/prod.Dockerfile
+        container_name: web_prod
+        ports:
+            - "8443:443"
+        depends_on:
+            - app
+
+    db:
+        image: postgres:17-alpine
+        container_name: db_prod
+        environment:
+            POSTGRES_USER: app_user
+            POSTGRES_PASSWORD: app_password
+            POSTGRES_DB: app_db
+        volumes:
+            - pgdata_prod:/var/lib/postgresql/data
+
+    cron:
+        build:
+            context: .
+            dockerfile: docker/prod.Dockerfile
+            target: cron
+        container_name: cron_prod
+        environment:
+            APP_ENV: prod
+            APP_DEBUG: "0"
+            APP_SECRET: "<APP_SECRET>"
+            APP_FRONTEND_URL: "https://localhost:8443"
+            DEFAULT_URI: "https://localhost:8443"
+            DATABASE_URL: "postgresql://app_user:app_password@db:5432/app_db?serverVersion=17&charset=utf8"
+        depends_on:
+            - db
+            - mailer
+
+    mailer:
+        image: axllent/mailpit
+        container_name: mailer_prod
+        ports:
+            - "8025:8025"
+        environment:
+            MP_SMTP_AUTH_ACCEPT_ANY: 1
+            MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+volumes:
+    pgdata_prod:

@@ -384,5 +384,6 @@ final class Voucher extends AbstractAggregateRoot
     public function assignTo(string $email): void
     {
         $this->issuedToEmail = $email;
+        $this->claimedByUserId = null;
     }
 }

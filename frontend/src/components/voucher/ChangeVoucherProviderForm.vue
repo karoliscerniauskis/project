@@ -16,7 +16,7 @@
                 </template>
             </el-alert>
         </div>
-        <el-form v-else ref="formRef" :model="form" label-position="top">
+        <el-form v-else :model="form" label-position="top">
             <el-form-item label="New Provider" prop="newProviderId">
                 <el-select v-model="form.newProviderId" placeholder="Select a provider" class="w-full">
                     <el-option
@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, type ModelRef } from 'vue'
-import { ElMessage, type FormInstance } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
 import { voucherApi, type Voucher } from '@/api/voucher.api'
 import { providerApi, type LinkedProvider } from '@/api/provider.api'
@@ -60,7 +60,6 @@ const emit = defineEmits<{
 }>()
 
 const dialogVisible: ModelRef<boolean> = defineModel<boolean>('visible', { required: true })
-const formRef = ref<FormInstance>()
 const loading = ref(false)
 const loadingLinkedProviders = ref(false)
 const linkedProviders = ref<LinkedProvider[]>([])

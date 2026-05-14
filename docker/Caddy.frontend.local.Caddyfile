@@ -1,0 +1,15 @@
+https://localhost {
+    tls internal
+
+    root * /srv/frontend
+    encode zstd gzip
+
+    handle /api/* {
+        reverse_proxy app:80
+    }
+
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+}

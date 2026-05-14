@@ -2,7 +2,7 @@ import type { ApiError, AuthResponse } from '@/types'
 import { storage } from './storage'
 import router from '@/router'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || ''
 
 interface RequestOptions extends RequestInit {
     skipAuth?: boolean

@@ -58,6 +58,28 @@ import { MESSAGES } from '@/constants/messages'
 const { data: notifications, loading, error, execute: fetchNotifications } = useAsyncState<Notification[]>()
 const { decrementCount } = useNotificationCount()
 
+interface ApiErrorResponse {
+    response?: {
+        data?: {
+            message?: string
+        }
+    }
+}
+
+function getErrorMessage(err: unknown, fallback: string): string {
+    if (err instanceof Error) {
+        return err.message
+    }
+
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+        const apiError = err as ApiErrorResponse
+
+        return apiError.response?.data?.message ?? fallback
+    }
+
+    return fallback
+}
+
 async function loadNotifications() {
     await fetchNotifications(() => notificationApi.getNotifications(), {
         errorMessage: MESSAGES.ERROR.NOTIFICATION_LOAD,
@@ -71,7 +93,7 @@ async function handleNotificationClick(notification: Notification) {
             notification.readAt = new Date().toISOString()
             decrementCount()
         } catch (err: unknown) {
-            ElMessage.error(err.response?.data?.message || MESSAGES.ERROR.NOTIFICATION_MARK_READ)
+            ElMessage.error(getErrorMessage(err, MESSAGES.ERROR.NOTIFICATION_MARK_READ))
         }
     }
 }
